@@ -1,0 +1,1393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Anatomy of a Wash</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A scroll-scrubbed teardown of the LG WM4000HWA front-load washer: a 360° turn, an X-ray scan, and an exploded, labelled assembly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: one fixed WebGL stage under a 1100vh scroll track. HUD sits on the frame edges,
+   chapter copy bottom-left, callouts in two side columns like a service-manual plate. */
+:root {
+  /* --k is driven by the scroll timeline: 0 = studio (light), 1 = blueprint (dark) */
+  --k: 0;
+  --studio-ink: #15191e;
+  --studio-dim: #5d656e;
+  --studio-accent: #1f58c4;
+  --bp-ink: #def5ff;
+  --bp-dim: #7b93ad;
+  --cyan: #7fe3ff;
+  --amber: #ffbe5c;
+  --night: #030912;
+  --rule-light: rgba(21, 25, 30, .16);
+  --rule-dark: rgba(127, 227, 255, .22);
+
+  --fg: color-mix(in oklab, var(--studio-ink) calc((1 - var(--k)) * 100%), var(--bp-ink));
+  --dim: color-mix(in oklab, var(--studio-dim) calc((1 - var(--k)) * 100%), var(--bp-dim));
+  --accent: color-mix(in oklab, var(--studio-accent) calc((1 - var(--k)) * 100%), var(--cyan));
+  --rule: color-mix(in oklab, var(--rule-light) calc((1 - var(--k)) * 100%), var(--rule-dark));
+
+  --f-display: "Instrument Serif", "Iowan Old Style", "Times New Roman", serif;
+  --f-body: "Geist", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  --edge: clamp(16px, 2.4vw, 32px);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--night);
+  color: var(--fg);
+  font: 400 15px/1.5 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  padding-left: var(--gutter-l);
+  padding-right: var(--gutter-r);
+}
+
+/* ---------- stage ---------- */
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+#leaders { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; overflow: visible; }
+#labels, #dims { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+#track { position: relative; height: 1100vh; z-index: 1; pointer-events: none; }
+
+/* ---------- boot ---------- */
+#boot {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+  background: #eceef0; color: var(--studio-ink);
+  font: 500 11px/1 var(--f-mono); letter-spacing: .18em; text-transform: uppercase;
+  transition: opacity .9s ease, visibility .9s;
+}
+#boot.done { opacity: 0; visibility: hidden; }
+#boot .bar { width: 160px; height: 1px; background: rgba(21,25,30,.15); margin-top: 14px; overflow: hidden; }
+#boot .bar i { display: block; height: 100%; width: 40%; background: var(--studio-ink); animation: boot 1.1s ease-in-out infinite; }
+@keyframes boot { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+#boot.fail .bar { display: none; }
+
+/* ---------- HUD ---------- */
+.hud { position: fixed; z-index: 6; pointer-events: none; font: 500 10.5px/1.35 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.hud b { color: var(--fg); font-weight: 500; }
+
+.hud-top {
+  top: 0; left: 0; right: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--edge)) calc(var(--gutter-r) + var(--edge) - 16px) 0 calc(var(--gutter-l) + var(--edge) - 16px);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 24px;
+}
+.hud-top .brand { display: grid; gap: 4px; }
+.hud-top .brand b { letter-spacing: .14em; }
+.hud-top .meta { justify-self: end; text-align: right; display: grid; gap: 4px; }
+.phases { display: grid; gap: 8px; min-width: min(520px, 46vw); }
+.phases ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.phases li { opacity: .45; transition: opacity .4s, color .4s; white-space: nowrap; }
+.phases li.on { opacity: 1; color: var(--fg); }
+.phases li span { color: var(--accent); margin-right: 6px; }
+.phases .rail { position: relative; height: 1px; background: var(--rule); }
+.phases .rail i { position: absolute; left: 0; top: -0.5px; height: 2px; width: 0; background: var(--accent); }
+.phases .rail em { position: absolute; top: -3px; width: 1px; height: 7px; background: var(--rule); }
+
+.hud-readout {
+  right: 0; bottom: 0;
+  padding: 0 calc(var(--gutter-r) + var(--edge) - 16px) calc(env(safe-area-inset-bottom, 0px) + var(--edge)) 0;
+  display: grid; grid-template-columns: auto auto; gap: 3px 18px; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.hud-readout dt { opacity: .7; }
+.hud-readout dd { margin: 0; color: var(--fg); min-width: 9ch; }
+
+.scroll-cue {
+  left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--edge));
+  transform: translateX(-50%); display: grid; justify-items: center; gap: 10px;
+}
+.scroll-cue i { width: 1px; height: 40px; background: linear-gradient(var(--fg), transparent); animation: cue 2.2s ease-in-out infinite; transform-origin: top; }
+@keyframes cue { 0% { transform: scaleY(0); opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* ---------- hero ---------- */
+.hero {
+  position: fixed; z-index: 5; pointer-events: none;
+  left: calc(var(--gutter-l) + var(--edge) - 16px);
+  top: 50%; transform: translateY(-50%);
+  width: min(560px, 44vw);
+}
+.eyebrow { font: 500 10.5px/1.4 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); display: flex; gap: 10px; align-items: center; }
+.eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; }
+.hero h1 {
+  font: 400 clamp(54px, 8.4vw, 138px)/.86 var(--f-display);
+  letter-spacing: -.02em; margin: 18px 0 22px; text-wrap: balance; color: var(--fg);
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero p { margin: 0; max-width: 40ch; color: var(--dim); font-size: 15.5px; }
+.hero p b { color: var(--fg); font-weight: 500; }
+
+/* ---------- chapters ---------- */
+.chapter {
+  position: fixed; z-index: 5; pointer-events: none;
+  left: calc(var(--gutter-l) + var(--edge) - 16px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--edge));
+  width: min(400px, calc(100vw - 2 * var(--edge) - var(--gutter-l) - var(--gutter-r) + 32px));
+  opacity: 0;
+}
+.chapter .eyebrow { color: var(--accent); }
+.chapter h2 { font: 400 clamp(34px, 3.6vw, 52px)/.95 var(--f-display); letter-spacing: -.01em; margin: 12px 0 12px; text-wrap: balance; }
+.chapter h2 em { font-style: italic; }
+.chapter p { margin: 0; color: var(--dim); max-width: 44ch; }
+.chapter p b { color: var(--fg); font-weight: 500; }
+
+.spec { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin-top: 16px; border-top: 1px solid var(--rule); }
+.spec div { padding: 9px 0; border-bottom: 1px solid var(--rule); display: grid; gap: 2px; }
+.spec div:nth-child(odd) { padding-right: 14px; border-right: 1px solid var(--rule); }
+.spec div:nth-child(even) { padding-left: 14px; }
+.spec dt { font: 500 9.5px/1.2 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.spec dd { margin: 0; font: 400 22px/1.1 var(--f-display); color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.legend { display: none; margin-top: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 12px; font: 500 10px/1.5 var(--f-mono); color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.legend span { color: var(--amber); margin-right: 6px; }
+
+/* ---------- callouts ---------- */
+.label {
+  position: absolute; left: 0; top: 0; width: 232px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start;
+  opacity: 0; pointer-events: none; will-change: transform, opacity;
+  color: var(--bp-ink);
+}
+.label.live { pointer-events: auto; cursor: default; }
+.label[data-side="left"] { grid-template-columns: minmax(0, 1fr) auto; text-align: right; }
+.label[data-side="left"] .balloon { order: 2; }
+.balloon {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--cyan); font: 500 10px/1 var(--f-mono); color: var(--cyan);
+  background: rgba(3, 9, 18, .72); transition: background .25s, color .25s, border-color .25s;
+}
+.label .t { display: grid; gap: 2px; min-width: 0; padding-top: 1px; }
+.label b { font: 500 12.5px/1.2 var(--f-body); letter-spacing: .01em; }
+.label i { font: 400 11.5px/1.35 var(--f-body); font-style: normal; color: var(--bp-dim); }
+.label code { font: 400 9.5px/1.3 var(--f-mono); color: rgba(127, 227, 255, .55); letter-spacing: .04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.label.tight i { display: none; }
+.label.hot { z-index: 2; }
+.label.tight.hot i { display: block; }
+.label.hot .t { background: rgba(3, 9, 18, .88); box-shadow: 0 0 0 6px rgba(3, 9, 18, .88); }
+.label.hot .balloon, .label:hover .balloon { background: var(--amber); border-color: var(--amber); color: #1a1206; }
+.label.hot b, .label:hover b { color: var(--amber); }
+.label.compact { width: auto; grid-template-columns: auto; }
+.label.compact .t { display: none; }
+
+#leaders path { fill: none; stroke: var(--cyan); stroke-width: 1; opacity: .8; }
+#leaders path.hot { stroke: var(--amber); opacity: 1; }
+#leaders circle.dot { fill: var(--cyan); }
+#leaders circle.ring { fill: none; stroke: var(--cyan); stroke-width: 1; }
+#leaders .hot.dot { fill: var(--amber); }
+#leaders .hot.ring { stroke: var(--amber); }
+
+.dim {
+  position: absolute; left: 0; top: 0; opacity: 0; white-space: nowrap;
+  font: 500 11px/1 var(--f-mono); letter-spacing: .06em; color: var(--amber);
+  background: rgba(3, 9, 18, .78); padding: 5px 7px; border: 1px solid rgba(255, 190, 92, .4);
+  font-variant-numeric: tabular-nums;
+}
+.dim small { color: rgba(255, 190, 92, .65); font-size: 9.5px; margin-left: 6px; }
+
+/* ---------- drawing frame + title block ---------- */
+#frame { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
+#frame path { fill: none; stroke: rgba(127, 227, 255, .5); stroke-width: 1; }
+#frame path.thin { stroke: rgba(127, 227, 255, .22); }
+.titleblock {
+  position: fixed; z-index: 6; pointer-events: none; opacity: 0;
+  right: calc(var(--gutter-r) + var(--edge) - 16px + 10px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--edge) + 10px);
+  display: grid; grid-template-columns: repeat(3, auto); border: 1px solid rgba(127, 227, 255, .45);
+  font: 500 9.5px/1.3 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--bp-dim);
+  background: rgba(3, 9, 18, .7);
+}
+.titleblock div { padding: 7px 12px; border-right: 1px solid rgba(127, 227, 255, .25); border-bottom: 1px solid rgba(127, 227, 255, .25); display: grid; gap: 3px; }
+.titleblock div:nth-child(3n) { border-right: 0; }
+.titleblock div:nth-last-child(-n + 3) { border-bottom: 0; }
+.titleblock b { color: var(--bp-ink); font-weight: 500; letter-spacing: .06em; }
+.titleblock .name { grid-column: 1 / -1; border-right: 0; }
+.titleblock .name b { font: 400 22px/1 var(--f-display); letter-spacing: 0; text-transform: none; }
+
+.note { position: fixed; z-index: 6; pointer-events: none; opacity: 0; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + var(--edge) + 4px); margin: 0; font: 400 9.5px/1.5 var(--f-mono); color: var(--bp-dim); letter-spacing: .05em; text-align: center; width: min(380px, 34vw); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .phases ol li b { display: none; }
+  .phases { min-width: 0; }
+  .hud-top { grid-template-columns: 1fr auto; }
+  .hud-top .phases { grid-column: 1 / -1; grid-row: 2; }
+  .hero { width: auto; right: calc(var(--gutter-r) + var(--edge) - 16px); top: auto; bottom: 18vh; transform: none; }
+  .hero h1 { font-size: clamp(48px, 13vw, 84px); }
+}
+@media (max-width: 1100px) {
+  .note { display: none; }
+}
+@media (max-width: 760px) {
+  .legend { display: grid; }
+  .hud-readout { display: none; }
+  .titleblock { display: none; }
+  .chapter h2 { font-size: 34px; }
+  .note { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue i, #boot .bar i { animation: none; }
+}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+    "animejs": "https://cdn.jsdelivr.net/npm/animejs@4.4.1/dist/bundles/anime.esm.min.js"
+  }
+}
+</script>
+</head>
+<body>
+
+<div id="boot" role="status"><div><span id="boot-msg">Calibrating model</span><div class="bar"><i></i></div></div></div>
+
+<canvas id="gl" aria-label="Rotating 3D model of the LG WM4000HWA washer that turns into an exploded wireframe as you scroll"></canvas>
+<svg id="frame" aria-hidden="true"></svg>
+<svg id="leaders" aria-hidden="true"></svg>
+<div id="dims" aria-hidden="true"></div>
+<div id="labels"></div>
+
+<header class="hud hud-top">
+  <div class="brand"><b>Anatomy / 001</b><span>Front-load washer study</span></div>
+  <nav class="phases" aria-label="Sections">
+    <ol>
+      <li data-p="0"><span>01</span><b>Object</b></li>
+      <li data-p="1"><span>02</span><b>X-ray</b></li>
+      <li data-p="2"><span>03</span><b>Explode</b></li>
+      <li data-p="3"><span>04</span><b>Anatomy</b></li>
+      <li data-p="4"><span>05</span><b>Spec</b></li>
+    </ol>
+    <div class="rail"><i id="rail-fill"></i></div>
+  </nav>
+  <div class="meta"><b>LG WM4000HWA</b><span id="fig">Fig. 1 — Exterior</span></div>
+</header>
+
+<section class="hero" id="hero">
+  <div class="eyebrow">LG WM4000HWA · 4.5 cu ft · Inverter Direct Drive</div>
+  <h1 id="hero-title">Anatomy of <em>a&nbsp;Wash</em></h1>
+  <p id="hero-copy">A modern front-loader looks like a white box with a window. Scroll to turn it, scan it, and take it apart, <b>one assembly at a time</b>.</p>
+</section>
+
+<div class="hud scroll-cue" id="cue"><span>Scroll</span><i></i></div>
+
+<section class="chapter" data-c="0">
+  <div class="eyebrow">01 — Exterior</div>
+  <h2>A full turn around <em>the shell</em></h2>
+  <p>27 inches wide, 39 tall, 30¼ deep. Everything you can see is skin. The machine that does the work <b>hangs inside it on springs</b>.</p>
+</section>
+<section class="chapter" data-c="1">
+  <div class="eyebrow">02 — X-ray</div>
+  <h2>Strip the <em>enamel</em></h2>
+  <p>A scan plane removes the painted surfaces. What stays is structure: <b>twenty assemblies</b> on one horizontal axis.</p>
+</section>
+<section class="chapter" data-c="2">
+  <div class="eyebrow">03 — Exploded assembly</div>
+  <h2>Pulled apart along <em>the drum axis</em></h2>
+  <p>The order follows a service teardown. From front to back: <b>door, gasket, drum, tub, stator, rotor</b>.</p>
+</section>
+<section class="chapter" data-c="3">
+  <div class="eyebrow">04 — Anatomy</div>
+  <h2>No belt. <em>No pulley.</em></h2>
+  <p>The rotor bolts straight onto the drum shaft, so the motor is the hub. Hover a callout to find its part.</p>
+  <div class="legend" id="legend"></div>
+</section>
+<section class="chapter" data-c="4">
+  <div class="eyebrow">05 — Specification</div>
+  <h2>WM4000HWA, <em>by the numbers</em></h2>
+  <dl class="spec">
+    <div><dt>Capacity</dt><dd>4.5 cu ft</dd></div>
+    <div><dt>Max spin</dt><dd>1,300 rpm</dd></div>
+    <div><dt>Drive</dt><dd>Direct, inverter</dd></div>
+    <div><dt>W × H × D</dt><dd>27 × 39 × 30¼″</dd></div>
+  </dl>
+</section>
+
+<p class="note" id="note">Interpretive model drawn from LG front-load service documentation. Proportions approximate. Independent study, not affiliated with LG Electronics.</p>
+
+<div class="titleblock" id="titleblock" aria-hidden="true">
+  <div class="name"><span>Title</span><b>Front-load washer, exploded</b></div>
+  <div><span>Model</span><b>WM4000HWA</b></div>
+  <div><span>Items</span><b>20</b></div>
+  <div><span>Sheet</span><b>1 / 1</b></div>
+  <div><span>Units</span><b>mm</b></div>
+  <div><span>Scale</span><b>NTS</b></div>
+  <div><span>Proj.</span><b>Persp.</b></div>
+</div>
+
+<dl class="hud hud-readout" id="readout">
+  <dt>Azimuth</dt><dd id="r-az">000.0°</dd>
+  <dt>Elevation</dt><dd id="r-el">00.0°</dd>
+  <dt>Scan plane</dt><dd id="r-scan">—</dd>
+  <dt>Separation</dt><dd id="r-ex">000 %</dd>
+</dl>
+
+<div id="track"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { animate, createTimeline, engine, onScroll, stagger, splitText, svg, utils } from 'animejs';
+
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// The timeline is scrubbed by scroll, not by the clock, so never let a background-tab
+// visibility change leave the engine paused.
+engine.pauseOnDocumentHidden = false;
+if (engine.paused) engine.resume();
+const $ = (s) => document.querySelector(s);
+const TAU = Math.PI * 2;
+const DEG = Math.PI / 180;
+
+/* ==========================================================================
+   Renderer
+   ========================================================================== */
+const canvas = $('#gl');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+} catch (err) {
+  $('#boot-msg').textContent = 'This page needs WebGL to draw the model';
+  $('#boot').classList.add('fail');
+  throw err;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.localClippingEnabled = true;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 60);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 1.0;
+
+const key = new THREE.DirectionalLight('#ffffff', 1.4);
+key.position.set(2.5, 4, 3);
+scene.add(key);
+const rim = new THREE.DirectionalLight('#dfe8ff', 0.8);
+rim.position.set(-3, 2, -2.5);
+scene.add(rim);
+scene.add(new THREE.HemisphereLight('#ffffff', '#b9bec4', 0.35));
+
+const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+const composer = new EffectComposer(renderer, rt);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0, 0.42, 0.22);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* ==========================================================================
+   Scroll-driven state. Anime.js writes into these numbers, the render loop reads them.
+   ========================================================================== */
+const state = {
+  rotY: 0,        // machine yaw (rad)
+  scan: 1.16,     // height of the X-ray plane (m)
+  ring: 0,        // scan ring visibility
+  bg: 0,          // studio → blueprint
+  bloom: 0,
+  shadow: 1,      // studio contact shadow
+  grid: 0,        // blueprint floor grid
+  dist: 3.2, el: 7, tx: 0, ty: 0.5, tz: 0,
+  dims: 0, dimsA: 1,
+  hud: 0,
+  orbit: 0,
+};
+const intro = { d: reduceMotion ? 0 : 1.6, lift: reduceMotion ? 0 : 0.12 };
+
+/* ==========================================================================
+   Backdrop: full-screen shader that cross-fades a studio sweep into a blueprint field
+   ========================================================================== */
+const bgMat = new THREE.ShaderMaterial({
+  depthTest: false, depthWrite: false,
+  uniforms: {
+    uMix: { value: 0 }, uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) },
+    uS0: { value: new THREE.Color('#f7f8f8') }, uS1: { value: new THREE.Color('#c3c9cf') },
+    uB0: { value: new THREE.Color('#0c2142') }, uB1: { value: new THREE.Color('#02060d') },
+    uGrid: { value: new THREE.Color('#5fd0ff') },
+  },
+  vertexShader: /* glsl */`
+    varying vec2 vUv;
+    void main() { vUv = uv; gl_Position = vec4(position.xy, 0.9999, 1.0); }`,
+  fragmentShader: /* glsl */`
+    uniform float uMix, uTime; uniform vec2 uRes;
+    uniform vec3 uS0, uS1, uB0, uB1, uGrid;
+    varying vec2 vUv;
+    float grid(vec2 p, float s, float w) {
+      vec2 g = abs(fract(p / s - 0.5) - 0.5) * s;
+      return 1.0 - smoothstep(0.0, w, min(g.x, g.y));
+    }
+    void main() {
+      vec2 px = vUv * uRes;
+      vec2 c = vUv - vec2(0.5, 0.52); c.x *= uRes.x / uRes.y;
+      float r = length(c);
+      vec3 studio = mix(uS0, uS1, smoothstep(0.0, 1.15, r));
+      studio *= 1.0 - 0.07 * smoothstep(0.42, 0.0, vUv.y);
+      vec3 bp = mix(uB0, uB1, smoothstep(0.0, 1.05, r));
+      float g = grid(px, 24.0, 1.0) * 0.03 + grid(px, 120.0, 1.2) * 0.065;
+      bp += uGrid * g * (1.0 - 0.6 * smoothstep(0.3, 1.2, r));
+      float t = uMix * 1.9;
+      float m = 1.0 - smoothstep(t - 0.32, t, r);
+      vec3 col = mix(studio, bp, m);
+      // a thin bright front where the two fields meet
+      col += uGrid * 0.35 * exp(-pow((r - t + 0.16) * 18.0, 2.0)) * step(0.001, uMix) * step(uMix, 0.999);
+      float n = fract(sin(dot(px + fract(uTime) * 91.0, vec2(12.9898, 78.233))) * 43758.5453);
+      col += (n - 0.5) * 0.014;
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+});
+const bgQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), bgMat);
+bgQuad.frustumCulled = false;
+bgQuad.renderOrder = -100;
+scene.add(bgQuad);
+
+/* ==========================================================================
+   Clipping planes for the X-ray sweep
+   solid surfaces stay below the plane, wire + ghost appear above it
+   ========================================================================== */
+const clipSolid = new THREE.Plane(new THREE.Vector3(0, -1, 0), 10);
+const clipWire = new THREE.Plane(new THREE.Vector3(0, 1, 0), -10);
+
+/* ==========================================================================
+   Procedural textures
+   ========================================================================== */
+function perforationTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+  g.fillStyle = '#000';
+  const sx = 16, sy = 14;
+  for (let y = 18, row = 0; y < c.height - 14; y += sy, row++) {
+    for (let x = (row % 2) * sx / 2; x < c.width; x += sx) {
+      g.beginPath(); g.arc(x, y, 3.1, 0, TAU); g.fill();
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = THREE.RepeatWrapping;
+  t.anisotropy = 8;
+  return t;
+}
+
+const displayCanvas = document.createElement('canvas');
+displayCanvas.width = 512; displayCanvas.height = 160;
+const displayTex = new THREE.CanvasTexture(displayCanvas);
+displayTex.colorSpace = THREE.SRGBColorSpace;
+function drawDisplay() {
+  const g = displayCanvas.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, 512, 160);
+  g.fillStyle = '#eaf7ff';
+  g.font = '500 92px "Geist Mono", ui-monospace, monospace';
+  g.textAlign = 'center';
+  g.fillText('1:14', 256, 112);
+  g.font = '500 17px "Geist Mono", ui-monospace, monospace';
+  g.fillStyle = '#86d9ff';
+  g.textAlign = 'left';
+  g.fillText('NORMAL', 26, 38); g.fillText('WARM', 26, 64); g.fillText('HIGH', 26, 90);
+  g.textAlign = 'right';
+  g.fillText('TURBOWASH', 488, 38); g.fillText('STEAM', 488, 64);
+  g.fillStyle = '#ffb547'; g.fillText('● WI-FI', 488, 90);
+  g.fillStyle = '#86d9ff'; g.fillRect(26, 130, 460, 3);
+  g.fillStyle = '#eaf7ff'; g.fillRect(26, 130, 300, 3);
+  displayTex.needsUpdate = true;
+}
+drawDisplay();
+document.fonts?.ready.then(drawDisplay);
+
+function radialTexture(stops) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  stops.forEach(([o, col]) => grad.addColorStop(o, col));
+  g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(c);
+}
+
+/* ==========================================================================
+   Materials
+   ========================================================================== */
+const solid = (o) => new THREE.MeshPhysicalMaterial({ side: THREE.DoubleSide, clippingPlanes: [clipSolid], ...o });
+const M = {
+  enamel: solid({ color: '#f4f5f3', roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 }),
+  enamelBack: solid({ color: '#d7dade', roughness: 0.55, metalness: 0.25 }),
+  plasticWhite: solid({ color: '#eceeef', roughness: 0.42, clearcoat: 0.4 }),
+  chrome: solid({ color: '#eef0f2', metalness: 1, roughness: 0.08 }),
+  satin: solid({ color: '#c9ced3', metalness: 1, roughness: 0.22 }),
+  blackGlass: solid({ color: '#08090b', roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.02 }),
+  tint: solid({ color: '#1a242d', roughness: 0.02, transparent: true, opacity: 0.58, depthWrite: false, clearcoat: 1 }),
+  smoke: solid({ color: '#40505d', roughness: 0.03, transparent: true, opacity: 0.32, depthWrite: false }),
+  rubber: solid({ color: '#4a4f54', roughness: 0.82 }),
+  drum: solid({ color: '#cfd3d7', metalness: 1, roughness: 0.26, alphaMap: perforationTexture(), alphaTest: 0.5 }),
+  steel: solid({ color: '#c8ccd1', metalness: 1, roughness: 0.24 }),
+  plastic: solid({ color: '#8e959c', roughness: 0.58 }),
+  darkSteel: solid({ color: '#353a40', metalness: 0.85, roughness: 0.36 }),
+  copper: solid({ color: '#c47b45', metalness: 1, roughness: 0.3 }),
+  magnet: solid({ color: '#5a6067', metalness: 0.7, roughness: 0.3 }),
+  concrete: solid({ color: '#9b978f', roughness: 0.96 }),
+  pcb: solid({ color: '#1c5b38', roughness: 0.45 }),
+  chip: solid({ color: '#141619', roughness: 0.35 }),
+  nickel: solid({ color: '#a9abad', metalness: 1, roughness: 0.34 }),
+  red: solid({ color: '#b73a30', roughness: 0.5 }),
+  blue: solid({ color: '#2d60b6', roughness: 0.5 }),
+  display: solid({ color: '#000000', emissive: '#ffffff', emissiveMap: displayTex, emissiveIntensity: 1.25, roughness: 0.08, clearcoat: 1 }),
+};
+
+const ghostMat = new THREE.MeshBasicMaterial({
+  color: '#1f63ff', transparent: true, opacity: 0.014, depthWrite: false,
+  blending: THREE.AdditiveBlending, side: THREE.DoubleSide, clippingPlanes: [clipWire],
+});
+
+// Shared uniforms so one write updates every wire material.
+const wireShared = { uScan: { value: 10 }, uTime: { value: 0 }, uGlobal: { value: 1 } };
+const wireColor = new THREE.Color('#6fdcff').multiplyScalar(1.6);
+const hotColor = new THREE.Color('#ffb547').multiplyScalar(2.2);
+function makeWireMat() {
+  return new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    clipping: true, clippingPlanes: [clipWire],
+    uniforms: {
+      ...wireShared,
+      uColor: { value: wireColor }, uHot: { value: hotColor },
+      uHi: { value: 0 }, uDim: { value: 0 },
+    },
+    vertexShader: /* glsl */`
+      #include <common>
+      #include <clipping_planes_pars_vertex>
+      varying vec3 vWorld;
+      void main() {
+        #include <begin_vertex>
+        #include <project_vertex>
+        #include <clipping_planes_vertex>
+        vWorld = (modelMatrix * vec4(position, 1.0)).xyz;
+      }`,
+    fragmentShader: /* glsl */`
+      #include <common>
+      #include <clipping_planes_pars_fragment>
+      uniform vec3 uColor, uHot; uniform float uScan, uHi, uDim, uGlobal, uTime;
+      varying vec3 vWorld;
+      void main() {
+        #include <clipping_planes_fragment>
+        float d = vWorld.y - uScan;
+        float edge = exp(-d * d * 1800.0);
+        vec3 c = mix(uColor, uHot, uHi);
+        c += vec3(1.0, 0.95, 0.85) * edge * 2.5;
+        float a = (0.3 + 0.55 * uHi + edge) * (1.0 - 0.7 * uDim) * uGlobal;
+        gl_FragColor = vec4(c * a, a);
+      }`,
+  });
+}
+
+/* ==========================================================================
+   Model — LG WM4000HWA, metres. Origin on the floor at the cabinet centre, front faces +Z.
+   27″ W × 39″ H × 30¼″ D including the door.
+   ========================================================================== */
+const W = 0.686, H = 0.991, D = 0.694;
+const ZF = D / 2;           // cabinet front face
+const AXIS_Y = 0.5;         // drum axis height
+const machine = new THREE.Group();
+scene.add(machine);
+
+const parts = [];
+function makePart(cfg) {
+  const group = new THREE.Group();
+  machine.add(group);
+  const p = {
+    ...cfg, group, wireMat: makeWireMat(),
+    off: new THREE.Vector3(...cfg.off), anchor: new THREE.Vector3(...(cfg.anchor || [0, 0, 0])),
+    e: 0, hi: 0, hiTarget: 0, label: null,
+  };
+  parts.push(p);
+  return p;
+}
+function add(p, geom, mat, { pos = [0, 0, 0], rot = [0, 0, 0], thr = 24, parent = p.group, wire = true, ghost = true } = {}) {
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.set(...pos);
+  mesh.rotation.set(...rot);
+  parent.add(mesh);
+  if (wire) mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geom, thr), p.wireMat));
+  if (ghost) {
+    const gm = new THREE.Mesh(geom, ghostMat);
+    gm.renderOrder = 2;
+    mesh.add(gm);
+  }
+  return mesh;
+}
+const lathe = (pts, seg = 72) => {
+  const g = new THREE.LatheGeometry(pts.map(([r, z]) => new THREE.Vector2(r, z)), seg);
+  g.rotateX(Math.PI / 2);   // lathe Y → world Z
+  return g;
+};
+const zCyl = (r1, r2, len, seg = 48, open = false) => {
+  const g = new THREE.CylinderGeometry(r1, r2, len, seg, 1, open);
+  g.rotateX(Math.PI / 2);
+  return g;
+};
+const rbox = (w, h, d, r = 0.004, s = 3) => new RoundedBoxGeometry(w, h, d, s, r);
+class Helix extends THREE.Curve {
+  constructor(r, h, turns) { super(); this.r = r; this.h = h; this.turns = turns; }
+  getPoint(t, out = new THREE.Vector3()) {
+    const a = t * this.turns * TAU;
+    return out.set(Math.cos(a) * this.r, t * this.h, Math.sin(a) * this.r);
+  }
+}
+const tube = (pts, r, seg = 64) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map((v) => new THREE.Vector3(...v))), seg, r, 10, false);
+
+/* ---- 01 Worktop ---- */
+{
+  const p = makePart({ no: 1, name: 'Worktop', desc: 'Pressed-steel lid. First panel off in a service teardown.', off: [0, 0.66, 0.05], anchor: [0.2, H - 0.01, -0.12], side: 'right' });
+  add(p, rbox(W + 0.004, 0.02, D + 0.004, 0.007, 4), M.enamel, { pos: [0, H - 0.01, 0] });
+}
+
+/* ---- 02 Control panel ---- */
+const fasciaY = H - 0.085;
+{
+  const p = makePart({ no: 2, name: 'Control Panel', desc: 'Cycle dial, LED display and ThinQ® Wi-Fi.', off: [0, 0.4, 0.62], anchor: [0.1, fasciaY, ZF + 0.02], side: 'left' });
+  add(p, rbox(W, 0.13, 0.032, 0.01, 4), M.enamel, { pos: [0, fasciaY, ZF - 0.002] });
+  // display window
+  add(p, rbox(0.2, 0.064, 0.006, 0.004), M.blackGlass, { pos: [0.1, fasciaY, ZF + 0.016] });
+  const disp = new THREE.Mesh(new THREE.PlaneGeometry(0.188, 0.0587), M.display);
+  disp.position.set(0.1, fasciaY, ZF + 0.0195);
+  p.group.add(disp);
+  // dial
+  add(p, zCyl(0.036, 0.036, 0.012, 64), M.chrome, { pos: [-0.06, fasciaY, ZF + 0.02], thr: 30 });
+  add(p, zCyl(0.03, 0.031, 0.026, 64), M.plasticWhite, { pos: [-0.06, fasciaY, ZF + 0.026], thr: 30 });
+  add(p, rbox(0.004, 0.02, 0.004, 0.0015, 2), M.chrome, { pos: [-0.06, fasciaY + 0.016, ZF + 0.04], wire: false, ghost: false });
+  // buttons
+  for (let i = 0; i < 4; i++) add(p, zCyl(0.008, 0.008, 0.006, 24), M.satin, { pos: [0.24 + (i % 2) * 0.03, fasciaY + (i < 2 ? 0.016 : -0.016), ZF + 0.017], thr: 40 });
+}
+
+/* ---- 03 Detergent dispenser ---- */
+{
+  const p = makePart({ no: 3, name: 'Detergent Dispenser', desc: 'Drawer with detergent, softener and bleach cups.', off: [-0.32, 0.48, 1.0], anchor: [-0.215, fasciaY, ZF + 0.02], side: 'left' });
+  add(p, rbox(0.19, 0.08, 0.014, 0.006), M.plasticWhite, { pos: [-0.215, fasciaY, ZF + 0.018] });
+  add(p, rbox(0.18, 0.07, 0.3, 0.004), M.plasticWhite, { pos: [-0.215, fasciaY - 0.004, ZF - 0.14] });
+  add(p, rbox(0.004, 0.06, 0.26, 0.001, 1), M.plastic, { pos: [-0.245, fasciaY, ZF - 0.13] });
+  add(p, rbox(0.004, 0.06, 0.26, 0.001, 1), M.plastic, { pos: [-0.185, fasciaY, ZF - 0.13] });
+  add(p, rbox(0.07, 0.006, 0.014, 0.002, 2), M.satin, { pos: [-0.215, fasciaY - 0.025, ZF + 0.027], wire: false });
+}
+
+/* ---- 04 Main PCB ---- */
+{
+  const p = makePart({ no: 4, name: 'Main Control Board', desc: 'Runs the inverter. AI DD™ reads load and fabric.', off: [0.2, 0.58, 0.32], anchor: [0.1, fasciaY, ZF - 0.05], side: 'right' });
+  const z = ZF - 0.04;
+  add(p, new THREE.BoxGeometry(0.34, 0.1, 0.004), M.pcb, { pos: [0.1, fasciaY, z] });
+  const chips = [[0.0, 0.01, 0.05, 0.03], [0.08, -0.02, 0.03, 0.03], [0.17, 0.02, 0.06, 0.025], [0.22, -0.025, 0.03, 0.02], [-0.04, -0.03, 0.04, 0.02]];
+  chips.forEach(([x, y, w, h]) => add(p, new THREE.BoxGeometry(w, h, 0.006), M.chip, { pos: [x, fasciaY + y, z - 0.005], ghost: false }));
+  for (let i = 0; i < 5; i++) add(p, zCyl(0.008, 0.008, 0.022, 16), i % 2 ? M.blue : M.chip, { pos: [-0.03 + i * 0.022, fasciaY + 0.03, z - 0.013], thr: 40, ghost: false });
+  add(p, new THREE.BoxGeometry(0.05, 0.02, 0.012), M.plasticWhite, { pos: [0.25, fasciaY + 0.03, z - 0.008], ghost: false });
+}
+
+/* ---- 05 Counterweight ---- */
+{
+  const p = makePart({ no: 5, name: 'Counterweight', desc: 'Cast concrete. Steadies the tub at 1,300 rpm.', off: [0, 0.36, 0.42], anchor: [0, AXIS_Y + 0.31, 0.18], side: 'left' });
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.22, 0); shape.lineTo(0.22, 0); shape.lineTo(0.2, 0.075); shape.lineTo(-0.2, 0.075); shape.closePath();
+  const g = new THREE.ExtrudeGeometry(shape, { depth: 0.07, bevelEnabled: true, bevelThickness: 0.006, bevelSize: 0.006, bevelSegments: 2 });
+  g.translate(0, 0, -0.035);
+  add(p, g, M.concrete, { pos: [0, AXIS_Y + 0.275, 0.18] });
+  [-0.16, 0.16].forEach((x) => add(p, zCyl(0.008, 0.008, 0.09, 12), M.nickel, { pos: [x, AXIS_Y + 0.31, 0.18], thr: 40, ghost: false }));
+}
+
+/* ---- 06 Suspension springs ---- */
+{
+  const p = makePart({ no: 6, name: 'Suspension Springs', desc: 'Hang the tub from the top of the cabinet frame.', off: [0, 0.42, -0.08], anchor: [0.17, 0.885, -0.06], side: 'right' });
+  [-0.17, 0.17].forEach((x) => {
+    const g = new THREE.TubeGeometry(new Helix(0.016, 0.12, 11), 260, 0.0028, 6, false);
+    add(p, g, M.darkSteel, { pos: [x, 0.82, -0.06], thr: 50, ghost: false });
+    add(p, tube([[0, 0, 0], [0, -0.012, 0.004], [0, -0.022, 0]], 0.003, 12), M.darkSteel, { pos: [x + 0.016, 0.82, -0.06], thr: 60, ghost: false });
+    add(p, tube([[0, 0, 0], [0, 0.012, 0.004], [0, 0.022, 0]], 0.003, 12), M.darkSteel, { pos: [x + 0.016, 0.94, -0.06], thr: 60, ghost: false });
+  });
+}
+
+/* ---- 07 Water inlet valve ---- */
+{
+  const p = makePart({ no: 7, name: 'Water Inlet Valve', desc: 'Two solenoids gate the hot and cold supply.', off: [0.26, 0.4, -0.6], anchor: [0.22, 0.9, -0.28], side: 'right' });
+  add(p, rbox(0.09, 0.04, 0.05, 0.006), M.plasticWhite, { pos: [0.22, 0.9, -0.28] });
+  [[-0.022, M.red], [0.022, M.blue]].forEach(([dx, m]) => {
+    add(p, new THREE.CylinderGeometry(0.014, 0.014, 0.03, 24), M.chip, { pos: [0.22 + dx, 0.935, -0.28], thr: 40 });
+    add(p, new THREE.CylinderGeometry(0.0145, 0.0145, 0.006, 24), m, { pos: [0.22 + dx, 0.952, -0.28], wire: false, ghost: false });
+    add(p, zCyl(0.01, 0.01, 0.06, 20), M.satin, { pos: [0.22 + dx, 0.9, -0.33], thr: 40 });
+  });
+  add(p, tube([[0.22, 0.9, -0.25], [0.12, 0.93, -0.12], [-0.1, 0.935, -0.02], [-0.215, 0.92, 0.02]], 0.009), M.rubber, { thr: 40, ghost: false });
+}
+
+/* ---- 08 Door ---- */
+const DOOR_Y = AXIS_Y + 0.02;
+{
+  const p = makePart({ no: 8, name: 'Door & Porthole', desc: 'Tempered glass bowl. Seals against the gasket lip.', off: [0, 0, 1.4], anchor: [0.24, DOOR_Y + 0.08, ZF + 0.05], side: 'left' });
+  const door = new THREE.Group();
+  door.position.set(0, DOOR_Y, ZF + 0.006);
+  p.group.add(door);
+  add(p, lathe([[0.25, 0], [0.258, 0.008], [0.262, 0.024], [0.258, 0.04], [0.245, 0.054], [0.226, 0.062], [0.214, 0.064]], 96), M.plasticWhite, { parent: door, thr: 12 });
+  add(p, new THREE.TorusGeometry(0.212, 0.0075, 16, 96), M.chrome, { parent: door, pos: [0, 0, 0.064], thr: 40 });
+  add(p, new THREE.TorusGeometry(0.255, 0.004, 12, 96), M.chrome, { parent: door, pos: [0, 0, 0.012], thr: 40, ghost: false });
+  add(p, lathe([[0.212, 0.06], [0.16, 0.067], [0.08, 0.07], [0.0, 0.071]], 96), M.tint, { parent: door, thr: 20, ghost: false });
+  add(p, lathe([[0.2, 0.052], [0.195, 0.02], [0.18, -0.03], [0.15, -0.075], [0.1, -0.1], [0.0, -0.11]], 96), M.smoke, { parent: door, thr: 14, ghost: false });
+  // hinge + latch
+  add(p, rbox(0.03, 0.12, 0.03, 0.006), M.plasticWhite, { parent: door, pos: [-0.262, 0, 0.012] });
+  add(p, rbox(0.014, 0.05, 0.02, 0.004), M.satin, { parent: door, pos: [0.25, 0, 0.03] });
+}
+
+/* ---- 09 Front panel ---- */
+{
+  const p = makePart({ no: 9, name: 'Front Panel', desc: 'Enamelled steel with the porthole opening.', off: [0, 0, 1.0], anchor: [-0.25, 0.14, ZF + 0.01], side: 'left' });
+  const s = new THREE.Shape();
+  const x0 = -W / 2, x1 = W / 2, y0 = 0.035, y1 = H - 0.155, r = 0.012;
+  s.moveTo(x0 + r, y0); s.lineTo(x1 - r, y0); s.quadraticCurveTo(x1, y0, x1, y0 + r);
+  s.lineTo(x1, y1 - r); s.quadraticCurveTo(x1, y1, x1 - r, y1); s.lineTo(x0 + r, y1);
+  s.quadraticCurveTo(x0, y1, x0, y1 - r); s.lineTo(x0, y0 + r); s.quadraticCurveTo(x0, y0, x0 + r, y0);
+  const hole = new THREE.Path(); hole.absarc(0, DOOR_Y, 0.235, 0, TAU, true);
+  s.holes.push(hole);
+  const g = new THREE.ExtrudeGeometry(s, { depth: 0.008, bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.003, bevelSegments: 3, curveSegments: 96 });
+  add(p, g, M.enamel, { pos: [0, 0, ZF - 0.008], thr: 30 });
+  // kick-plate service hatch
+  add(p, rbox(0.12, 0.07, 0.004, 0.006), M.plasticWhite, { pos: [0.22, 0.09, ZF + 0.004] });
+}
+
+/* ---- 10 Gasket ---- */
+{
+  const p = makePart({ no: 10, name: 'Door Boot Gasket', desc: 'Folded rubber bellows. Seals while the tub moves.', off: [0, 0, 0.66], anchor: [-0.18, DOOR_Y + 0.17, ZF - 0.04], side: 'left' });
+  const g = lathe([[0.24, 0.0], [0.248, -0.01], [0.24, -0.022], [0.22, -0.03], [0.232, -0.048], [0.222, -0.066], [0.236, -0.085], [0.236, -0.105]], 96);
+  add(p, g, M.rubber, { pos: [0, DOOR_Y, ZF], thr: 14 });
+}
+
+/* ---- 11 Drum (spins) ---- */
+const DRUM_Z0 = -0.215, DRUM_Z1 = 0.165;
+{
+  const p = makePart({ no: 11, name: 'Stainless Steel Drum', desc: '4.5 cu ft perforated shell with three lifters.', off: [0, 0, 0.32], anchor: [0, AXIS_Y + 0.25, -0.02], side: 'left' });
+  const spin = new THREE.Group(); spin.position.set(0, AXIS_Y, 0); p.group.add(spin); p.spin = spin;
+  const len = DRUM_Z1 - DRUM_Z0, zc = (DRUM_Z0 + DRUM_Z1) / 2;
+  add(p, zCyl(0.25, 0.25, len, 64, true), M.drum, { parent: spin, pos: [0, 0, zc], thr: 4, ghost: false });
+  add(p, lathe([[0.25, DRUM_Z1], [0.247, DRUM_Z1 + 0.012], [0.225, DRUM_Z1 + 0.024], [0.205, DRUM_Z1 + 0.026]], 64), M.steel, { parent: spin, thr: 20 });
+  add(p, new THREE.CircleGeometry(0.25, 64).translate(0, 0, 0), M.steel, { parent: spin, pos: [0, 0, DRUM_Z0], thr: 30 });
+  for (let i = 0; i < 3; i++) {
+    const a = i * TAU / 3;
+    const lifter = add(p, rbox(0.06, 0.035, len - 0.02, 0.01, 3), M.steel, { parent: spin, pos: [Math.cos(a) * 0.235, Math.sin(a) * 0.235, zc], rot: [0, 0, a + Math.PI / 2], thr: 30 });
+    lifter.renderOrder = 1;
+  }
+  // spider + shaft
+  for (let i = 0; i < 3; i++) {
+    const a = i * TAU / 3 + Math.PI / 6;
+    add(p, rbox(0.23, 0.04, 0.02, 0.008), M.darkSteel, { parent: spin, pos: [Math.cos(a) * 0.115, Math.sin(a) * 0.115, DRUM_Z0 - 0.014], rot: [0, 0, a], thr: 30 });
+  }
+  add(p, zCyl(0.045, 0.045, 0.03, 32), M.darkSteel, { parent: spin, pos: [0, 0, DRUM_Z0 - 0.018], thr: 30 });
+  add(p, zCyl(0.016, 0.016, 0.11, 24), M.steel, { parent: spin, pos: [0, 0, DRUM_Z0 - 0.07], thr: 30 });
+}
+
+/* ---- 12 Outer tub ---- */
+{
+  const p = makePart({ no: 12, name: 'Outer Tub', desc: 'Sealed polymer tank. The drum turns inside it.', off: [0, 0, 0], anchor: [0.3, AXIS_Y - 0.06, -0.08], side: 'right' });
+  const z0 = -0.245, z1 = 0.205;
+  add(p, zCyl(0.3, 0.3, z1 - z0, 32, true), M.plastic, { pos: [0, AXIS_Y, (z0 + z1) / 2], thr: 4 });
+  add(p, new THREE.CircleGeometry(0.3, 64), M.plastic, { pos: [0, AXIS_Y, z0], thr: 30 });
+  add(p, lathe([[0.3, z1], [0.298, z1 + 0.012], [0.262, z1 + 0.024], [0.236, z1 + 0.03], [0.236, z1 + 0.04]], 64), M.plastic, { pos: [0, AXIS_Y, 0], thr: 20 });
+  [-0.17, -0.03, 0.11].forEach((z) => add(p, new THREE.TorusGeometry(0.302, 0.006, 8, 64), M.plastic, { pos: [0, AXIS_Y, z], wire: false, ghost: false }));
+  // bearing housing ribs on the back face
+  for (let i = 0; i < 6; i++) {
+    const a = i * TAU / 6;
+    add(p, rbox(0.2, 0.012, 0.016, 0.003), M.plastic, { pos: [Math.cos(a) * 0.17, AXIS_Y + Math.sin(a) * 0.17, z0 - 0.008], rot: [0, 0, a], thr: 40, ghost: false });
+  }
+  // spring + damper bosses
+  [-0.17, 0.17].forEach((x) => add(p, rbox(0.03, 0.03, 0.03, 0.004), M.plastic, { pos: [x, AXIS_Y + 0.305, -0.06], ghost: false }));
+  [-0.12, 0.12].forEach((x) => add(p, rbox(0.03, 0.03, 0.04, 0.004), M.plastic, { pos: [x, AXIS_Y - 0.3, 0.02], ghost: false }));
+  // sump
+  add(p, rbox(0.12, 0.05, 0.16, 0.012), M.plastic, { pos: [0, AXIS_Y - 0.31, 0.04], ghost: false });
+}
+
+/* ---- 13 Heater ---- */
+{
+  const p = makePart({ no: 13, name: 'Heater Element', desc: 'Sheathed element in the sump. Heats wash water.', off: [0, -0.34, 0.08], anchor: [0.06, 0.225, -0.1], side: 'right' });
+  const y = 0.226;
+  add(p, tube([[-0.05, y, 0.15], [-0.05, y, -0.12], [-0.035, y, -0.17], [0, y, -0.185], [0.035, y, -0.17], [0.05, y, -0.12], [0.05, y, 0.15]], 0.0065, 120), M.nickel, { thr: 50, ghost: false });
+  add(p, rbox(0.13, 0.04, 0.03, 0.005), M.chip, { pos: [0, y, 0.17] });
+  [-0.03, 0.03].forEach((x) => add(p, zCyl(0.004, 0.004, 0.02, 10), M.copper, { pos: [x, y, 0.193], thr: 60, ghost: false }));
+}
+
+/* ---- 14 Stator ---- */
+const STATOR_Z = -0.27;
+{
+  const p = makePart({ no: 14, name: 'Stator', desc: 'Fixed copper windings bolted to the tub. Half of the motor.', off: [0, 0, -0.56], anchor: [0.12, AXIS_Y + 0.08, STATOR_Z], side: 'right' });
+  const cores = [], coils = [];
+  const N = 36;
+  for (let i = 0; i < N; i++) {
+    const a = i * TAU / N;
+    const core = new THREE.BoxGeometry(0.06, 0.009, 0.03); core.translate(0.105, 0, 0); core.rotateZ(a); cores.push(core);
+    const coil = new THREE.BoxGeometry(0.036, 0.016, 0.026); coil.translate(0.1, 0, 0); coil.rotateZ(a); coils.push(coil);
+  }
+  add(p, mergeGeometries(cores), M.darkSteel, { pos: [0, AXIS_Y, STATOR_Z], thr: 40, ghost: false });
+  add(p, mergeGeometries(coils), M.copper, { pos: [0, AXIS_Y, STATOR_Z], thr: 40 });
+  add(p, lathe([[0.072, -0.02], [0.08, -0.02], [0.08, 0.02], [0.072, 0.02], [0.03, 0.02], [0.03, -0.02], [0.072, -0.02]], 64), M.plastic, { pos: [0, AXIS_Y, STATOR_Z], thr: 30 });
+  for (let i = 0; i < 6; i++) {
+    const a = i * TAU / 6;
+    add(p, zCyl(0.006, 0.006, 0.05, 12), M.nickel, { pos: [Math.cos(a) * 0.055, AXIS_Y + Math.sin(a) * 0.055, STATOR_Z + 0.01], thr: 60, ghost: false });
+  }
+}
+
+/* ---- 15 Rotor (spins with the drum) ---- */
+const ROTOR_Z = -0.31;
+{
+  const p = makePart({ no: 15, name: 'Rotor', desc: 'Magnet ring on the drum shaft. Direct Drive.', off: [0, 0, -0.88], anchor: [0, AXIS_Y + 0.165, ROTOR_Z + 0.02], side: 'right' });
+  const spin = new THREE.Group(); spin.position.set(0, AXIS_Y, ROTOR_Z); p.group.add(spin); p.spin = spin;
+  add(p, lathe([[0.02, 0], [0.155, 0], [0.163, 0.004], [0.166, 0.012], [0.166, 0.055], [0.158, 0.055], [0.158, 0.008], [0.02, 0.008]], 72), M.darkSteel, { parent: spin, thr: 20 });
+  for (let i = 0; i < 12; i++) {
+    const a = i * TAU / 12;
+    add(p, rbox(0.11, 0.008, 0.008, 0.002, 1), M.satin, { parent: spin, pos: [Math.cos(a) * 0.09, Math.sin(a) * 0.09, -0.004], rot: [0, 0, a], thr: 40, ghost: false });
+  }
+  const mags = [];
+  for (let i = 0; i < 48; i++) {
+    const a = i * TAU / 48;
+    const m = new THREE.BoxGeometry(0.008, 0.018, 0.04); m.translate(0.152, 0, 0.032); m.rotateZ(a); mags.push(m);
+  }
+  add(p, mergeGeometries(mags), M.magnet, { parent: spin, thr: 40, ghost: false });
+  add(p, zCyl(0.03, 0.03, 0.02, 24), M.satin, { parent: spin, pos: [0, 0, -0.008], thr: 30 });
+}
+
+/* ---- 16 Rear panel ---- */
+{
+  const p = makePart({ no: 16, name: 'Rear Panel', desc: 'Service access to the motor and hose ports.', off: [0, 0, -1.22], anchor: [-0.2, 0.75, -ZF], side: 'right' });
+  add(p, rbox(W - 0.02, H - 0.06, 0.01, 0.003, 2), M.enamelBack, { pos: [0, (H - 0.06) / 2 + 0.03, -ZF + 0.005] });
+  add(p, rbox(0.36, 0.36, 0.006, 0.01, 3), M.enamelBack, { pos: [0, AXIS_Y, -ZF - 0.002] });
+  for (let i = 0; i < 6; i++) add(p, rbox(0.12, 0.008, 0.004, 0.002, 1), M.darkSteel, { pos: [-0.2, 0.86 - i * 0.022, -ZF - 0.002], ghost: false });
+}
+
+/* ---- 17 Cabinet sides ---- */
+{
+  const p = makePart({ no: 17, name: 'Cabinet Side Panels', desc: 'Folded steel. They carry the frame load.', off: [-0.66, 0, 0], anchor: [-W / 2, 0.62, 0.05], side: 'left' });
+  add(p, rbox(0.012, H - 0.05, D - 0.01, 0.004), M.enamel, { pos: [-W / 2 + 0.006, (H - 0.05) / 2 + 0.03, 0] });
+  const q = makePart({ no: 0, off: [0.66, 0, 0] });
+  add(q, rbox(0.012, H - 0.05, D - 0.01, 0.004), M.enamel, { pos: [W / 2 - 0.006, (H - 0.05) / 2 + 0.03, 0] });
+}
+
+/* ---- 18 Dampers ---- */
+{
+  const p = makePart({ no: 18, name: 'Friction Dampers', desc: 'Soak up tub motion during spin.', off: [0, -0.4, 0.02], anchor: [0.16, 0.13, 0.02], side: 'right' });
+  [-1, 1].forEach((sgn) => {
+    const top = new THREE.Vector3(sgn * 0.12, AXIS_Y - 0.31, 0.02);
+    const bot = new THREE.Vector3(sgn * 0.21, 0.055, 0.02);
+    const dir = bot.clone().sub(top);
+    const len = dir.length();
+    const g = new THREE.Group();
+    g.position.copy(top).add(bot).multiplyScalar(0.5);
+    g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+    p.group.add(g);
+    add(p, new THREE.CylinderGeometry(0.019, 0.019, len * 0.55, 24), M.darkSteel, { parent: g, pos: [0, len * 0.18, 0], thr: 40 });
+    add(p, new THREE.CylinderGeometry(0.007, 0.007, len * 0.55, 12), M.steel, { parent: g, pos: [0, -len * 0.22, 0], thr: 40, ghost: false });
+    [len / 2, -len / 2].forEach((y) => add(p, new THREE.TorusGeometry(0.012, 0.004, 8, 20), M.darkSteel, { parent: g, pos: [0, y, 0], rot: [0, Math.PI / 2, 0], thr: 50, ghost: false }));
+  });
+}
+
+/* ---- 19 Drain pump ---- */
+{
+  const p = makePart({ no: 19, name: 'Drain Pump & Filter', desc: 'Empties the tub. Coin trap opens at the front.', off: [0.32, -0.42, 0.5], anchor: [0.2, 0.1, 0.22], side: 'right' });
+  add(p, zCyl(0.045, 0.045, 0.05, 40), M.plastic, { pos: [0.2, 0.1, 0.2], thr: 30 });
+  add(p, zCyl(0.032, 0.032, 0.06, 32), M.chip, { pos: [0.2, 0.1, 0.145], thr: 30 });
+  add(p, zCyl(0.034, 0.03, 0.03, 40), M.plasticWhite, { pos: [0.2, 0.1, 0.245], thr: 30 });
+  add(p, new THREE.CylinderGeometry(0.012, 0.012, 0.06, 20), M.plastic, { pos: [0.2, 0.155, 0.21], thr: 40, ghost: false });
+  add(p, tube([[0.0, AXIS_Y - 0.33, 0.06], [0.06, 0.15, 0.12], [0.16, 0.11, 0.2]], 0.018, 48), M.rubber, { thr: 40, ghost: false });
+}
+
+/* ---- 20 Base frame ---- */
+{
+  const p = makePart({ no: 20, name: 'Base Frame & Feet', desc: 'Four threaded feet level the cabinet.', off: [0, -0.66, 0], anchor: [-0.2, 0.035, 0.25], side: 'left' });
+  add(p, rbox(W - 0.012, 0.03, D - 0.012, 0.004), M.darkSteel, { pos: [0, 0.035, 0] });
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => {
+    add(p, new THREE.CylinderGeometry(0.022, 0.024, 0.02, 24), M.chip, { pos: [sx * (W / 2 - 0.05), 0.01, sz * (D / 2 - 0.06)], thr: 40, ghost: false });
+    add(p, new THREE.CylinderGeometry(0.006, 0.006, 0.02, 12), M.satin, { pos: [sx * (W / 2 - 0.05), 0.026, sz * (D / 2 - 0.06)], thr: 40, ghost: false });
+  });
+}
+
+const labelled = parts.filter((p) => p.no > 0).sort((a, b) => a.no - b.no);
+const twin = parts.find((p) => p.no === 0);
+const sideLeft = parts.find((p) => p.no === 17);
+
+/* ==========================================================================
+   Floor: studio contact shadow + blueprint grid
+   ========================================================================== */
+const shadow = new THREE.Mesh(
+  new THREE.PlaneGeometry(1.7, 1.7).rotateX(-Math.PI / 2),
+  new THREE.MeshBasicMaterial({ map: radialTexture([[0, 'rgba(0,0,0,.55)'], [0.35, 'rgba(0,0,0,.28)'], [0.7, 'rgba(0,0,0,.06)'], [1, 'rgba(0,0,0,0)']]), transparent: true, depthWrite: false })
+);
+shadow.position.y = 0.001;
+shadow.renderOrder = -1;
+scene.add(shadow);
+
+const gridMat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  uniforms: { uA: { value: 0 }, uC: { value: new THREE.Color('#58c8ff') } },
+  vertexShader: /* glsl */`varying vec3 vW; void main(){ vec4 w = modelMatrix * vec4(position,1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
+  fragmentShader: /* glsl */`
+    uniform float uA; uniform vec3 uC; varying vec3 vW;
+    float line(vec2 p, float s){ vec2 q = p * s; vec2 g = abs(fract(q - .5) - .5) / fwidth(q); return 1. - min(min(g.x, g.y), 1.); }
+    void main(){
+      vec2 p = vW.xz; float r = length(p);
+      float l = line(p, 10.) * .22 + line(p, 2.) * .55;
+      float axis = (1. - min(abs(p.x) / fwidth(p.x), 1.)) + (1. - min(abs(p.y) / fwidth(p.y), 1.));
+      float a = (l + axis * .25) * (1. - smoothstep(.5, 2.8, r)) * uA;
+      gl_FragColor = vec4(uC * a, a);
+    }`,
+});
+const grid = new THREE.Mesh(new THREE.PlaneGeometry(7, 7).rotateX(-Math.PI / 2), gridMat);
+grid.position.y = -0.002;
+scene.add(grid);
+
+/* ==========================================================================
+   Scan ring: a laser plane that slices the machine
+   ========================================================================== */
+const scanGroup = new THREE.Group();
+scene.add(scanGroup);
+const scanDisc = new THREE.Mesh(
+  new THREE.CircleGeometry(0.66, 96).rotateX(-Math.PI / 2),
+  new THREE.MeshBasicMaterial({ map: radialTexture([[0, 'rgba(127,227,255,0.02)'], [0.75, 'rgba(127,227,255,0.10)'], [0.97, 'rgba(127,227,255,0.55)'], [1, 'rgba(127,227,255,0)']]), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })
+);
+scanGroup.add(scanDisc);
+const ticks = [];
+for (let i = 0; i < 120; i++) {
+  const a = i * TAU / 120, r0 = 0.68, r1 = i % 10 === 0 ? 0.73 : 0.7;
+  ticks.push(Math.cos(a) * r0, 0, Math.sin(a) * r0, Math.cos(a) * r1, 0, Math.sin(a) * r1);
+}
+const tickGeo = new THREE.BufferGeometry();
+tickGeo.setAttribute('position', new THREE.Float32BufferAttribute(ticks, 3));
+const tickMat = new THREE.LineBasicMaterial({ color: new THREE.Color('#7fe3ff').multiplyScalar(2), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+const tickRing = new THREE.LineSegments(tickGeo, tickMat);
+scanGroup.add(tickRing);
+
+/* ==========================================================================
+   Dimension lines (overall W × H × D)
+   ========================================================================== */
+const dimMat = new THREE.LineBasicMaterial({ color: new THREE.Color('#ffb547').multiplyScalar(1.8), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+const DEPTH_FRONT = ZF + 0.071;
+const dims = [
+  { a: [-W / 2, H + 0.07, ZF], b: [W / 2, H + 0.07, ZF], ext: [0, -1, 0], text: 'W 27″', mm: '686 mm' },
+  { a: [-W / 2 - 0.08, 0, ZF], b: [-W / 2 - 0.08, H, ZF], ext: [1, 0, 0], text: 'H 39″', mm: '991 mm' },
+  { a: [W / 2 + 0.08, 0.004, -ZF], b: [W / 2 + 0.08, 0.004, DEPTH_FRONT], ext: [-1, 0, 0], text: 'D 30¼″', mm: '768 mm' },
+].map((d) => {
+  const a = new THREE.Vector3(...d.a), b = new THREE.Vector3(...d.b), n = new THREE.Vector3(...d.ext);
+  const pts = [];
+  const push = (p, q) => pts.push(p.x, p.y, p.z, q.x, q.y, q.z);
+  push(a.clone().addScaledVector(n, 0.07), a.clone().addScaledVector(n, -0.02));
+  push(b.clone().addScaledVector(n, 0.07), b.clone().addScaledVector(n, -0.02));
+  const dir = b.clone().sub(a).normalize();
+  const tick = dir.clone().add(n.clone().multiplyScalar(-1)).normalize().multiplyScalar(0.018);
+  push(a.clone().sub(tick), a.clone().add(tick));
+  push(b.clone().sub(tick), b.clone().add(tick));
+  const N = 40;
+  for (let i = 0; i < N; i++) push(a.clone().lerp(b, i / N), a.clone().lerp(b, (i + 1) / N));
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  const line = new THREE.LineSegments(g, dimMat);
+  machine.add(line);
+  const el = document.createElement('div');
+  el.className = 'dim';
+  el.innerHTML = `${d.text}<small>${d.mm}</small>`;
+  $('#dims').appendChild(el);
+  return { line, el, mid: a.clone().lerp(b, 0.5), count: pts.length / 3 };
+});
+
+/* ==========================================================================
+   Callouts (HTML + SVG leaders)
+   ========================================================================== */
+const SVGNS = 'http://www.w3.org/2000/svg';
+const leaders = $('#leaders');
+const legend = $('#legend');
+labelled.forEach((p) => {
+  const el = document.createElement('div');
+  el.className = 'label';
+  el.dataset.side = p.side;
+  const no = String(p.no).padStart(2, '0');
+  el.innerHTML = `<span class="balloon">${no}</span><span class="t"><b>${p.name}</b><i>${p.desc}</i><code></code></span>`;
+  $('#labels').appendChild(el);
+  const path = document.createElementNS(SVGNS, 'path');
+  const dot = document.createElementNS(SVGNS, 'circle'); dot.setAttribute('r', '2.5'); dot.classList.add('dot');
+  const ring = document.createElementNS(SVGNS, 'circle'); ring.classList.add('ring');
+  leaders.append(path, ring, dot);
+  p.label = { el, path, dot, ring, code: el.querySelector('code'), p: 0, x: 0, y: 0, init: false };
+  const hot = (on) => { p.hiTarget = on ? 1 : 0; hovered = on ? p : null; };
+  el.addEventListener('pointerenter', () => hot(true));
+  el.addEventListener('pointerleave', () => hot(false));
+  legend.insertAdjacentHTML('beforeend', `<div><span>${no}</span>${p.name}</div>`);
+});
+let hovered = null;
+
+/* ==========================================================================
+   Drawing frame (SVG, drawn with anime.js createDrawable)
+   ========================================================================== */
+const frame = $('#frame');
+function buildFrame() {
+  const w = innerWidth, h = innerHeight, m = Math.max(10, Math.min(22, w * 0.015));
+  frame.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  const d = [
+    `M${m} ${m}H${w - m}V${h - m}H${m}Z`,
+    `M${m + 6} ${m + 6}H${w - m - 6}V${h - m - 6}H${m + 6}Z`,
+  ];
+  // zone ticks along the border, like a drawing sheet
+  const zones = [];
+  for (let i = 1; i < 8; i++) { const x = m + (w - 2 * m) * i / 8; zones.push(`M${x} ${m}V${m + 6}M${x} ${h - m}V${h - m - 6}`); }
+  for (let i = 1; i < 6; i++) { const y = m + (h - 2 * m) * i / 6; zones.push(`M${m} ${y}H${m + 6}M${w - m} ${y}H${w - m - 6}`); }
+  // centre cross-hair
+  const cx = w / 2, cy = h / 2;
+  zones.push(`M${cx - 14} ${cy}H${cx + 14}M${cx} ${cy - 14}V${cy + 14}`);
+  if (!frame.childElementCount) {
+    d.forEach((_, i) => { const pth = document.createElementNS(SVGNS, 'path'); if (i) pth.classList.add('thin'); frame.appendChild(pth); });
+    const z = document.createElementNS(SVGNS, 'path'); z.classList.add('thin'); frame.appendChild(z);
+  }
+  const paths = frame.querySelectorAll('path');
+  d.forEach((v, i) => paths[i].setAttribute('d', v));
+  paths[2].setAttribute('d', zones.join(''));
+}
+buildFrame();
+const frameDrawables = svg.createDrawable('#frame path');
+utils.set(frameDrawables, { draw: '0 0' });
+
+/* ==========================================================================
+   Sizing
+   ========================================================================== */
+let VW = 1, VH = 1;
+function resize() {
+  VW = innerWidth; VH = innerHeight;
+  renderer.setSize(VW, VH, false);
+  composer.setSize(VW, VH);
+  bloom.resolution.set(VW / 2, VH / 2);
+  camera.aspect = VW / VH;
+  // on tall phone screens the copy sits low, so lift the model into the upper part of the frame
+  if (VW / VH < 0.8) camera.setViewOffset(VW, VH, 0, VH * 0.13, VW, VH);
+  else camera.clearViewOffset();
+  camera.updateProjectionMatrix();
+  bgMat.uniforms.uRes.value.set(VW, VH);
+  buildFrame();
+}
+addEventListener('resize', resize);
+resize();
+
+/* ==========================================================================
+   Hero intro (plays once on load) — anime.js text split + camera dolly
+   ========================================================================== */
+const heroSplit = splitText('#hero-title', { chars: { wrap: 'clip' } });
+function playIntro() {
+  if (reduceMotion) return;
+  const fade = '.hero .eyebrow, #hero-copy, .hud-top';
+  utils.set(fade, { opacity: 0 });
+  animate(heroSplit.chars, { y: ['105%', '0%'], duration: 1100, delay: stagger(28, { start: 250 }), ease: 'outExpo' });
+  animate(fade, { opacity: [0, 1], y: [14, 0], duration: 900, delay: stagger(120, { start: 700 }), ease: 'outQuart' });
+  animate(intro, { d: 0, lift: 0, duration: 2400, ease: 'outQuart' });
+}
+
+/* ==========================================================================
+   The scroll timeline. One anime.js timeline, scrubbed by onScroll.
+   Units are arbitrary: 10 000 = the full scroll track.
+   ========================================================================== */
+const chapters = [...document.querySelectorAll('.chapter')];
+const chapterIn = (i, at) => tl.add(chapters[i], { opacity: [0, 1], y: [24, 0], duration: 380, ease: 'outCubic' }, at);
+const chapterOut = (i, at) => tl.add(chapters[i], { opacity: [1, 0], y: [0, -16], duration: 300, ease: 'inCubic' }, at);
+const labelStates = labelled.map((p) => p.label);
+const partStates = parts;
+
+const tl = createTimeline({
+  defaults: { ease: 'inOutSine' },
+  autoplay: onScroll({
+    target: '#track',
+    enter: 'top top',
+    leave: 'bottom bottom',
+    sync: reduceMotion ? true : 0.55,
+  }),
+});
+
+tl
+  // 01 — Exterior: one full turn
+  .add('#hero', { opacity: [1, 0], y: [0, -40], filter: ['blur(0px)', 'blur(6px)'], duration: 600, ease: 'inQuad' }, 80)
+  .add('#cue', { opacity: [1, 0], duration: 300 }, 0)
+  .add(state, { rotY: [0, TAU], duration: 2300, ease: 'inOutQuad' }, 0);
+chapterIn(0, 550); chapterOut(0, 1950);
+
+tl
+  // 02 — X-ray: the scan plane sweeps down, the studio dissolves into the blueprint
+  .add(state, { ring: [0, 1], duration: 180, ease: 'outQuad' }, 2300)
+  .add(state, { scan: [1.16, -0.16], duration: 1550, ease: 'inOutSine' }, 2350)
+  .add(state, { ring: [1, 0], duration: 180, ease: 'inQuad' }, 3800)
+  .add(state, { bg: [0, 1], duration: 1300, ease: 'inOutQuad' }, 2400)
+  .add(document.documentElement, { '--k': [0, 1], duration: 700, ease: 'inOutQuad' }, 2700)
+  .add(state, { bloom: [0, 1], duration: 800 }, 3300)
+  .add(state, { shadow: [1, 0], duration: 500 }, 2350)
+  .add(state, { grid: [0, 1], duration: 900 }, 2900)
+  .add(state, { rotY: [TAU, TAU - 0.62], duration: 1900, ease: 'inOutSine' }, 2300)
+  .add(state, { el: [7, 16], ty: [0.5, 0.48], duration: 1900 }, 2300)
+  // overall dimensions, drawn once the X-ray has settled
+  .add(state, { dims: [0, 1], duration: 650, ease: 'outQuad' }, 3550)
+  .add(state, { dimsA: [1, 0], duration: 300 }, 4300);
+chapterIn(1, 2550); chapterOut(1, 3950);
+
+tl
+  // 03 — Exploded assembly: parts leave along their offsets, from the axis outward
+  .add(partStates, { e: [0, 1], duration: 1500, delay: stagger(45, { from: 'center' }), ease: 'inOutCubic' }, 4350)
+  .add(state, { dist: [3.2, 6.1], el: [16, 21], tx: [0, 0.04], ty: [0.48, 0.58], tz: [0, 0.1], duration: 2200, ease: 'inOutCubic' }, 4250);
+chapterIn(2, 4450); chapterOut(2, 6000);
+
+tl
+  // 04 — Anatomy: callouts draw one after another while the camera drifts
+  .add(labelStates, { p: [0, 1], duration: 520, delay: stagger(95), ease: 'outQuad' }, 6250)
+  .add(state, { orbit: [0, 0.32], duration: 3400, ease: 'inOutSine' }, 6100)
+  .add(state, { dist: [6.1, 5.8], duration: 3000 }, 6500);
+chapterIn(3, 6350); chapterOut(3, 8650);
+
+tl
+  // 05 — Specification: the sheet frame and title block close the drawing
+  .add('#readout', { opacity: [1, 0], duration: 300 }, 8700)
+  .add(frameDrawables, { draw: ['0 0', '0 1'], duration: 700, delay: stagger(90), ease: 'inOutQuad' }, 8750)
+  .add('#titleblock', { opacity: [0, 1], y: [12, 0], duration: 400, ease: 'outCubic' }, 9300)
+  .add('#note', { opacity: [0, 1], duration: 400 }, 9400)
+  .add(state, { hud: [0, 1], duration: 1 }, 9999);
+chapterIn(4, 8900);
+
+/* ==========================================================================
+   Render loop
+   ========================================================================== */
+const tmpV = new THREE.Vector3();
+const anchorV = new THREE.Vector3();
+const camTarget = new THREE.Vector3();
+const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
+addEventListener('pointermove', (e) => { pointer.x = e.clientX / innerWidth - 0.5; pointer.y = e.clientY / innerHeight - 0.5; });
+
+const phaseLis = [...document.querySelectorAll('.phases li')];
+const PHASE_AT = [0, 0.22, 0.42, 0.6, 0.86];
+const FIGS = ['Fig. 1 — Exterior', 'Fig. 2 — Section scan', 'Fig. 3 — Exploded view', 'Fig. 4 — Callouts', 'Fig. 5 — Sheet'];
+const railFill = $('#rail-fill');
+const readoutEl = $('#readout'), titleEl = $('#titleblock');
+const rAz = $('#r-az'), rEl = $('#r-el'), rScan = $('#r-scan'), rEx = $('#r-ex'), fig = $('#fig');
+let lastPhase = -1, frameNo = 0, spinAngle = 0;
+const clock = new THREE.Clock();
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+function project(local, out) {
+  tmpV.copy(local);
+  machine.localToWorld(tmpV);
+  tmpV.project(camera);
+  out.x = (tmpV.x * 0.5 + 0.5) * VW;
+  out.y = (-tmpV.y * 0.5 + 0.5) * VH;
+  out.z = tmpV.z;
+  return out;
+}
+
+function layoutLabels() {
+  const compact = VW < 760;
+  const scr = { x: 0, y: 0, z: 0 };
+  const centre = project(new THREE.Vector3(state.tx, state.ty, state.tz), { x: 0, y: 0, z: 0 });
+  const lw = Math.min(232, VW * 0.2);
+  const pad = Math.max(16, VW * 0.024);
+  const top = 112;
+  // keep each column clear of whatever panel is on screen below it
+  let botL = VH - 40, botR = VH - 40;
+  const clearOf = (el, side) => {
+    if (parseFloat(el.style.opacity || getComputedStyle(el).opacity) < 0.05) return;
+    const r = el.getBoundingClientRect();
+    if (r.height === 0) return;
+    if (side !== 'right' && r.left < VW / 2) botL = Math.min(botL, r.top - 22);
+    if (side !== 'left' && r.right > VW / 2) botR = Math.min(botR, r.top - 22);
+  };
+  chapters.forEach((c) => clearOf(c, 'left'));
+  clearOf(readoutEl, 'right');
+  clearOf(titleEl, 'right');
+  const cols = { left: [], right: [] };
+
+  labelled.forEach((p) => {
+    const L = p.label;
+    anchorV.copy(p.anchor).addScaledVector(p.off, p.e);
+    if (p.bob) anchorV.y += p.bob;
+    project(anchorV, scr);
+    L.ax = scr.x; L.ay = scr.y;
+    if (frameNo % 4 === 0 && L.p > 0) {
+      const f = (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2);
+      L.code.textContent = `x${f(anchorV.x)} y${f(anchorV.y)} z${f(anchorV.z)} m`;
+    }
+    cols[p.side].push(p);
+  });
+
+  if (!compact) {
+    Object.entries(cols).forEach(([side, list]) => {
+      list.sort((a, b) => a.label.ay - b.label.ay);
+      const bottom = side === 'left' ? botL : botR;
+      const gap = Math.max(30, Math.min(72, (bottom - top) / Math.max(1, list.length - 1)));
+      const tight = gap < 66;
+      const ys = list.map((p) => Math.min(bottom, Math.max(top, p.label.ay)));
+      for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + gap);
+      ys[ys.length - 1] = Math.min(ys[ys.length - 1], bottom);
+      for (let i = ys.length - 2; i >= 0; i--) ys[i] = Math.min(ys[i], ys[i + 1] - gap);
+      list.forEach((p, i) => {
+        const L = p.label;
+        L.el.classList.toggle('tight', tight);
+        L.el.classList.remove('compact');
+        L.el.style.width = lw + 'px';
+        const ty = ys[i];
+        L.y = L.init ? L.y + (ty - L.y) * 0.25 : ty;
+        L.init = true;
+        const boxX = side === 'left' ? pad : VW - pad - lw;
+        const lineEnd = side === 'left' ? boxX + lw + 8 : boxX - 8;
+        const elbow = side === 'left' ? lineEnd + 26 : lineEnd - 26;
+        L.box = [boxX, L.y - 13];
+        L.d = [L.ax, L.ay, elbow, L.y, lineEnd, L.y];
+      });
+    });
+  } else {
+    labelled.forEach((p) => {
+      const L = p.label;
+      let dx = L.ax - centre.x, dy = L.ay - centre.y;
+      const len = Math.hypot(dx, dy) || 1;
+      dx /= len; dy /= len;
+      const bx = L.ax + dx * 30, by = L.ay + dy * 30;
+      L.el.classList.add('compact');
+      L.el.style.width = '';
+      L.box = [bx - 13, by - 13];
+      L.d = [L.ax, L.ay, L.ax + dx * 17, L.ay + dy * 17, L.ax + dx * 17, L.ay + dy * 17];
+    });
+  }
+
+  labelled.forEach((p) => {
+    const L = p.label;
+    const q = Math.min(1, L.p * 1.7);
+    const show = L.p > 0.001;
+    const [ax, ay, ex, ey, lx, ly] = L.d;
+    const len = Math.hypot(ex - ax, ey - ay) + Math.hypot(lx - ex, ly - ey) + 0.01;
+    L.path.setAttribute('d', `M${ax.toFixed(1)} ${ay.toFixed(1)}L${ex.toFixed(1)} ${ey.toFixed(1)}L${lx.toFixed(1)} ${ly.toFixed(1)}`);
+    L.path.style.strokeDasharray = `${len} ${len}`;
+    L.path.style.strokeDashoffset = `${len * (1 - q)}`;
+    L.path.style.display = show ? '' : 'none';
+    L.dot.setAttribute('cx', ax); L.dot.setAttribute('cy', ay);
+    L.ring.setAttribute('cx', ax); L.ring.setAttribute('cy', ay);
+    const pulse = reduceMotion ? 0.5 : (Math.sin(clock.elapsedTime * 3 + p.no) * 0.5 + 0.5);
+    L.ring.setAttribute('r', (3 + q * 4 + pulse * 2).toFixed(2));
+    L.ring.style.opacity = show ? (0.35 + 0.4 * (1 - pulse)) * q : 0;
+    L.dot.style.opacity = show ? q : 0;
+    const a = smooth(0.4, 1, L.p);
+    L.el.style.opacity = a;
+    const slide = (1 - a) * (p.side === 'left' ? -12 : 12);
+    L.el.style.transform = `translate(${(L.box[0] + slide).toFixed(1)}px, ${L.box[1].toFixed(1)}px)`;
+    L.el.classList.toggle('live', a > 0.5);
+    const hot = hovered === p;
+    L.el.classList.toggle('hot', hot);
+    L.path.classList.toggle('hot', hot); L.dot.classList.toggle('hot', hot); L.ring.classList.toggle('hot', hot);
+  });
+}
+
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+  frameNo++;
+
+  // pointer parallax, eased
+  pointer.sx += (pointer.x - pointer.sx) * 0.05;
+  pointer.sy += (pointer.y - pointer.sy) * 0.05;
+  const px = reduceMotion ? 0 : pointer.sx, py = reduceMotion ? 0 : pointer.sy;
+
+  // machine yaw + exploded offsets
+  machine.rotation.y = state.rotY + state.orbit + px * 0.12;
+  machine.position.y = intro.lift * -1;
+  if (!reduceMotion) spinAngle += dt * 0.55;
+  parts.forEach((p, i) => {
+    const e = p.e;
+    p.bob = reduceMotion ? 0 : Math.sin(t * 0.9 + i * 1.7) * 0.006 * e;
+    p.group.position.copy(p.off).multiplyScalar(e);
+    p.group.position.y += p.bob;
+    if (p.spin) p.spin.rotation.z = spinAngle;
+    if (p === twin) p.hiTarget = sideLeft.hiTarget;
+    // flash each part as its callout draws, plus hover highlight
+    const pulse = p.label ? Math.sin(Math.min(1, p.label.p) * Math.PI) * 0.85 : 0;
+    p.hi += (Math.max(p.hiTarget, pulse) - p.hi) * 0.18;
+    p.wireMat.uniforms.uHi.value = p.hi;
+    p.wireMat.uniforms.uDim.value = hovered && hovered !== p && !(hovered === sideLeft && p === twin) ? 1 : 0;
+  });
+
+  // X-ray plane
+  const s = state.scan >= 1.155 ? 50 : state.scan <= -0.155 ? -50 : state.scan;
+  clipSolid.constant = s;
+  clipWire.constant = -s;
+  wireShared.uScan.value = s;
+  wireShared.uTime.value = t;
+  scanGroup.position.y = state.scan;
+  scanGroup.visible = state.ring > 0.001;
+  scanDisc.material.opacity = state.ring;
+  tickMat.opacity = state.ring;
+  tickRing.rotation.y = t * 0.25;
+
+  // backdrop + floor
+  bgMat.uniforms.uMix.value = state.bg;
+  bgMat.uniforms.uTime.value = t;
+  shadow.material.opacity = state.shadow;
+  shadow.visible = state.shadow > 0.001;
+  gridMat.uniforms.uA.value = state.grid;
+  bloom.strength = state.bloom * 0.55;
+  scene.environmentIntensity = 1 - state.bg * 0.6;
+
+  // dimension lines
+  dims.forEach((d) => {
+    const n = Math.floor(d.count * state.dims / 2) * 2;
+    d.line.geometry.setDrawRange(0, n);
+    d.line.visible = n > 0 && state.dimsA > 0.001;
+  });
+  dimMat.opacity = state.dimsA;
+
+  // camera: orbit target with responsive framing
+  const aspect = VW / VH;
+  const fit = aspect < 1.25 ? Math.min(2.3, 1.25 / aspect) : 1;
+  const explodeFit = 1 + (fit - 1) * Math.min(1, state.dist / 4);
+  const dist = (state.dist + intro.d) * (state.dist > 3.3 ? explodeFit : Math.max(1, fit * 0.92));
+  const el = (state.el + py * 6) * DEG;
+  camTarget.set(state.tx, state.ty, state.tz);
+  camera.position.set(camTarget.x + Math.sin(px * 0.1) * dist * Math.cos(el), camTarget.y + dist * Math.sin(el), camTarget.z + dist * Math.cos(el));
+  camera.lookAt(camTarget);
+  camera.updateMatrixWorld();
+  machine.updateMatrixWorld();
+
+  composer.render();
+
+  // DOM overlays (after render so projections match the frame)
+  layoutLabels();
+  dims.forEach((d) => {
+    const o = project(d.mid, { x: 0, y: 0, z: 0 });
+    d.el.style.opacity = smooth(0.55, 1, state.dims) * state.dimsA;
+    d.el.style.transform = `translate(${(o.x - d.el.offsetWidth / 2).toFixed(1)}px, ${(o.y - 11).toFixed(1)}px)`;
+  });
+
+  // HUD
+  const prog = tl.progress;
+  let phase = 0;
+  PHASE_AT.forEach((v, i) => { if (prog >= v - 0.001) phase = i; });
+  if (phase !== lastPhase) {
+    phaseLis.forEach((li, i) => li.classList.toggle('on', i === phase));
+    fig.textContent = FIGS[phase];
+    lastPhase = phase;
+  }
+  railFill.style.width = (prog * 100).toFixed(2) + '%';
+  if (frameNo % 3 === 0) {
+    const az = (((machine.rotation.y / DEG) % 360) + 360) % 360;
+    rAz.textContent = az.toFixed(1).padStart(5, '0') + '°';
+    rEl.textContent = (el / DEG).toFixed(1).padStart(4, '0') + '°';
+    rScan.textContent = state.scan < 1.15 && state.scan > -0.15 ? `y ${Math.max(0, state.scan * 1000).toFixed(0).padStart(4, '0')} mm` : '—';
+    const ex = parts.reduce((a, p) => a + p.e, 0) / parts.length;
+    rEx.textContent = (ex * 100).toFixed(0).padStart(3, '0') + ' %';
+  }
+}
+
+// rail tick marks at phase boundaries
+PHASE_AT.slice(1).forEach((v) => { const em = document.createElement('em'); em.style.left = v * 100 + '%'; $('.phases .rail').appendChild(em); });
+
+renderer.setAnimationLoop(tick);
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  $('#boot').classList.add('done');
+  playIntro();
+}));
+</script>
+</body>
+</html>
