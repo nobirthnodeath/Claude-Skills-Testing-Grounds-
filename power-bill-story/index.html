@@ -95,7 +95,7 @@ a { color: var(--amber); text-underline-offset: 3px; }
 
 /* ---------- story ---------- */
 #story { position: relative; z-index: 2; }
-.chap { position: relative; height: 170vh; padding-left: calc(var(--gutter-l) + clamp(0px, 3vw, 40px)); padding-right: var(--gutter-r); }
+.chap { position: relative; display: flow-root; height: 170vh; padding-bottom: 24vh; padding-left: calc(var(--gutter-l) + clamp(0px, 3vw, 40px)); padding-right: var(--gutter-r); }
 .card {
   position: sticky; top: 13vh; width: min(470px, 100%);
   background: var(--panel); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
@@ -122,12 +122,23 @@ a { color: var(--amber); text-underline-offset: 3px; }
 .parts b { font-weight: 500; color: var(--ink); }
 
 /* hero */
+.card-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--rule); }
+.card-nav button, .cue {
+  appearance: none; background: none; cursor: pointer; color: var(--ink);
+  border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 9px 14px;
+  font: 500 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.card-nav button:hover, .cue:hover { border-color: var(--tone, var(--amber)); color: var(--tone, var(--amber)); }
+.nav-count { font: 500 11px/1 var(--f-mono); color: var(--muted); letter-spacing: .12em; font-variant-numeric: tabular-nums; }
+.card-prog { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,.07); border-radius: 0 0 10px 10px; overflow: hidden; }
+.card-prog i { display: block; height: 100%; background: var(--tone, var(--amber)); transform-origin: left; transform: scaleX(0); }
 .chap.hero .card { background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; padding: 0; top: 18vh; width: min(640px, 100%); }
 .hero h1 { font: 800 clamp(52px, 7.6vw, 112px)/.92 var(--f-display); letter-spacing: -.035em; margin: 0 0 22px; text-wrap: balance; font-variation-settings: "opsz" 96; }
 .hero h1 em { font-style: normal; color: var(--amber); }
 .hero .dek { font-size: clamp(19px, 1.6vw, 22px); max-width: 30em; color: #d9d4ca; text-shadow: 0 2px 20px rgba(0,0,0,.6); }
-.cue { margin-top: 28px; font: 500 11px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); display: flex; gap: 12px; align-items: center; }
-.cue i { width: 1px; height: 36px; background: linear-gradient(var(--amber), transparent); animation: cue 2.4s ease-in-out infinite; transform-origin: top; }
+.cue { margin-top: 28px; display: inline-flex; gap: 12px; align-items: center; padding: 12px 18px 12px 14px; }
+.cue i { width: 1px; height: 18px; background: linear-gradient(var(--amber), transparent); animation: cue 2.4s ease-in-out infinite; transform-origin: top; }
 @keyframes cue { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); opacity: 1; } 100% { opacity: 0; } }
 
 /* charts */
@@ -190,9 +201,10 @@ a { color: var(--amber); text-underline-offset: 3px; }
 
 @media (max-width: 820px) {
   body { font-size: 17.5px; }
-  .chap { padding-left: var(--gutter-l); }
+  /* phone cards are taller than the screen, so chapters are longer here (the script reads the same value) */
+  .chap { height: 230vh; padding-bottom: 0; padding-left: var(--gutter-l); }
   .stat { grid-template-columns: minmax(0, 1fr); gap: 6px; }
-  .card { position: relative; top: auto; margin-top: 58vh; background: rgba(10, 15, 31, .9); padding: 22px 20px 24px; }
+  .card { position: relative; top: auto; margin-top: 48vh; background: rgba(10, 15, 31, .9); padding: 22px 20px 24px; }
   .chap.hero .card { margin-top: 52vh; top: auto; }
   .chap.petition .card { margin-top: 30vh; top: auto; }
   .hero h1 { font-size: clamp(46px, 13vw, 70px); }
@@ -251,7 +263,7 @@ a { color: var(--amber); text-underline-offset: 3px; }
       <p class="eyebrow">An illustrated explainer on electricity prices</p>
       <h1>Who pays for <em>the cloud?</em></h1>
       <p class="dek">Electric bills are rising faster than most of what you buy. A big part of the reason is being built down the road. Scroll to follow the power from the plant to your home, and see where the new costs go.</p>
-      <div class="cue"><i></i>Scroll to begin</div>
+      <button type="button" class="cue" id="start"><i></i>Scroll or start the story</button>
     </div>
   </section>
 
@@ -312,7 +324,7 @@ a { color: var(--amber); text-underline-offset: 3px; }
     <div class="card">
       <p class="eyebrow"><b>05</b> The build-out</p>
       <h2>New wires. Shared bills.</h2>
-      <p>To serve a data center, utilities build new substations and high-voltage lines. Utilities earn a set return on what they build. The cost is usually spread across <span class="hl-coral">every customer</span>.</p>
+      <p>To serve a data center, utilities build new substations and high-voltage lines. The utility adds that cost to its rates and earns a set return on it. So <span class="hl-coral">every customer pays a share</span>, not only the data center.</p>
       <p>Some tech companies also get special contracts with private terms. Harvard's Electricity Law Initiative reviewed about 50 utility proceedings. It found deals that can shift costs onto families and small businesses.</p>
       <div class="stat" style="--tone: var(--coral)"><strong>$31B</strong><span>Rate increases that U.S. utilities asked for in 2025. That is double the year before.</span></div>
       <p class="src">Sources: Harvard ELI, “Extracting Profits from the Public,” 2025; PowerLines, 2026.</p>
@@ -438,7 +450,7 @@ const camera = new THREE.PerspectiveCamera(34, 1, 0.5, 900);
 
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.7, 0.45, 0.7);
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.6, 0.45, 0.92);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
@@ -452,7 +464,7 @@ const S = {
   newLine: 0, newWire: 0, newSub: 0,
   solar: 0,
   fMain: 0.55, fFeed: 0.55, fSpur: 0, fNew: 0, fSolar: 0,
-  cHome: 0, cDC: 0,
+  link: 0, ripple: 0, rateOn: 0, linkDC: 0, dcPays: 0,
 };
 const intro = { k: reduceMotion ? 0 : 1 };
 
@@ -620,7 +632,8 @@ const bodyIM = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), mat('#fff
 const roofShape = new THREE.Shape([new THREE.Vector2(-0.6, 0), new THREE.Vector2(0.6, 0), new THREE.Vector2(0, 0.5)]);
 const roofGeo = new THREE.ExtrudeGeometry(roofShape, { depth: 1, bevelEnabled: false });
 roofGeo.translate(0, 0, -0.5);
-const roofIM = new THREE.InstancedMesh(roofGeo, mat('#3a3434', { roughness: 0.7 }), houses.length);
+const roofIM = new THREE.InstancedMesh(roofGeo, mat('#ffffff', { roughness: 0.7 }), houses.length);
+const roofBase = new THREE.Color('#3a3434');
 const winGeo = new THREE.PlaneGeometry(0.28, 0.26);
 const winIM = new THREE.InstancedMesh(winGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', toneMapped: false }), houses.length * 3);
 const winBase = [];
@@ -634,6 +647,7 @@ const winBase = [];
     bodyIM.setColorAt(i, col.set(i === HERO ? '#f0d2a2' : WALLS[i % WALLS.length]));
     m4.compose(p.set(h.x, h.h, h.z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, h.face + Math.PI / 2, 0)), s.set(h.d * 1.18, 1.1, h.w * 1.08));
     roofIM.setMatrixAt(i, m4);
+    roofIM.setColorAt(i, roofBase);
     // two street-facing windows + one side window
     const fz = Math.cos(h.face), fx = Math.sin(h.face);
     const front = h.d / 2 + 0.01;
@@ -1059,10 +1073,11 @@ const solarRows = [];
    Flows: glowing pulses that travel along the wires
    ========================================================================== */
 const flows = [];
-function makeFlow(points, color, { count = 40, size = 0.14, speed = 6, k = 4 } = {}) {
+function makeFlow(points, color, { count = 40, size = 0.1, speed = 6 } = {}) {
   const curve = new THREE.CatmullRomCurve3(points, false, 'centripetal');
   const len = curve.getLength();
-  const im = new THREE.InstancedMesh(new THREE.SphereGeometry(size, 10, 8), glow(color, k), count);
+  // flat, matte dots: kept under the bloom threshold so they read as markers, not lights
+  const im = new THREE.InstancedMesh(new THREE.SphereGeometry(size, 10, 8), new THREE.MeshBasicMaterial({ color }), count);
   im.frustumCulled = false;
   scene.add(im);
   const f = { curve, len, im, count, speed, amount: 0, phase: Array.from({ length: count }, (_, i) => i / count + rand() * 0.4 / count), reverse: false };
@@ -1071,15 +1086,67 @@ function makeFlow(points, color, { count = 40, size = 0.14, speed = 6, k = 4 } =
 }
 const plantOut = V3(PLANT.x - 6.2, 2.3, PLANT.z - 0.2);
 const F = {
-  main: makeFlow([plantOut, V3(26, 6, 6.3), ...mainLine.mids, V3(SUB.x + 2, 2.6, SUB.z)], '#ffc46b', { count: 22, size: 0.11 }),
-  feeds: feederPaths.map((p) => makeFlow(p, '#ffc46b', { count: 12, size: 0.09, speed: 4 })),
-  spur: makeFlow([V3(SUB.x + 1.6, 2.6, SUB.z), ...spurPts.slice(1), V3(DC.x - 8, 1.6, DC.z + 4)], '#6fd3ff', { count: 24, size: 0.13, speed: 6.5 }),
-  newL: makeFlow([V3(43, 6.3, -2.2), ...newLine.mids, V3(NEW_SUB.x, 2.8, NEW_SUB.z), V3(DC.x + 8, 1.8, DC.z + 2)], '#6fd3ff', { count: 34, size: 0.15, speed: 7.5 }),
-  solar: makeFlow([V3(28, 1.2, -15.5), V3(23.6, 1.6, -14.5), V3(DC.x + 8.2, 1.6, DC.z - 2)], '#8ff0b4', { count: 16, size: 0.13, speed: 3 }),
-  costArc: makeFlow([V3(NEW_SUB.x, 3, NEW_SUB.z), V3(16, 11, 1), V3(6, 12, 4), V3(SUB.x + 1, 3, SUB.z)], '#ff6b57', { count: 22, size: 0.24, speed: 5, k: 3.4 }),
-  costFeeds: feederPaths.map((p) => makeFlow(p, '#ff6b57', { count: 12, size: 0.17, speed: 3.6, k: 3.4 })),
-  costDC: makeFlow([V3(43, 8.2, -2.2), ...newLine.mids.map((p) => p.clone().add(V3(0, 1.1, 0))), V3(NEW_SUB.x, 4.2, NEW_SUB.z), V3(DC.x + 6, 3.6, DC.z + 2)], '#ff6b57', { count: 22, size: 0.22, speed: 5, k: 3.4 }),
+  main: makeFlow([plantOut, V3(26, 6, 6.3), ...mainLine.mids, V3(SUB.x + 2, 2.6, SUB.z)], '#f2b35a', { count: 18, size: 0.1 }),
+  feeds: feederPaths.map((p) => makeFlow(p, '#f2b35a', { count: 10, size: 0.08, speed: 4 })),
+  spur: makeFlow([V3(SUB.x + 1.6, 2.6, SUB.z), ...spurPts.slice(1), V3(DC.x - 8, 1.6, DC.z + 4)], '#58bfe8', { count: 20, size: 0.11, speed: 6.5 }),
+  newL: makeFlow([V3(43, 6.3, -2.2), ...newLine.mids, V3(NEW_SUB.x, 2.8, NEW_SUB.z), V3(DC.x + 8, 1.8, DC.z + 2)], '#58bfe8', { count: 28, size: 0.12, speed: 7.5 }),
+  solar: makeFlow([V3(28, 1.2, -15.5), V3(23.6, 1.6, -14.5), V3(DC.x + 8.2, 1.6, DC.z - 2)], '#7fdca3', { count: 14, size: 0.1, speed: 3 }),
 };
+/* ==========================================================================
+   Rate increases. Not a flow: a chain of cause and effect.
+   1. A cost line draws from the new substation to the utility, carrying a $ token.
+   2. A ripple spreads out from the utility across its service area.
+   3. As it reaches each home, the roof turns coral and a rate-increase badge pops up.
+   In the fairer-deal chapter the cost line goes to the data center instead.
+   ========================================================================== */
+const CORAL = new THREE.Color('#ff6b57');
+function disc(draw) {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#ff6b57'; g.beginPath(); g.arc(64, 64, 58, 0, TAU); g.fill();
+  g.lineWidth = 5; g.strokeStyle = 'rgba(255,255,255,.9)'; g.stroke();
+  g.fillStyle = '#fff'; draw(g);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.SpriteMaterial({ map: t, color: '#d6d6d6', depthWrite: false });
+}
+const upMat = disc((g) => { g.beginPath(); g.moveTo(64, 26); g.lineTo(98, 66); g.lineTo(76, 66); g.lineTo(76, 100); g.lineTo(52, 100); g.lineTo(52, 66); g.lineTo(30, 66); g.closePath(); g.fill(); });
+const dollarMat = disc((g) => { g.font = '800 78px "Bricolage Grotesque", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('$', 64, 70); });
+const badges = houses.map((h) => {
+  const b = new THREE.Sprite(upMat);
+  b.position.set(h.x, h.h + 1.35, h.z); b.scale.setScalar(0.001);
+  scene.add(b);
+  return b;
+});
+const dcBadge = new THREE.Sprite(upMat);
+dcBadge.position.set(DC.x, 6.6, DC.z); dcBadge.scale.setScalar(0.001);
+scene.add(dcBadge);
+const ripple = new THREE.Mesh(new THREE.RingGeometry(0.97, 1, 128).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ff6b57', transparent: true, depthWrite: false }));
+const rippleFill = new THREE.Mesh(new THREE.CircleGeometry(1, 96).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ff6b57', transparent: true, depthWrite: false, opacity: 0 }));
+ripple.position.set(SUB.x, 0.09, SUB.z); rippleFill.position.set(SUB.x, 0.07, SUB.z);
+scene.add(ripple, rippleFill);
+function costLink(to, height) {
+  const a = V3(NEW_SUB.x, 3.4, NEW_SUB.z);
+  const mid = a.clone().lerp(to, 0.5); mid.y += height;
+  const curve = new THREE.QuadraticBezierCurve3(a, mid, to);
+  const geo = new THREE.TubeGeometry(curve, 90, 0.07, 6, false);
+  const line = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: '#e8604d' }));
+  geo.setDrawRange(0, 0);
+  const token = new THREE.Sprite(dollarMat);
+  token.scale.setScalar(1.5);
+  scene.add(line, token);
+  return { curve, geo, line, token, total: geo.index.count };
+}
+const linkUtility = costLink(V3(SUB.x, 3.4, SUB.z), 8);
+const linkDC = costLink(V3(DC.x + 5, 4.2, DC.z + 1.5), 4);
+function drawLink(L, p) {
+  L.geo.setDrawRange(0, Math.floor(L.total * p / 6) * 6);
+  L.line.visible = p > 0.002;
+  L.token.visible = p > 0.002 && p < 0.995;
+  L.curve.getPoint(Math.min(1, p), L.token.position);
+  L.token.position.y += 0.9;
+}
+const outBack = (x) => { const c = 1.9; return x <= 0 ? 0 : 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+
 const m4f = new THREE.Matrix4(), pf = new THREE.Vector3(), qf = new THREE.Quaternion(), sf = new THREE.Vector3();
 function updateFlow(f, dt) {
   const visible = Math.round(f.count * Math.min(1, f.amount));
@@ -1110,8 +1177,9 @@ const TAGS = [
   { id: 'dc', text: 'Data center campus', tone: 'cyan', at: V3(DC.x, 5, DC.z) },
   { id: 'newline', text: 'New high-voltage line', tone: 'coral', at: V3(34.5, 9, -2.8) },
   { id: 'newsub', text: 'New substation', tone: 'coral', at: V3(NEW_SUB.x, 4.2, NEW_SUB.z) },
-  { id: 'costs', text: 'Costs shared by all customers', tone: 'coral', at: V3(11, 13, 2.5) },
-  { id: 'dcpays', text: 'Paid by the data center', tone: 'mint', at: V3(31, 9.8, -3.1) },
+  { id: 'costlink', text: 'Cost of the new grid', tone: 'coral', at: V3(10.5, 9.4, 1.4) },
+  { id: 'costs', text: 'Utility raises rates for everyone', tone: 'coral', at: V3(SUB.x, 4.4, SUB.z) },
+  { id: 'dcpays', text: 'Paid by the data center', tone: 'mint', at: V3(DC.x, 9.7, DC.z) },
   { id: 'solar', text: 'On-site solar + batteries', tone: 'mint', at: V3(28.5, 2.6, -17) },
 ];
 const tagLayer = $('#tags');
@@ -1194,14 +1262,14 @@ resize();
 
 /* ==========================================================================
    The scroll timeline
-   Each chapter is 170vh. Chapter i's card settles when the page has scrolled i × 170vh,
+   Each chapter is 170vh (230vh on phones). Chapter i's card settles when the page has scrolled i × 170vh,
    so its scene change plays over the viewport-height of scroll just before that.
    ========================================================================== */
 // charts start empty; the timeline draws them in
 utils.set('#cap-chart .bar i', { scaleY: 0 });
 utils.set(['#lc-area', '#lc-labels'], { opacity: 0 });
 
-const N = 9, CH = 170, VIEW = 100, TOTAL = N * CH - VIEW, T = 10000;
+const N = 9, CH = matchMedia('(max-width: 820px)').matches ? 230 : 170, VIEW = 100, TOTAL = N * CH - VIEW, T = 10000;
 const at = (i) => T * (i * CH) / TOTAL;            // card i settles
 const D = T * VIEW / TOTAL;                        // one viewport of scroll
 const C = T * CH / TOTAL;                          // one chapter of scroll
@@ -1269,10 +1337,13 @@ tl.add(newLine.pylons.map((p) => p.scale), { y: [0.001, 1.12], duration: 0.3 * D
   .add(newSub.scale, { x: [0.001, 1.35], y: [0.001, 1.35], z: [0.001, 1.35], duration: 0.3 * D, ease: 'outBack' }, into(5) + 0.15 * D)
   .add(newLine.spans.map((l) => l.material), { opacity: [0, 0.6], duration: 0.25 * D }, into(5) + 0.55 * D)
   .add(S, { fNew: [0, 1], duration: 0.3 * D }, at(5) - 0.2 * D)
-  .add(S, { cHome: [0, 1], duration: 0.4 * D }, at(5) - 0.15 * D);
+  .add(S, { link: [0, 1], duration: 0.35 * D, ease: 'inOutQuad' }, at(5) - 0.25 * D)
+  .add(S, { rateOn: [0, 1], duration: 0.02 * C }, at(5) + 0.08 * D)
+  .add(S, { ripple: [0, 1], duration: 0.38 * C, ease: 'linear' }, at(5) + 0.08 * D);
 show('newline', at(5) - 0.3 * D, into(6));
 show('newsub', at(5) - 0.2 * D, into(6));
-show('costs', at(5) - 0.05 * D, into(6) + 0.3 * D);
+show('costlink', at(5) - 0.15 * D, into(6) + 0.3 * D);
+show('costs', at(5) + 0.1 * D, into(6) + 0.3 * D);
 
 // 06 — back home
 tl.add(S, { homeRing: [0, 1], duration: 0.35 * D }, at(6) - 0.4 * D)
@@ -1286,8 +1357,10 @@ tl.add(svg.createDrawable('#lc-line'), { draw: ['0 0', '0 1'], duration: 0.6 * D
 
 // 07 — a fairer deal
 tl.add(solarRows.map((r) => r.scale), { x: [0.001, 1], y: [0.001, 1], z: [0.001, 1], duration: 0.3 * D, delay: stagger(0.06 * D), ease: 'outBack' }, into(7) + 0.1 * D)
-  .add(S, { cHome: [1, 0], duration: 0.4 * D }, at(7) - 0.4 * D)
-  .add(S, { cDC: [0, 1], fSolar: [0, 1], duration: 0.4 * D }, at(7) - 0.25 * D);
+  .add(S, { rateOn: [1, 0], link: [1, 0], duration: 0.35 * D }, at(7) - 0.5 * D)
+  .add(S, { linkDC: [0, 1], duration: 0.35 * D, ease: 'inOutQuad' }, at(7) - 0.3 * D)
+  .add(S, { dcPays: [0, 1], duration: 0.15 * D, ease: 'linear' }, at(7) - 0.05 * D)
+  .add(S, { fSolar: [0, 1], duration: 0.4 * D }, at(7) - 0.25 * D);
 show('dcpays', at(7) - 0.2 * D, into(8) + 0.3 * D);
 show('solar', at(7) - 0.1 * D, into(8) + 0.3 * D);
 
@@ -1296,6 +1369,39 @@ tl.add(S, { dawn: [0, 1], duration: 1.3 * D, ease: 'inOutQuad' }, into(8) - 0.2 
 
 // pad the timeline to its full length so scroll maps 1:1
 tl.add(S, { solar: [0, 1], duration: 1 }, T - 1);
+
+/* ==========================================================================
+   Card navigation: a thin progress bar on each card plus back / next controls
+   ========================================================================== */
+const chapEls = [...document.querySelectorAll('.chap')];
+const chapPx = () => innerHeight * CH / 100;
+const goTo = (i) => scrollTo({ top: Math.round(i * chapPx() + 2), behavior: reduceMotion ? 'auto' : 'smooth' });
+const progBars = [];
+chapEls.forEach((sec, i) => {
+  if (i === 0) return;
+  const card = sec.querySelector('.card');
+  const last = i === N - 1;
+  card.insertAdjacentHTML('beforeend', `<nav class="card-nav" aria-label="Chapter navigation">
+      <button type="button" class="nav-prev">← Back</button>
+      <span class="nav-count">${String(i).padStart(2, '0')} / ${String(N - 1).padStart(2, '0')}</span>
+      ${last ? '<span></span>' : '<button type="button" class="nav-next">Next →</button>'}
+    </nav><div class="card-prog" aria-hidden="true"><i></i></div>`);
+  card.querySelector('.nav-prev').addEventListener('click', () => goTo(i - 1));
+  card.querySelector('.nav-next')?.addEventListener('click', () => goTo(i + 1));
+  progBars.push({ i, el: card.querySelector('.card-prog i') });
+});
+$('#start').addEventListener('click', () => goTo(1));
+function updateProgress() {
+  const ch = chapPx();
+  const end = N * ch - innerHeight;
+  progBars.forEach(({ i, el }) => {
+    const a = i * ch, b = Math.min((i + 1) * ch, end);
+    const p = Math.min(1, Math.max(0, (scrollY - a + innerHeight * 0.25) / (b - a + innerHeight * 0.25)));
+    el.style.transform = `scaleX(${p.toFixed(4)})`;
+  });
+}
+addEventListener('scroll', updateProgress, { passive: true });
+updateProgress();
 
 /* ==========================================================================
    Card text: each card's lines rise in once, the first time it comes into view.
@@ -1444,9 +1550,28 @@ function tick() {
   F.spur.amount = S.fSpur;
   F.newL.amount = S.fNew;
   F.solar.amount = S.fSolar;
-  F.costArc.amount = S.cHome;
-  F.costFeeds.forEach((f) => { f.amount = S.cHome; });
-  F.costDC.amount = S.cDC;
+
+  // rate increases
+  drawLink(linkUtility, S.link);
+  drawLink(linkDC, S.linkDC);
+  const R = S.ripple * 40;
+  ripple.scale.setScalar(Math.max(0.01, R)); rippleFill.scale.setScalar(Math.max(0.01, R));
+  const ro = Math.sin(Math.PI * Math.min(1, S.ripple)) * S.rateOn;
+  ripple.material.opacity = ro * 0.9; rippleFill.material.opacity = ro * 0.035;
+  ripple.visible = rippleFill.visible = ro > 0.01;
+  for (let i = 0; i < houses.length; i++) {
+    const h = houses[i];
+    const d = Math.hypot(h.x - SUB.x, h.z - SUB.z);
+    const r = S.rateOn * Math.min(1, Math.max(0, (R - d) / 3));
+    badges[i].scale.setScalar(Math.max(0.001, outBack(r) * 0.62));
+    badges[i].visible = r > 0.01;
+    badges[i].position.y = h.h + 1.15 + Math.sin(t * 2 + i) * 0.07 * motion;
+    roofIM.setColorAt(i, winCol.copy(roofBase).lerp(CORAL, r * 0.6));
+  }
+  roofIM.instanceColor.needsUpdate = true;
+  dcBadge.scale.setScalar(Math.max(0.001, outBack(S.dcPays) * 2.4));
+  dcBadge.visible = S.dcPays > 0.01;
+  dcBadge.position.y = 6.6 + Math.sin(t * 2) * 0.12 * motion;
   flows.forEach((f) => updateFlow(f, dt * (reduceMotion ? 0.35 : 1)));
 
   composer.render();

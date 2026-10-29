@@ -11,12 +11,14 @@ The whole story happens in one 3D town. The camera moves through the town as you
 | 02 The grid | Power pulses move from the plant, through the transmission lines and the substation, to the streets. |
 | 03 A new neighbor | A crane appears and a data center campus rises. A new line connects it to the town substation. |
 | 04 A crowded grid | Cyan pulses take more of the power. PJM capacity prices are shown as a bar chart. |
-| 05 The build-out | A new high-voltage line and a new substation are built. Red cost pulses move from them to every house. |
+| 05 The build-out | A new high-voltage line and a new substation are built. A coral cost line, carrying a $ token, draws from the new substation to the utility. A ring then spreads out from the utility. As it reaches each house, the roof turns coral and a rate-increase badge appears. |
 | 06 Back home | The same house. The bill is now $169. A line chart shows the change. |
-| 07 A fairer deal | Solar panels and batteries appear. The cost pulses go to the data center, not to the houses. |
+| 07 A fairer deal | Solar panels and batteries appear. The badges leave the houses. The cost line now goes to the data center, and the data center gets the badge. |
 | 08 Take action | Dawn comes over the town. The petition form. When someone signs, a wave of light moves across the houses. |
 
-Colour has one meaning everywhere: amber is power to homes, cyan is power to data centers, coral is cost, and mint is on-site clean power.
+Colour has one meaning everywhere: amber is power to homes, cyan is power to data centers, coral is cost, and mint is on-site clean power. Power moves as small flat dots along the wires. Cost never moves like power: it is shown as cause and effect (cost line, then ripple, then badge).
+
+Each story card has a thin progress bar and Back / Next buttons. The cards have a gap between them so they do not touch.
 
 ## How it is built
 
