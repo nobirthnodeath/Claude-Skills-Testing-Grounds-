@@ -1,0 +1,1475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Who Pays for the Cloud</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="An illustrated scroll story about why household electricity bills are rising, how data centers change the grid, and what regulators can do.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a fixed WebGL diorama of one town behind a column of story cards.
+   Cards sit left on wide screens (the scene is offset right) and at the bottom on phones.
+   A utility-bill stub stays on screen and moves forward in time with the story. */
+:root {
+  --night: #0a0f1f;
+  --panel: rgba(12, 17, 34, .78);
+  --panel-solid: #10162b;
+  --ink: #f3eee4;
+  --muted: #a7aec2;
+  --rule: rgba(243, 238, 228, .14);
+  --amber: #ffc46b;      /* power to homes */
+  --cyan: #6fd3ff;       /* power to data centers */
+  --coral: #ff6b57;      /* costs */
+  --mint: #8ff0b4;       /* on-site clean power */
+  --dawn: #f6b48f;
+
+  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--night); color: var(--ink);
+  font: 400 19px/1.55 var(--f-body);
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+a { color: var(--amber); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+.scrim { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, rgba(8, 12, 26, .72) 0%, rgba(8, 12, 26, .35) 30%, rgba(8, 12, 26, 0) 50%); }
+@media (max-width: 820px) { .scrim { background: linear-gradient(0deg, rgba(8, 12, 26, .7) 0%, rgba(8, 12, 26, 0) 45%); } }
+#tags { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+.tag {
+  position: absolute; left: 0; top: 0; opacity: 0; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px; will-change: transform, opacity;
+  font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+}
+.tag i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 0 14px currentColor; flex: none; }
+.tag span { background: rgba(10, 15, 31, .82); padding: 6px 9px; border: 1px solid rgba(255,255,255,.14); border-radius: 3px; }
+.tag[data-tone="amber"] { color: var(--amber); }
+.tag[data-tone="cyan"] { color: var(--cyan); }
+.tag[data-tone="coral"] { color: var(--coral); }
+.tag[data-tone="mint"] { color: var(--mint); }
+.tag[data-tone="ink"] { color: var(--ink); }
+.tag span { color: var(--ink); }
+
+/* ---------- boot ---------- */
+#boot { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: var(--night); color: var(--muted); font: 500 11px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; transition: opacity .9s, visibility .9s; }
+#boot.done { opacity: 0; visibility: hidden; }
+
+/* ---------- bill stub (persistent) ---------- */
+.bill {
+  position: fixed; z-index: 8; right: calc(var(--gutter-r) + 12px); bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  width: 260px; padding: 16px 18px 14px; color: #1d1a16;
+  background: #f6f1e7; border-radius: 6px 6px 2px 2px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.45), 0 2px 0 rgba(0,0,0,.08);
+  font: 400 11px/1.35 var(--f-mono); letter-spacing: .02em;
+}
+.bill::after { /* perforated tear edge */
+  content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 8px;
+  background: radial-gradient(circle at 5px 0, transparent 4px, #f6f1e7 4.5px) 0 0 / 10px 8px repeat-x;
+}
+.bill header { display: flex; justify-content: space-between; align-items: baseline; text-transform: uppercase; letter-spacing: .12em; font-size: 9.5px; color: #6c655a; }
+.bill header b { color: #1d1a16; font-weight: 500; }
+.bill .amt { display: flex; align-items: baseline; gap: 8px; margin: 8px 0 2px; }
+.bill .amt strong { font: 800 44px/1 var(--f-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.bill .amt em { font-style: normal; font-size: 11px; color: #6c655a; }
+.bill .delta { display: inline-block; font-weight: 500; color: #b4321f; background: rgba(255,107,87,.14); padding: 2px 6px; border-radius: 3px; font-variant-numeric: tabular-nums; }
+.bill .delta.zero { color: #6c655a; background: rgba(0,0,0,.05); }
+.bill dl { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin: 10px 0 8px; padding-top: 8px; border-top: 1px dashed rgba(0,0,0,.2); font-variant-numeric: tabular-nums; }
+.bill dt { color: #6c655a; } .bill dd { margin: 0; text-align: right; }
+.bill svg { display: block; width: 100%; height: 34px; overflow: visible; }
+.bill .years { display: flex; justify-content: space-between; color: #8a8377; font-size: 9px; margin-top: 3px; }
+.bill .signed { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(0,0,0,.2); color: #1f6b43; font-weight: 500; }
+.bill.has-signed .signed { display: block; }
+
+/* ---------- story ---------- */
+#story { position: relative; z-index: 2; }
+.chap { position: relative; height: 170vh; padding-left: calc(var(--gutter-l) + clamp(0px, 3vw, 40px)); padding-right: var(--gutter-r); }
+.card {
+  position: sticky; top: 13vh; width: min(470px, 100%);
+  background: var(--panel); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid rgba(255,255,255,.08); border-radius: 10px;
+  padding: 26px 28px 28px; box-shadow: 0 30px 80px rgba(0,0,0,.35);
+}
+.eyebrow { font: 500 11px/1.3 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: flex; gap: 10px; align-items: center; margin: 0 0 14px; }
+.eyebrow b { color: var(--tone, var(--amber)); font-weight: 500; }
+.card h2 { font: 800 clamp(30px, 3.2vw, 42px)/1.02 var(--f-display); letter-spacing: -.02em; margin: 0 0 14px; text-wrap: balance; font-variation-settings: "opsz" 72; }
+.card p { margin: 0 0 14px; max-width: 62ch; }
+.card p:last-child { margin-bottom: 0; }
+.card .small { font-size: 15.5px; color: var(--muted); }
+.card .src { font: 400 11px/1.4 var(--f-mono); color: var(--muted); letter-spacing: .02em; margin-top: 12px; }
+.card .src a { color: var(--muted); }
+.hl-amber { color: var(--amber); } .hl-cyan { color: var(--cyan); } .hl-coral { color: var(--coral); } .hl-mint { color: var(--mint); }
+
+.stat { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; margin: 18px 0; padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.stat strong { font: 800 46px/1 var(--f-display); letter-spacing: -.03em; color: var(--tone, var(--cyan)); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 15.5px; line-height: 1.4; color: var(--muted); }
+
+.parts { list-style: none; padding: 0; margin: 4px 0 16px; display: grid; gap: 12px; }
+.parts li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; font-size: 17px; line-height: 1.45; }
+.parts li::before { content: ""; width: 10px; height: 10px; margin-top: 8px; border-radius: 50%; background: var(--dot, var(--amber)); box-shadow: 0 0 12px var(--dot, var(--amber)); }
+.parts b { font-weight: 500; color: var(--ink); }
+
+/* hero */
+.chap.hero .card { background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; padding: 0; top: 18vh; width: min(640px, 100%); }
+.hero h1 { font: 800 clamp(52px, 7.6vw, 112px)/.92 var(--f-display); letter-spacing: -.035em; margin: 0 0 22px; text-wrap: balance; font-variation-settings: "opsz" 96; }
+.hero h1 em { font-style: normal; color: var(--amber); }
+.hero .dek { font-size: clamp(19px, 1.6vw, 22px); max-width: 30em; color: #d9d4ca; text-shadow: 0 2px 20px rgba(0,0,0,.6); }
+.cue { margin-top: 28px; font: 500 11px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); display: flex; gap: 12px; align-items: center; }
+.cue i { width: 1px; height: 36px; background: linear-gradient(var(--amber), transparent); animation: cue 2.4s ease-in-out infinite; transform-origin: top; }
+@keyframes cue { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); opacity: 1; } 100% { opacity: 0; } }
+
+/* charts */
+.chart { margin: 16px 0 6px; }
+.chart figcaption { font: 500 10.5px/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: end; height: 150px; border-bottom: 1px solid var(--rule); }
+.bar { display: grid; align-content: end; justify-items: center; gap: 6px; height: 100%; }
+.bar b { font: 600 15px/1 var(--f-display); font-variant-numeric: tabular-nums; }
+.bar i { display: block; width: 100%; background: linear-gradient(var(--coral), #b8402f); border-radius: 3px 3px 0 0; transform-origin: bottom; }
+.bar.low i { background: linear-gradient(#8a93a8, #59617a); }
+.bar-x { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 6px; font: 400 10.5px/1.3 var(--f-mono); color: var(--muted); text-align: center; }
+.line-chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.line-chart .grid line { stroke: var(--rule); }
+.line-chart text { fill: var(--muted); font: 400 10.5px var(--f-mono); }
+.line-chart .ln { fill: none; stroke: var(--coral); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.line-chart .area { fill: url(#areaGrad); }
+.line-chart .end { fill: var(--coral); }
+.line-chart .lbl { fill: var(--ink); font: 600 13px var(--f-display); }
+
+/* fixes */
+.asks { list-style: none; padding: 0; margin: 6px 0 14px; display: grid; gap: 14px; counter-reset: ask; }
+.asks li { counter-increment: ask; display: grid; grid-template-columns: 34px 1fr; gap: 12px; font-size: 16.5px; line-height: 1.45; }
+.asks li::before { content: counter(ask); width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--mint); color: var(--mint); display: grid; place-items: center; font: 500 12px/1 var(--f-mono); }
+.asks b { display: block; font: 600 17px/1.25 var(--f-display); color: var(--ink); margin-bottom: 2px; }
+
+/* petition */
+.chap.petition .card { top: 8vh; width: min(500px, 100%); }
+.petition form { display: grid; gap: 12px; margin-top: 18px; }
+.field { display: grid; gap: 6px; }
+.field label { font: 500 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.field input {
+  font: 400 17px/1.2 var(--f-body); color: var(--ink); background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.16); border-radius: 6px; padding: 12px 14px; width: 100%;
+}
+.field input:focus { outline: 2px solid var(--amber); outline-offset: 1px; border-color: transparent; }
+.field input[aria-invalid="true"] { border-color: var(--coral); }
+.row2 { display: grid; grid-template-columns: minmax(0, 1fr) 130px; gap: 12px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--muted); }
+.check input { margin-top: 4px; accent-color: var(--amber); }
+.btn {
+  appearance: none; border: 0; cursor: pointer; margin-top: 4px;
+  font: 700 17px/1 var(--f-display); letter-spacing: .01em; color: #1b1407;
+  background: var(--amber); border-radius: 6px; padding: 16px 20px;
+  box-shadow: 0 10px 30px rgba(255, 196, 107, .25); transition: transform .15s, box-shadow .15s;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 14px 34px rgba(255, 196, 107, .35); }
+.err { color: var(--coral); font-size: 14.5px; min-height: 1px; margin: 0; }
+.letter { font-size: 15px; color: var(--muted); border-left: 2px solid var(--amber); padding-left: 12px; margin: 0; }
+.done { display: none; }
+.petition.signed form { display: none; }
+.petition.signed .done { display: block; }
+.done h3 { font: 800 30px/1.05 var(--f-display); margin: 18px 0 10px; color: var(--amber); }
+.proto { font: 400 11px/1.4 var(--f-mono); color: var(--muted); margin-top: 14px; }
+
+/* sources */
+.sources { position: relative; z-index: 2; background: var(--panel-solid); border-top: 1px solid var(--rule); padding-block: 56px 120px; padding-left: calc(var(--gutter-l) + clamp(0px, 3vw, 40px)); padding-right: var(--gutter-r); }
+.sources h2 { font: 800 28px/1.1 var(--f-display); margin: 0 0 18px; }
+.sources ol { margin: 0; padding-left: 20px; max-width: 900px; display: grid; gap: 8px; font-size: 15.5px; color: var(--muted); }
+.sources p { max-width: 70ch; color: var(--muted); font-size: 15.5px; }
+
+@media (max-width: 820px) {
+  body { font-size: 17.5px; }
+  .chap { padding-left: var(--gutter-l); }
+  .stat { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .card { position: relative; top: auto; margin-top: 58vh; background: rgba(10, 15, 31, .9); padding: 22px 20px 24px; }
+  .chap.hero .card { margin-top: 52vh; top: auto; }
+  .chap.petition .card { margin-top: 30vh; top: auto; }
+  .hero h1 { font-size: clamp(46px, 13vw, 70px); }
+  .bill {
+    top: calc(env(safe-area-inset-top, 0px) + 10px); bottom: auto; left: var(--gutter-l); right: var(--gutter-r); width: auto;
+    padding: 10px 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 14px; align-items: center;
+  }
+  .bill::after { display: none; }
+  .bill header { grid-column: 1 / -1; }
+  .bill .amt { margin: 0; } .bill .amt strong { font-size: 28px; }
+  .bill dl, .bill svg, .bill .years { display: none; }
+  .bill .rate-m { display: block; text-align: right; }
+  .bill .signed { grid-column: 1 / -1; margin-top: 2px; padding-top: 4px; }
+  .row2 { grid-template-columns: minmax(0, 1fr); }
+}
+.bill .rate-m { display: none; color: #6c655a; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .cue i { animation: none; } }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+    "animejs": "https://cdn.jsdelivr.net/npm/animejs@4.4.1/dist/bundles/anime.esm.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="boot" role="status">Building the town</div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="tags" aria-hidden="true"></div>
+<div class="scrim" aria-hidden="true"></div>
+
+<aside class="bill" id="bill" aria-label="A typical monthly electric bill, updated as the story moves through time">
+  <header><span>Typical home · 900 kWh</span><b id="b-year">2020</b></header>
+  <div class="amt"><strong id="b-amt">$119</strong><em>/month</em></div>
+  <span class="delta zero" id="b-delta">baseline</span>
+  <span class="rate-m" id="b-rate-m">13.2¢/kWh</span>
+  <dl>
+    <dt>Avg. price</dt><dd id="b-rate">13.2¢ / kWh</dd>
+    <dt>Usage</dt><dd>900 kWh</dd>
+  </dl>
+  <svg viewBox="0 0 224 34" preserveAspectRatio="none" aria-hidden="true">
+    <polyline id="b-spark-bg" fill="none" stroke="rgba(0,0,0,.14)" stroke-width="1.5" points=""></polyline>
+    <polyline id="b-spark" fill="none" stroke="#c4402c" stroke-width="2" stroke-linejoin="round" points=""></polyline>
+    <circle id="b-dot" r="3.5" fill="#c4402c" cx="0" cy="0"></circle>
+  </svg>
+  <div class="years"><span>2020</span><span>2026</span></div>
+  <div class="signed" id="b-signed">✓ You signed the petition</div>
+</aside>
+
+<main id="story">
+  <section class="chap hero" data-i="0">
+    <div class="card">
+      <p class="eyebrow">An illustrated explainer on electricity prices</p>
+      <h1>Who pays for <em>the cloud?</em></h1>
+      <p class="dek">Electric bills are rising faster than most of what you buy. A big part of the reason is being built down the road. Scroll to follow the power from the plant to your home, and see where the new costs go.</p>
+      <div class="cue"><i></i>Scroll to begin</div>
+    </div>
+  </section>
+
+  <section class="chap" data-i="1">
+    <div class="card">
+      <p class="eyebrow"><b>01</b> Your home</p>
+      <h2>It starts with an ordinary house.</h2>
+      <p>A typical American home uses about <b>900 kilowatt-hours</b> of electricity a month. In 2020, the national average price was about <b>13.2 cents</b> per kilowatt-hour. That made the bill about <span class="hl-amber">$119</span>.</p>
+      <p class="small">Watch the bill in the corner. It follows the national average price as this story moves forward in time.</p>
+    </div>
+  </section>
+
+  <section class="chap" data-i="2">
+    <div class="card">
+      <p class="eyebrow"><b>02</b> The grid</p>
+      <h2>Your bill pays for three things.</h2>
+      <ul class="parts">
+        <li><span><b>Making the power.</b> Power plants burn fuel or catch the wind and sun.</span></li>
+        <li><span><b>Moving the power.</b> High-voltage lines carry it across the region. Substations step it down for your street.</span></li>
+        <li><span><b>Keeping power in reserve.</b> Grid operators pay plants to be ready for the hottest afternoon of the year. This is called <em>capacity</em>.</span></li>
+      </ul>
+      <p class="small">Homes and businesses share the cost of this system. When someone needs the grid to grow, everyone's rates can feel it.</p>
+    </div>
+  </section>
+
+  <section class="chap" data-i="3" style="--tone: var(--cyan)">
+    <div class="card">
+      <p class="eyebrow"><b>03</b> A new neighbor</p>
+      <h2>Then a data center moves in.</h2>
+      <p>AI tools are trained and run in buildings full of computer chips. The chips run day and night, and they need constant cooling.</p>
+      <div class="stat"><strong>100+ MW</strong><span>A single large campus can draw more than 100 megawatts. That is about the average draw of <b class="hl-cyan">80,000 homes</b>.</span></div>
+      <p>In 2023, data centers used <b>4.4%</b> of all U.S. electricity. Federal researchers expect <b class="hl-cyan">6.7% to 12%</b> by 2028.</p>
+      <p class="src">Source: Lawrence Berkeley National Laboratory for the U.S. Dept. of Energy, Dec. 2024.</p>
+    </div>
+  </section>
+
+  <section class="chap" data-i="4" style="--tone: var(--coral)">
+    <div class="card">
+      <p class="eyebrow"><b>04</b> A crowded grid</p>
+      <h2>Demand is growing faster than supply.</h2>
+      <p>New power plants and lines take years to build. A data center can be ready in months. When demand jumps before supply catches up, the price of keeping power in reserve goes up.</p>
+      <figure class="chart" id="cap-chart">
+        <figcaption>Capacity price in PJM, $ per megawatt-day</figcaption>
+        <div class="bars">
+          <div class="bar low"><b>$29</b><i style="height: 8.7%"></i></div>
+          <div class="bar"><b>$270</b><i style="height: 81%"></i></div>
+          <div class="bar"><b>$329</b><i style="height: 98.7%"></i></div>
+          <div class="bar"><b>$333</b><i style="height: 100%"></i></div>
+        </div>
+        <div class="bar-x"><span>2024–25</span><span>2025–26</span><span>2026–27</span><span>2027–28</span></div>
+      </figure>
+      <p class="small">PJM runs the grid for 67 million people in 13 states and D.C. Its independent market monitor says data center demand caused <b class="hl-coral">$29.4 billion, or 46%,</b> of capacity charges over the last four auctions. Those charges reach household bills.</p>
+      <p class="src">Sources: PJM auction results; Monitoring Analytics via Utility Dive, 2026.</p>
+    </div>
+  </section>
+
+  <section class="chap" data-i="5" style="--tone: var(--coral)">
+    <div class="card">
+      <p class="eyebrow"><b>05</b> The build-out</p>
+      <h2>New wires. Shared bills.</h2>
+      <p>To serve a data center, utilities build new substations and high-voltage lines. Utilities earn a set return on what they build. The cost is usually spread across <span class="hl-coral">every customer</span>.</p>
+      <p>Some tech companies also get special contracts with private terms. Harvard's Electricity Law Initiative reviewed about 50 utility proceedings. It found deals that can shift costs onto families and small businesses.</p>
+      <div class="stat" style="--tone: var(--coral)"><strong>$31B</strong><span>Rate increases that U.S. utilities asked for in 2025. That is double the year before.</span></div>
+      <p class="src">Sources: Harvard ELI, “Extracting Profits from the Public,” 2025; PowerLines, 2026.</p>
+    </div>
+  </section>
+
+  <section class="chap" data-i="6" style="--tone: var(--coral)">
+    <div class="card">
+      <p class="eyebrow"><b>06</b> Back home</p>
+      <h2>The same house. A bigger bill.</h2>
+      <p>By April 2026, the national average price reached <b>18.8 cents</b> per kilowatt-hour. For the same home, that is about <span class="hl-coral">$169 a month</span>, or $50 more than in 2020.</p>
+      <figure class="chart line-chart" id="line-chart">
+        <figcaption>Typical monthly bill at the U.S. average price</figcaption>
+        <svg viewBox="0 0 400 170" role="img" aria-label="Line chart. Monthly bill: 2020 $119, 2021 $123, 2022 $135, 2023 $144, 2024 $149, 2025 $156, April 2026 $169.">
+          <defs><linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff6b57" stop-opacity=".35"/><stop offset="1" stop-color="#ff6b57" stop-opacity="0"/></linearGradient></defs>
+          <g id="lc-grid" class="grid"></g>
+          <path id="lc-area" class="area" d=""></path>
+          <path id="lc-line" class="ln" d=""></path>
+          <g id="lc-labels"></g>
+        </svg>
+      </figure>
+      <p class="small">Fuel prices, storms and old equipment add costs too. But researchers at Carnegie Mellon and NC State project that data center growth could raise U.S. power costs about 8% by 2030, and more than 25% in parts of Virginia.</p>
+      <p class="src">Sources: U.S. EIA residential prices; Carnegie Mellon Open Energy Outlook, 2025.</p>
+    </div>
+  </section>
+
+  <section class="chap" data-i="7" style="--tone: var(--mint)">
+    <div class="card">
+      <p class="eyebrow"><b>07</b> A fairer deal</p>
+      <h2>It does not have to work this way.</h2>
+      <p>Data centers can grow without passing their costs to households. States and regulators can set clear rules:</p>
+      <ol class="asks">
+        <li><span><b>Make data centers pay their full cost.</b>The companies that need new lines, substations and power plants pay for them.</span></li>
+        <li><span><b>No secret deals.</b>Every special contract between a utility and a data center is made public.</span></li>
+        <li><span><b>Protect household bills.</b>Regulators check the effect on home bills before they approve a large new load.</span></li>
+      </ol>
+      <p class="small">Some states have started. In 2025, Ohio regulators approved a rule that makes new data centers pay for most of the power they reserve, even if they use less.</p>
+    </div>
+  </section>
+
+  <section class="chap petition" data-i="8" id="petition" style="--tone: var(--amber)">
+    <div class="card">
+      <p class="eyebrow"><b>08</b> Take action</p>
+      <h2>Tell regulators: protect our power bills.</h2>
+      <p class="letter">To state utility regulators and lawmakers: Make data centers pay their own way. Publish every special contract. Check the effect on household bills before you approve new data center load.</p>
+      <form id="sign" novalidate>
+        <div class="field"><label for="f-name">Full name</label><input id="f-name" name="name" autocomplete="name" required></div>
+        <div class="row2">
+          <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+          <div class="field"><label for="f-zip">ZIP code</label><input id="f-zip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" required></div>
+        </div>
+        <label class="check" for="f-updates"><input id="f-updates" type="checkbox" checked> Send me updates about this campaign.</label>
+        <p class="err" id="f-err" role="alert"></p>
+        <button class="btn" type="submit">Sign the petition</button>
+      </form>
+      <div class="done" aria-live="polite">
+        <h3 id="done-title">Thank you.</h3>
+        <p>Your name is on the petition. Share this page so your neighbors can see where their bills are going.</p>
+      </div>
+      <p class="proto">Prototype: this form does not send data anywhere yet.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="sources">
+  <h2>Sources and method</h2>
+  <p>The bill uses 900 kWh a month at the U.S. average residential price from the Energy Information Administration. The 2026 value is the April 2026 monthly average. The town is an illustration, not a real place.</p>
+  <ol>
+    <li>U.S. Energy Information Administration, Electric Power Monthly and Short-Term Energy Outlook: average residential price, 2020–2026.</li>
+    <li>Lawrence Berkeley National Laboratory, <a href="https://energyanalysis.lbl.gov/news/berkeley-lab-report-evaluates-increase-electricity-demand-data-centers" target="_blank" rel="noopener">2024 United States Data Center Energy Usage Report</a>, Dec. 2024.</li>
+    <li>PJM Interconnection, Base Residual Auction results, 2024/25–2027/28 delivery years.</li>
+    <li>Utility Dive, <a href="https://www.utilitydive.com/news/data-center-pjm-wholesale-market/828917/" target="_blank" rel="noopener">reporting on Monitoring Analytics</a> (PJM's independent market monitor), 2026.</li>
+    <li>Martin &amp; Peskoe, <a href="https://eelp.law.harvard.edu/extracting-profits-from-the-public-how-utility-ratepayers-are-paying-for-big-tech/" target="_blank" rel="noopener">“Extracting Profits from the Public,”</a> Harvard Electricity Law Initiative, March 2025.</li>
+    <li>PowerLines, <a href="https://powerlines.org/utilities-requested-record-31-billion-in-rate-increases-in-2025-double-that-of-2024/" target="_blank" rel="noopener">Utilities Requested Record $31 Billion in Rate Increases in 2025</a>, Jan. 2026.</li>
+    <li>Carnegie Mellon University and NC State, <a href="https://www.cmu.edu/work-that-matters/energy-innovation/data-center-growth-could-increase-electricity-bills-8" target="_blank" rel="noopener">Data center growth could increase electricity bills 8%</a>, 2025.</li>
+  </ol>
+</footer>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { animate, createTimeline, engine, onScroll, stagger, svg, utils } from 'animejs';
+
+// The story is scrubbed by scroll, so a hidden-tab event must never leave the engine paused.
+engine.pauseOnDocumentHidden = false;
+if (engine.paused) engine.resume();
+
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (s) => document.querySelector(s);
+const TAU = Math.PI * 2;
+
+/* ==========================================================================
+   Data: U.S. average residential price (EIA), cents per kWh. 2026 = April 2026.
+   ========================================================================== */
+const YEARS = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+const PRICE = [13.2, 13.7, 15.0, 16.0, 16.5, 17.3, 18.8];
+const KWH = 900;
+const priceAt = (y) => {
+  const t = Math.min(YEARS.length - 1, Math.max(0, y - 2020));
+  const i = Math.min(YEARS.length - 2, Math.floor(t));
+  return PRICE[i] + (PRICE[i + 1] - PRICE[i]) * (t - i);
+};
+
+/* ==========================================================================
+   Renderer + post
+   ========================================================================== */
+const canvas = $('#gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.3;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const fogNight = new THREE.Color('#0d1328'), fogDawn = new THREE.Color('#b98a86');
+scene.fog = new THREE.FogExp2(fogNight.clone(), 0.0055);
+const camera = new THREE.PerspectiveCamera(34, 1, 0.5, 900);
+
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.7, 0.45, 0.7);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* ==========================================================================
+   Scroll-driven state (anime.js writes, render loop reads)
+   ========================================================================== */
+const cam = { px: 38, py: 50, pz: 74, tx: 3, ty: 0, tz: -2 };
+const S = {
+  dawn: 0, year: 2020, homeRing: 0,
+  dc: 0, dcLights: 0, crane: 0, spur: 0,
+  newLine: 0, newWire: 0, newSub: 0,
+  solar: 0,
+  fMain: 0.55, fFeed: 0.55, fSpur: 0, fNew: 0, fSolar: 0,
+  cHome: 0, cDC: 0,
+};
+const intro = { k: reduceMotion ? 0 : 1 };
+
+/* ==========================================================================
+   Helpers
+   ========================================================================== */
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0, ...o });
+const glow = (hex, k = 3) => new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), toneMapped: false });
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const rand = rng(20261029);
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+function bar(a, b, r, seg = 5) {
+  const dir = b.clone().sub(a);
+  const g = new THREE.CylinderGeometry(r, r, dir.length(), seg, 1);
+  g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(V3(0, 1, 0), dir.clone().normalize()));
+  g.translate((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
+  return g;
+}
+function shadowed(o) { o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); return o; }
+function catenary(a, b, sag, n = 18) {
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const p = a.clone().lerp(b, t);
+    p.y -= sag * 4 * t * (1 - t);
+    pts.push(p);
+  }
+  return pts;
+}
+
+/* ==========================================================================
+   Sky, stars, lights
+   ========================================================================== */
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, fog: false,
+  uniforms: {
+    uDawn: { value: 0 },
+    nTop: { value: new THREE.Color('#050815') }, nHor: { value: new THREE.Color('#1c2547') },
+    dTop: { value: new THREE.Color('#2a3a6e') }, dHor: { value: new THREE.Color('#f2a27c') },
+  },
+  vertexShader: `varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+  fragmentShader: `
+    uniform float uDawn; uniform vec3 nTop, nHor, dTop, dHor; varying vec3 vP;
+    void main(){
+      float h = clamp(vP.y * 1.6 + 0.1, 0., 1.);
+      vec3 night = mix(nHor, nTop, pow(h, .6));
+      vec3 dawn = mix(dHor, dTop, pow(h, .45));
+      // sun glow on the eastern horizon
+      float sun = pow(max(dot(vP, normalize(vec3(1., .08, -.35))), 0.), 24.);
+      dawn += vec3(1., .7, .45) * sun * .9;
+      gl_FragColor = vec4(mix(night, dawn, uDawn), 1.);
+    }`,
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(420, 32, 16), skyMat));
+
+const starPos = [];
+for (let i = 0; i < 1400; i++) {
+  const u = rand(), v = rand() * 0.9 + 0.08;
+  const th = u * TAU, ph = Math.acos(v);
+  starPos.push(Math.sin(ph) * Math.cos(th) * 400, Math.cos(ph) * 400, Math.sin(ph) * Math.sin(th) * 400);
+}
+const starGeo = new THREE.BufferGeometry();
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+const starMat = new THREE.PointsMaterial({ color: '#dfe6ff', size: 1.6, sizeAttenuation: false, transparent: true, fog: false, depthWrite: false });
+scene.add(new THREE.Points(starGeo, starMat));
+
+const moonDisc = new THREE.Mesh(new THREE.CircleGeometry(9, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color('#fff5df').multiplyScalar(1.6), fog: false, transparent: true }));
+moonDisc.position.set(-160, 170, -260); moonDisc.lookAt(0, 0, 0);
+scene.add(moonDisc);
+
+const hemi = new THREE.HemisphereLight('#7084c8', '#1a2030', 2.1);
+scene.add(hemi);
+const moon = new THREE.DirectionalLight('#b4c4ff', 2.2);
+moon.position.set(-30, 60, 25);
+moon.castShadow = true;
+moon.shadow.mapSize.set(2048, 2048);
+Object.assign(moon.shadow.camera, { left: -50, right: 50, top: 40, bottom: -40, near: 1, far: 160 });
+moon.shadow.bias = -0.0006;
+moon.shadow.normalBias = 0.04;
+scene.add(moon);
+const sun = new THREE.DirectionalLight('#ffb48a', 0);
+sun.position.set(80, 18, -30);
+scene.add(sun);
+
+/* ==========================================================================
+   Ground: a diorama slab with soil strata, river, hills, roads
+   ========================================================================== */
+const GX = 86, GZ = 60;
+const grass = mat('#2f5640', { roughness: 0.95 });
+const soil = mat('#3d2b20');
+const slab = new THREE.Mesh(new THREE.BoxGeometry(GX, 5, GZ), [soil, soil, grass, soil, soil, soil]);
+slab.position.y = -2.5; slab.receiveShadow = true;
+scene.add(slab);
+const strata = new THREE.Mesh(new THREE.BoxGeometry(GX + 0.2, 0.5, GZ + 0.2), mat('#2a1d16'));
+strata.position.y = -1.6; scene.add(strata);
+const strata2 = new THREE.Mesh(new THREE.BoxGeometry(GX + 0.2, 0.35, GZ + 0.2), mat('#55402e'));
+strata2.position.y = -3.7; scene.add(strata2);
+
+// river along the back edge
+{
+  const top = [], bot = [];
+  for (let x = -GX / 2; x <= GX / 2 + 0.01; x += 2) {
+    const z = -24.5 + Math.sin(x * 0.11) * 1.6;
+    top.push(new THREE.Vector2(x, -(z - 2.1)));
+    bot.push(new THREE.Vector2(x, -(z + 2.1)));
+  }
+  const shape = new THREE.Shape([...top, ...bot.reverse()]);
+  const g = new THREE.ShapeGeometry(shape);
+  g.rotateX(-Math.PI / 2);
+  const river = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#0d2238', roughness: 0.12, metalness: 0.7 }));
+  river.position.y = 0.03; river.receiveShadow = true;
+  scene.add(river);
+}
+// hills in the north-east for the wind turbines
+[[41, -17, 5], [36.5, -21, 4.5], [-36, -16, 5.5]].forEach(([x, z, r]) => {
+  const h = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 12, 0, TAU, 0, Math.PI / 2), grass);
+  h.scale.y = 0.32; h.position.set(x, 0, z); h.receiveShadow = true;
+  scene.add(h);
+});
+
+// roads
+const asphalt = mat('#25282f', { roughness: 0.9 });
+const ROADS = [
+  [-36, 4, -8, 4, 1.3], [-36, 10, 40, 10, 1.6], [-36, 16, -8, 16, 1.3],
+  [-9, 1.5, -9, 21, 1.3], [6, 10, 6, -2, 1.3], [6, -2, 22, -2, 1.3],
+];
+const dashes = [];
+ROADS.forEach(([x0, z0, x1, z1, w]) => {
+  const len = Math.hypot(x1 - x0, z1 - z0);
+  const r = new THREE.Mesh(new THREE.BoxGeometry(x0 === x1 ? w : len + w, 0.04, x0 === x1 ? len + w : w), asphalt);
+  r.position.set((x0 + x1) / 2, 0.02, (z0 + z1) / 2);
+  r.receiveShadow = true;
+  scene.add(r);
+  for (let d = 1; d < len - 1; d += 1.4) {
+    const t = d / len;
+    dashes.push([x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, x0 === x1]);
+  }
+});
+{
+  const dm = new THREE.InstancedMesh(new THREE.BoxGeometry(0.5, 0.02, 0.07), mat('#bfb79e', { roughness: 0.6 }), dashes.length);
+  const m4 = new THREE.Matrix4();
+  dashes.forEach(([x, z, vert], i) => { m4.makeRotationY(vert ? Math.PI / 2 : 0).setPosition(x, 0.05, z); dm.setMatrixAt(i, m4); });
+  scene.add(dm);
+}
+
+/* ==========================================================================
+   Neighborhood — 48 houses on three streets. One of them is "your home".
+   ========================================================================== */
+const STREETS = [4, 10, 16];
+const houses = [];
+STREETS.forEach((sz) => {
+  [-1, 1].forEach((side) => {
+    for (let c = 0; c < 8; c++) {
+      const x = -33 + c * 3.05 + (rand() - 0.5) * 0.3;
+      const z = sz + side * 2.0;
+      houses.push({ x, z, face: side > 0 ? Math.PI : 0, w: 1.5 + rand() * 0.4, d: 1.3 + rand() * 0.3, h: 0.95 + rand() * 0.45 });
+    }
+  });
+});
+const HERO = houses.findIndex((h) => h.z > 17 && h.x > -13);
+houses[HERO].w = 1.9; houses[HERO].h = 1.25;
+
+const WALLS = ['#c9b79c', '#a7b8c4', '#c4a29a', '#b8c4a8', '#d6cfc2', '#9fa9b7', '#c7b28a'];
+const bodyIM = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), mat('#ffffff', { roughness: 0.8 }), houses.length);
+const roofShape = new THREE.Shape([new THREE.Vector2(-0.6, 0), new THREE.Vector2(0.6, 0), new THREE.Vector2(0, 0.5)]);
+const roofGeo = new THREE.ExtrudeGeometry(roofShape, { depth: 1, bevelEnabled: false });
+roofGeo.translate(0, 0, -0.5);
+const roofIM = new THREE.InstancedMesh(roofGeo, mat('#3a3434', { roughness: 0.7 }), houses.length);
+const winGeo = new THREE.PlaneGeometry(0.28, 0.26);
+const winIM = new THREE.InstancedMesh(winGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', toneMapped: false }), houses.length * 3);
+const winBase = [];
+{
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
+  const col = new THREE.Color();
+  houses.forEach((h, i) => {
+    q.setFromEuler(new THREE.Euler(0, h.face, 0));
+    m4.compose(p.set(h.x, h.h / 2, h.z), q, s.set(h.w, h.h, h.d));
+    bodyIM.setMatrixAt(i, m4);
+    bodyIM.setColorAt(i, col.set(i === HERO ? '#f0d2a2' : WALLS[i % WALLS.length]));
+    m4.compose(p.set(h.x, h.h, h.z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, h.face + Math.PI / 2, 0)), s.set(h.d * 1.18, 1.1, h.w * 1.08));
+    roofIM.setMatrixAt(i, m4);
+    // two street-facing windows + one side window
+    const fz = Math.cos(h.face), fx = Math.sin(h.face);
+    const front = h.d / 2 + 0.01;
+    [[-0.38, 0.5], [0.38, 0.5]].forEach(([u, v], k) => {
+      m4.compose(p.set(h.x + u * Math.cos(h.face) + fx * front, h.h * v, h.z - u * Math.sin(h.face) + fz * front), q, s.set(1, 1, 1));
+      winIM.setMatrixAt(i * 3 + k, m4);
+    });
+    const sq = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, h.face + Math.PI / 2, 0));
+    m4.compose(p.set(h.x + Math.cos(h.face) * (h.w / 2 + 0.01), h.h * 0.55, h.z - Math.sin(h.face) * (h.w / 2 + 0.01)), sq, s.set(1, 1, 1));
+    winIM.setMatrixAt(i * 3 + 2, m4);
+    for (let k = 0; k < 3; k++) winBase.push(rand() < 0.18 ? 0.06 : 0.75 + rand() * 0.5);
+  });
+}
+bodyIM.castShadow = bodyIM.receiveShadow = true;
+roofIM.castShadow = true;
+scene.add(bodyIM, roofIM, winIM);
+const winColor = new THREE.Color('#ffc46b');
+const winPulse = new Float32Array(houses.length * 3); // petition celebration wave
+
+// your-home ring
+const ring = new THREE.Mesh(new THREE.RingGeometry(1.7, 1.85, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffc46b').multiplyScalar(3), transparent: true, toneMapped: false, depthWrite: false }));
+ring.position.set(houses[HERO].x, 0.06, houses[HERO].z);
+scene.add(ring);
+const ring2 = ring.clone(); ring2.material = ring.material.clone(); scene.add(ring2);
+
+// trees
+{
+  const spots = [];
+  const blocked = (x, z) =>
+    (x > -10 && x < 40 && z > 2 && z < 11) || (x > 1 && x < 25 && z < -1 && z > -20) || (x > 21 && x < 35 && z > -21 && z < -11) || (x > 22 && x < 44 && z > -6 && z < -1) || (x > 22 && x < 36 && z > 2 && z < 18) ||
+    Math.abs(z - 4) < 0.9 || Math.abs(z - 10) < 1 || Math.abs(z - 16) < 0.9 || z < -22 || (x > -10 && x < -8);
+  let tries = 0;
+  while (spots.length < 260 && tries++ < 6000) {
+    const x = (rand() - 0.5) * (GX - 4), z = (rand() - 0.5) * (GZ - 4);
+    if (blocked(x, z)) continue;
+    if (houses.some((h) => Math.abs(h.x - x) < 1.3 && Math.abs(h.z - z) < 1.3)) continue;
+    spots.push([x, z, 0.6 + rand() * 0.7]);
+  }
+  const crown = new THREE.InstancedMesh(new THREE.ConeGeometry(0.7, 1.8, 7), mat('#2c5b40'), spots.length);
+  const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.08, 0.1, 0.6, 5), mat('#3b2a1f'), spots.length);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
+  const tint = new THREE.Color();
+  spots.forEach(([x, z, k], i) => {
+    m4.compose(p.set(x, 0.3 * k + 0.9 * k, z), q, s.set(k, k, k)); crown.setMatrixAt(i, m4);
+    crown.setColorAt(i, tint.set('#ffffff').multiplyScalar(0.75 + rand() * 0.5));
+    m4.compose(p.set(x, 0.3 * k, z), q, s.set(k, k, k)); trunk.setMatrixAt(i, m4);
+  });
+  crown.castShadow = trunk.castShadow = true;
+  scene.add(crown, trunk);
+}
+
+// street lights
+{
+  const pts = [];
+  STREETS.forEach((z) => { for (let x = -34; x <= -10; x += 4) pts.push([x, z + 0.95]); });
+  for (let x = -6; x <= 38; x += 5) pts.push([x, 11.1]);
+  const poleIM = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.03, 0.04, 1.4, 5), mat('#5a5f69'), pts.length);
+  const bulbIM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.07, 8, 6), glow('#ffd9a0', 2), pts.length);
+  const m4 = new THREE.Matrix4();
+  pts.forEach(([x, z], i) => { m4.makeTranslation(x, 0.7, z); poleIM.setMatrixAt(i, m4); m4.makeTranslation(x, 1.42, z); bulbIM.setMatrixAt(i, m4); });
+  scene.add(poleIM, bulbIM);
+}
+
+/* ==========================================================================
+   Distribution poles + feeders
+   ========================================================================== */
+const SUB = V3(-4, 0, 6.3);
+const wireMat = new THREE.LineBasicMaterial({ color: '#7d8597', transparent: true, opacity: 0.55 });
+const feederPaths = [];
+{
+  const poles = [];
+  STREETS.forEach((z) => {
+    const zz = z - 1.0;
+    const pts = [];
+    for (let x = -34; x <= -9; x += 3) pts.push(V3(x, 3, zz));
+    pts.reverse();
+    pts.forEach((p) => poles.push(p));
+    for (let i = 0; i < pts.length - 1; i++) {
+      const g = new THREE.BufferGeometry().setFromPoints(catenary(pts[i], pts[i + 1], 0.18, 8));
+      scene.add(new THREE.Line(g, wireMat));
+    }
+    const head = [V3(SUB.x - 1.6, 2.6, SUB.z), V3(-7, 3, zz), pts[0]];
+    const g = new THREE.BufferGeometry().setFromPoints([...catenary(head[0], head[1], 0.2, 8), ...catenary(head[1], head[2], 0.15, 6).slice(1)]);
+    scene.add(new THREE.Line(g, wireMat));
+    poles.push(V3(-7, 3, zz));
+    feederPaths.push([head[0], head[1], ...pts]);
+  });
+  const poleIM = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07, 0.09, 3.2, 6), mat('#5b4637'), poles.length);
+  const armIM = new THREE.InstancedMesh(new THREE.BoxGeometry(0.06, 0.06, 0.9), mat('#5b4637'), poles.length);
+  const m4 = new THREE.Matrix4();
+  poles.forEach((p, i) => { m4.makeTranslation(p.x, 1.6, p.z); poleIM.setMatrixAt(i, m4); m4.makeTranslation(p.x, 3, p.z); armIM.setMatrixAt(i, m4); });
+  poleIM.castShadow = true;
+  scene.add(poleIM, armIM);
+}
+
+/* ==========================================================================
+   Substations (shared builder)
+   ========================================================================== */
+function makeSubstation(scale = 1, accent = '#ffc46b') {
+  const g = new THREE.Group();
+  const steel = mat('#8c939e', { metalness: 0.6, roughness: 0.45 });
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(5, 0.1, 4), mat('#5d6168'));
+  pad.position.y = 0.05; g.add(pad);
+  [-1.2, 0.9].forEach((x) => {
+    const t = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 0.9), mat('#5f6d64', { roughness: 0.6 }));
+    t.position.set(x, 0.65, 0.6); g.add(t);
+    for (let k = -1; k <= 1; k++) {
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.5, 8), mat('#d8d4cc'));
+      b.position.set(x + k * 0.3, 1.45, 0.6); g.add(b);
+    }
+  });
+  const frame = [];
+  [-2, 0, 2].forEach((x) => { frame.push(bar(V3(x, 0, -1.2), V3(x, 2.8, -1.2), 0.05)); });
+  frame.push(bar(V3(-2, 2.6, -1.2), V3(2, 2.6, -1.2), 0.05));
+  frame.push(bar(V3(-2, 2.0, -1.2), V3(2, 2.0, -1.2), 0.04));
+  g.add(new THREE.Mesh(mergeGeometries(frame), steel));
+  // fence
+  const f = [];
+  const w = 2.45, d = 1.95;
+  [[-w, -d, w, -d], [w, -d, w, d], [w, d, -w, d], [-w, d, -w, -d]].forEach(([a, b, c, e]) => {
+    f.push(-0 + a, 0.6, b, c, 0.6, e, a, 0.05, b, c, 0.05, e);
+    const n = 8;
+    for (let i = 0; i <= n; i++) { const x = a + (c - a) * i / n, z = b + (e - b) * i / n; f.push(x, 0, z, x, 0.65, z); }
+  });
+  const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(f, 3));
+  g.add(new THREE.LineSegments(fg, new THREE.LineBasicMaterial({ color: '#9aa1ad', transparent: true, opacity: 0.5 })));
+  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), glow(accent, 4));
+  lamp.position.set(2.2, 0.9, 1.7); g.add(lamp);
+  const lamp2 = lamp.clone(); lamp2.position.set(-2.2, 0.9, -1.7); g.add(lamp2);
+  g.scale.setScalar(scale);
+  return shadowed(g);
+}
+const mainSub = makeSubstation(1);
+mainSub.position.copy(SUB);
+scene.add(mainSub);
+
+/* ==========================================================================
+   Transmission pylons (lattice steel)
+   ========================================================================== */
+const pylonGeo = (() => {
+  const parts = [];
+  const H = 7, b = 0.8, t = 0.22;
+  const legs = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+  legs.forEach(([sx, sz]) => parts.push(bar(V3(sx * b, 0, sz * b), V3(sx * t, H, sz * t), 0.045)));
+  for (let k = 0; k < 5; k++) {
+    const y0 = k * 1.3, y1 = y0 + 1.3;
+    const w0 = b + (t - b) * (y0 / H), w1 = b + (t - b) * (y1 / H);
+    for (let s = 0; s < 4; s++) {
+      const [ax, az] = legs[s], [bx, bz] = legs[(s + 1) % 4];
+      parts.push(bar(V3(ax * w0, y0, az * w0), V3(bx * w1, y1, bz * w1), 0.02, 3));
+      parts.push(bar(V3(ax * w1, y1, az * w1), V3(bx * w1, y1, bz * w1), 0.02, 3));
+    }
+  }
+  // crossarms (perpendicular to the line, along local Z)
+  parts.push(bar(V3(0, 5.6, -1.8), V3(0, 5.6, 1.8), 0.05));
+  parts.push(bar(V3(0, 6.7, -1.2), V3(0, 6.7, 1.2), 0.045));
+  [[5.6, 1.8], [5.6, -1.8], [6.7, 1.2], [6.7, -1.2]].forEach(([y, z]) => parts.push(bar(V3(0, y, z), V3(0, y - 0.45, z), 0.03, 4)));
+  return mergeGeometries(parts);
+})();
+const pylonMat = mat('#9aa3b2', { metalness: 0.7, roughness: 0.4 });
+const ARMS = [[5.15, 1.8], [5.15, -1.8], [6.25, 1.2]];
+function buildLine(points, { scale = 1 } = {}) {
+  const pylons = [], spans = [], mids = [];
+  points.forEach((p, i) => {
+    const next = points[i + 1] || p, prev = points[i - 1] || p;
+    const dir = next.clone().sub(prev); const yaw = Math.atan2(dir.x, dir.z) + Math.PI / 2;
+    const m = new THREE.Mesh(pylonGeo, pylonMat);
+    m.position.copy(p); m.rotation.y = yaw; m.scale.setScalar(scale);
+    m.castShadow = true;
+    scene.add(m);
+    pylons.push(m);
+  });
+  const tip = (m, [y, z]) => m.localToWorld(V3(0, y, z));
+  pylons.forEach((m) => m.updateMatrixWorld());
+  for (let i = 0; i < pylons.length - 1; i++) {
+    ARMS.forEach((arm, k) => {
+      const pts = catenary(tip(pylons[i], arm), tip(pylons[i + 1], arm), 0.7, 16);
+      const g = new THREE.BufferGeometry().setFromPoints(pts);
+      const l = new THREE.Line(g, wireMat);
+      scene.add(l);
+      spans.push(l);
+      if (k === 2) mids.push(...(i === 0 ? pts : pts.slice(1)));
+    });
+  }
+  return { pylons, spans, mids };
+}
+
+/* ==========================================================================
+   Power plant + generation
+   ========================================================================== */
+const PLANT = V3(31, 0, 6.5);
+const blinkers = [];
+{
+  const g = new THREE.Group();
+  const hall = new THREE.Mesh(new THREE.BoxGeometry(7, 3.4, 4.4), mat('#6c7480', { roughness: 0.7 }));
+  hall.position.set(0, 1.7, 0); g.add(hall);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.2, 4.6), mat('#4a515b'));
+  roof.position.set(0, 3.5, 0); g.add(roof);
+  const hrsg = new THREE.Mesh(new THREE.BoxGeometry(2.2, 4.2, 3.2), mat('#7b828c'));
+  hrsg.position.set(3.6, 2.1, 0); g.add(hrsg);
+  [-1.6, 1.6].forEach((z) => {
+    const st = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.6, 12, 16), mat('#8d939b'));
+    st.position.set(4.6, 6, z); g.add(st);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.47, 0.47, 0.6, 16), mat('#b0473b'));
+    band.position.set(4.6, 11.2, z); g.add(band);
+    const light = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), glow('#ff3b2f', 5));
+    light.position.set(4.6, 12.15, z); g.add(light); blinkers.push(light);
+  });
+  // lit window bands
+  for (let k = 0; k < 9; k++) {
+    const w = new THREE.Mesh(new THREE.PlaneGeometry(0.45, 0.35), glow('#ffd18a', 2.4));
+    w.position.set(-3 + k * 0.7, 2.2, 2.21); g.add(w);
+  }
+  // switchyard
+  const yard = makeSubstation(0.8);
+  yard.position.set(-5.6, 0, 0); yard.rotation.y = Math.PI / 2; g.add(yard);
+  g.position.copy(PLANT);
+  scene.add(shadowed(g));
+}
+// cooling tower (hyperboloid)
+const TOWER = V3(26, 0, 15);
+{
+  const prof = [];
+  for (let i = 0; i <= 20; i++) { const y = i / 20 * 8.5; const r = 2.0 + 1.25 * Math.pow((y - 6.2) / 6.2, 2); prof.push(new THREE.Vector2(r, y)); }
+  const t = new THREE.Mesh(new THREE.LatheGeometry(prof, 40), mat('#a4a9ae', { side: THREE.DoubleSide, roughness: 0.9 }));
+  t.position.copy(TOWER); t.castShadow = t.receiveShadow = true;
+  scene.add(t);
+}
+// steam
+const steam = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  const tex = new THREE.CanvasTexture(c);
+  const N = 70;
+  const pos = new Float32Array(N * 3);
+  const seeds = Array.from({ length: N }, () => [rand(), rand(), rand()]);
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const m = new THREE.PointsMaterial({ map: tex, size: 3, transparent: true, depthWrite: false, opacity: 0.32, color: '#c7cede' });
+  const pts = new THREE.Points(geo, m);
+  scene.add(pts);
+  return { pos, seeds, geo, m, N };
+})();
+
+// wind turbines
+const rotors = [];
+[[-37, -15.5], [41, -17], [36.5, -21]].forEach(([x, z], i) => {
+  const g = new THREE.Group();
+  const y0 = 1.7;
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.26, 9, 10), mat('#d5d9de'));
+  tower.position.y = 4.5; g.add(tower);
+  const nac = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 1.1), mat('#d5d9de')); nac.position.set(0, 9.1, 0); g.add(nac);
+  const rotor = new THREE.Group(); rotor.position.set(0, 9.1, 0.6);
+  for (let k = 0; k < 3; k++) {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.16, 4, 0.05), mat('#e5e8ec'));
+    b.geometry.translate(0, 2, 0); b.rotation.z = k * TAU / 3; rotor.add(b);
+  }
+  rotor.add(new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), mat('#e5e8ec')));
+  g.add(rotor); rotors.push([rotor, 0.4 + i * 0.07]);
+  const red = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), glow('#ff3b2f', 5)); red.position.set(0, 9.42, 0); g.add(red); blinkers.push(red);
+  g.position.set(x, y0, z); g.rotation.y = -0.6;
+  scene.add(shadowed(g));
+});
+
+/* ==========================================================================
+   Main transmission corridor: plant → town substation
+   ========================================================================== */
+const mainLine = buildLine([V3(24, 0, 6.3), V3(17.5, 0, 6.3), V3(11, 0, 6.3), V3(4.5, 0, 6.3)]);
+
+/* ==========================================================================
+   Data center campus (rises in chapter 3)
+   ========================================================================== */
+const DC = V3(13, 0, -12);
+const dcHalls = [];
+const fanBlades = [];
+const dcStrips = [];
+const dcGroup = new THREE.Group();
+scene.add(dcGroup);
+{
+  const facade = mat('#d6dbe2', { roughness: 0.55, metalness: 0.15 });
+  const roofM = mat('#9aa1ab', { roughness: 0.6 });
+  const stripMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#6fd3ff').multiplyScalar(3), toneMapped: false, transparent: true });
+  dcStrips.push(stripMat);
+  [-4.4, -0.2, 4.0].forEach((dz, hi) => {
+    const hall = new THREE.Group();
+    hall.position.set(DC.x, 0, DC.z + dz);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(16, 3.2, 3.2), facade);
+    body.position.y = 1.6; hall.add(body);
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(16.2, 0.15, 3.4), roofM); cap.position.y = 3.25; hall.add(cap);
+    // light strips + louvres
+    [1.65, -1.65].forEach((z) => {
+      const s = new THREE.Mesh(new THREE.BoxGeometry(15.6, 0.07, 0.02), stripMat); s.position.set(0, 2.75, z * 0.995); hall.add(s);
+      const s2 = new THREE.Mesh(new THREE.BoxGeometry(15.6, 0.04, 0.02), stripMat); s2.position.set(0, 0.55, z * 0.995); hall.add(s2);
+      for (let k = 0; k < 14; k++) {
+        const l = new THREE.Mesh(new THREE.BoxGeometry(0.75, 1.4, 0.03), mat('#aeb5bf')); l.position.set(-7 + k * 1.08, 1.6, z * 1.003); hall.add(l);
+      }
+    });
+    // rooftop cooling units
+    for (let r = 0; r < 2; r++) {
+      for (let k = 0; k < 9; k++) {
+        const u = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45, 1.0), mat('#c3c9d1'));
+        u.position.set(-6.6 + k * 1.65, 3.55, -0.65 + r * 1.3); hall.add(u);
+        const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.04, 16), mat('#2b2f36'));
+        ring.position.set(u.position.x, 3.79, u.position.z); hall.add(ring);
+        const blades = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.03, 0.12), mat('#7d848e'));
+        blades.position.set(u.position.x, 3.82, u.position.z); hall.add(blades);
+        const b2 = blades.clone(); b2.rotation.y = Math.PI / 2; blades.add(b2); b2.position.set(0, 0, 0);
+        fanBlades.push(blades);
+      }
+    }
+    hall.scale.y = 0.001;
+    dcGroup.add(shadowed(hall));
+    dcHalls.push(hall);
+  });
+  // generator yard
+  for (let k = 0; k < 10; k++) {
+    const gnr = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 0.7), mat('#4d5560'));
+    gnr.position.set(DC.x - 7 + k * 1.55, 0.45, DC.z - 7.6);
+    const h = new THREE.Group(); h.add(gnr); h.scale.y = 0.001; dcGroup.add(shadowed(h)); dcHalls.push(h);
+  }
+  // fence + yard lights
+  const f = [];
+  const x0 = DC.x - 9.2, x1 = DC.x + 9.2, z0 = DC.z - 8.4, z1 = DC.z + 6.6;
+  [[x0, z0, x1, z0], [x1, z0, x1, z1], [x1, z1, x0, z1], [x0, z1, x0, z0]].forEach(([a, b, c, d]) => f.push(a, 0.5, b, c, 0.5, d));
+  const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(f, 3));
+  const fence = new THREE.LineSegments(fg, new THREE.LineBasicMaterial({ color: '#8fa0b8', transparent: true, opacity: 0 }));
+  dcGroup.add(fence);
+  dcStrips.push(fence.material);
+  const lampMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#e8f4ff').multiplyScalar(3.5), toneMapped: false, transparent: true, opacity: 0 });
+  dcStrips.push(lampMat);
+  for (let k = 0; k < 8; k++) {
+    const l = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), lampMat);
+    l.position.set(x0 + (x1 - x0) * (k / 7), 1.6, k % 2 ? z0 : z1); dcGroup.add(l);
+  }
+}
+// parking lot (cars)
+{
+  const n = 28;
+  const carIM = new THREE.InstancedMesh(new THREE.BoxGeometry(0.7, 0.35, 0.38), mat('#ffffff', { roughness: 0.4, metalness: 0.3 }), n);
+  const m4 = new THREE.Matrix4(), col = new THREE.Color();
+  const CAR = ['#8b96a8', '#2e3542', '#b9bfc7', '#6b3a3a', '#d8dade', '#3f5873'];
+  for (let i = 0; i < n; i++) { m4.makeTranslation(DC.x - 7 + (i % 14) * 1.05, 0.18, DC.z + 7.6 + Math.floor(i / 14) * 0.9 - 2.4); carIM.setMatrixAt(i, m4); carIM.setColorAt(i, col.set(CAR[i % CAR.length])); }
+  carIM.scale.y = 1; carIM.visible = false; scene.add(carIM);
+  dcGroup.userData.cars = carIM;
+}
+// spur: town substation → data center substation
+const dcSub = makeSubstation(1, '#6fd3ff');
+dcSub.position.set(2, 0, -5.5); dcSub.scale.setScalar(0.001);
+scene.add(dcSub);
+const spurPoles = [V3(-2.5, 0, 2.5), V3(0, 0, -1.5)];
+const spurParts = [];
+const spurPts = [V3(SUB.x + 1.6, 2.6, SUB.z), V3(-2.5, 3.6, 2.5), V3(0, 3.6, -1.5), V3(2, 2.6, -4.2)];
+spurPoles.forEach((p) => {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 3.8, 8), mat('#8a919c', { metalness: 0.5 }));
+  m.position.set(p.x, 1.9, p.z); m.scale.y = 0.001; scene.add(m); spurParts.push(m);
+});
+const spurWire = new THREE.Line(new THREE.BufferGeometry().setFromPoints(
+  [...catenary(spurPts[0], spurPts[1], 0.3, 10), ...catenary(spurPts[1], spurPts[2], 0.3, 10).slice(1), ...catenary(spurPts[2], spurPts[3], 0.3, 10).slice(1)]
+), wireMat.clone());
+spurWire.material.opacity = 0; scene.add(spurWire);
+
+// construction crane
+const crane = new THREE.Group();
+{
+  const parts = [];
+  const H = 13;
+  [[-0.35, -0.35], [0.35, -0.35], [0.35, 0.35], [-0.35, 0.35]].forEach(([x, z]) => parts.push(bar(V3(x, 0, z), V3(x, H, z), 0.05)));
+  for (let y = 0; y < H; y += 1) parts.push(bar(V3(-0.35, y, -0.35), V3(0.35, y + 1, 0.35), 0.025, 3), bar(V3(0.35, y, -0.35), V3(-0.35, y + 1, 0.35), 0.025, 3));
+  parts.push(bar(V3(-10, H, 0), V3(3.5, H, 0), 0.12));
+  parts.push(bar(V3(0, H + 2, 0), V3(-10, H, 0), 0.03, 3), bar(V3(0, H + 2, 0), V3(3.5, H, 0), 0.03, 3), bar(V3(0, H, 0), V3(0, H + 2, 0), 0.06));
+  parts.push(bar(V3(-6, H, 0), V3(-6, 5, 0), 0.015, 3));
+  crane.add(new THREE.Mesh(mergeGeometries(parts), mat('#e2b33f', { roughness: 0.5, metalness: 0.3 })));
+  const cw = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.8), mat('#6c727c')); cw.position.set(2.8, H - 0.5, 0); crane.add(cw);
+  const red = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), glow('#ff3b2f', 5)); red.position.set(0, H + 2.1, 0); crane.add(red); blinkers.push(red);
+  crane.position.set(23, 0, -11); crane.rotation.y = 0.5; crane.scale.y = 0.001;
+  scene.add(shadowed(crane));
+}
+
+/* ==========================================================================
+   New high-voltage line + substation (chapter 5)
+   ========================================================================== */
+const NEW_SUB = V3(25, 0, -3.6);
+const newSub = makeSubstation(1.35, '#ff6b57');
+newSub.position.copy(NEW_SUB); newSub.scale.setScalar(0.001);
+scene.add(newSub);
+const newLine = buildLine([V3(42.2, 0, -2.2), V3(37, 0, -2.6), V3(32, 0, -3.0), V3(28.2, 0, -3.3)], { scale: 1.12 });
+newLine.pylons.forEach((p) => { p.userData.s = p.scale.x; p.scale.y = 0.001; });
+newLine.spans.forEach((l) => { l.material = wireMat.clone(); l.material.opacity = 0; });
+
+/* ==========================================================================
+   Solar + batteries beside the data center (chapter 7)
+   ========================================================================== */
+const solarRows = [];
+{
+  const panelGeo = new THREE.BoxGeometry(1.5, 0.05, 0.9);
+  const panelMat = new THREE.MeshStandardMaterial({ color: '#3b64b8', roughness: 0.25, metalness: 0.5, emissive: '#18326e' });
+  for (let r = 0; r < 6; r++) {
+    const row = new THREE.Group();
+    for (let k = 0; k < 6; k++) {
+      const p = new THREE.Mesh(panelGeo, panelMat);
+      p.position.set(-7.5 + k * 1.65, 0.55, 0); p.rotation.x = -0.45;
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 4), mat('#8a919c'));
+      leg.position.set(p.position.x, 0.27, 0); row.add(p, leg);
+    }
+    row.position.set(32, 0, -19.4 + r * 1.35);
+    row.scale.setScalar(0.001);
+    scene.add(shadowed(row));
+    solarRows.push(row);
+  }
+  for (let k = 0; k < 4; k++) {
+    const g = new THREE.Group();
+    const b = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.9, 2.2), mat('#e7e9ec'));
+    b.position.y = 0.45; g.add(b);
+    const led = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.08, 1.6), glow('#8ff0b4', 3)); led.position.set(0.51, 0.75, 0); g.add(led);
+    g.position.set(22.6, 0, -18.4 + k * 2.4); g.scale.setScalar(0.001);
+    scene.add(shadowed(g));
+    solarRows.push(g);
+  }
+}
+
+/* ==========================================================================
+   Flows: glowing pulses that travel along the wires
+   ========================================================================== */
+const flows = [];
+function makeFlow(points, color, { count = 40, size = 0.14, speed = 6, k = 4 } = {}) {
+  const curve = new THREE.CatmullRomCurve3(points, false, 'centripetal');
+  const len = curve.getLength();
+  const im = new THREE.InstancedMesh(new THREE.SphereGeometry(size, 10, 8), glow(color, k), count);
+  im.frustumCulled = false;
+  scene.add(im);
+  const f = { curve, len, im, count, speed, amount: 0, phase: Array.from({ length: count }, (_, i) => i / count + rand() * 0.4 / count), reverse: false };
+  flows.push(f);
+  return f;
+}
+const plantOut = V3(PLANT.x - 6.2, 2.3, PLANT.z - 0.2);
+const F = {
+  main: makeFlow([plantOut, V3(26, 6, 6.3), ...mainLine.mids, V3(SUB.x + 2, 2.6, SUB.z)], '#ffc46b', { count: 22, size: 0.11 }),
+  feeds: feederPaths.map((p) => makeFlow(p, '#ffc46b', { count: 12, size: 0.09, speed: 4 })),
+  spur: makeFlow([V3(SUB.x + 1.6, 2.6, SUB.z), ...spurPts.slice(1), V3(DC.x - 8, 1.6, DC.z + 4)], '#6fd3ff', { count: 24, size: 0.13, speed: 6.5 }),
+  newL: makeFlow([V3(43, 6.3, -2.2), ...newLine.mids, V3(NEW_SUB.x, 2.8, NEW_SUB.z), V3(DC.x + 8, 1.8, DC.z + 2)], '#6fd3ff', { count: 34, size: 0.15, speed: 7.5 }),
+  solar: makeFlow([V3(28, 1.2, -15.5), V3(23.6, 1.6, -14.5), V3(DC.x + 8.2, 1.6, DC.z - 2)], '#8ff0b4', { count: 16, size: 0.13, speed: 3 }),
+  costArc: makeFlow([V3(NEW_SUB.x, 3, NEW_SUB.z), V3(16, 11, 1), V3(6, 12, 4), V3(SUB.x + 1, 3, SUB.z)], '#ff6b57', { count: 22, size: 0.24, speed: 5, k: 3.4 }),
+  costFeeds: feederPaths.map((p) => makeFlow(p, '#ff6b57', { count: 12, size: 0.17, speed: 3.6, k: 3.4 })),
+  costDC: makeFlow([V3(43, 8.2, -2.2), ...newLine.mids.map((p) => p.clone().add(V3(0, 1.1, 0))), V3(NEW_SUB.x, 4.2, NEW_SUB.z), V3(DC.x + 6, 3.6, DC.z + 2)], '#ff6b57', { count: 22, size: 0.22, speed: 5, k: 3.4 }),
+};
+const m4f = new THREE.Matrix4(), pf = new THREE.Vector3(), qf = new THREE.Quaternion(), sf = new THREE.Vector3();
+function updateFlow(f, dt) {
+  const visible = Math.round(f.count * Math.min(1, f.amount));
+  const step = (f.speed / f.len) * dt;
+  for (let i = 0; i < f.count; i++) {
+    f.phase[i] = (f.phase[i] + step) % 1;
+    const on = i < visible;
+    const u = f.phase[i];
+    f.curve.getPointAt(u, pf);
+    // fade in/out at the ends of the path
+    const s = on ? Math.min(1, u * 12, (1 - u) * 12) : 0;
+    m4f.compose(pf, qf, sf.setScalar(Math.max(0.0001, s)));
+    f.im.setMatrixAt(i, m4f);
+  }
+  f.im.instanceMatrix.needsUpdate = true;
+  f.im.visible = visible > 0;
+}
+
+/* ==========================================================================
+   Floating 3D tags
+   ========================================================================== */
+const TAGS = [
+  { id: 'home', text: 'Your home', tone: 'amber', at: V3(houses[HERO].x, 2.9, houses[HERO].z) },
+  { id: 'plant', text: 'Power plant', tone: 'ink', at: V3(PLANT.x, 5.6, PLANT.z) },
+  { id: 'lines', text: 'Transmission lines', tone: 'ink', at: V3(14, 8, 6.3) },
+  { id: 'sub', text: 'Substation', tone: 'amber', at: V3(SUB.x, 3.6, SUB.z) },
+  { id: 'streets', text: 'Neighborhood lines', tone: 'amber', at: V3(-22, 3.6, 9) },
+  { id: 'dc', text: 'Data center campus', tone: 'cyan', at: V3(DC.x, 5, DC.z) },
+  { id: 'newline', text: 'New high-voltage line', tone: 'coral', at: V3(34.5, 9, -2.8) },
+  { id: 'newsub', text: 'New substation', tone: 'coral', at: V3(NEW_SUB.x, 4.2, NEW_SUB.z) },
+  { id: 'costs', text: 'Costs shared by all customers', tone: 'coral', at: V3(11, 13, 2.5) },
+  { id: 'dcpays', text: 'Paid by the data center', tone: 'mint', at: V3(31, 9.8, -3.1) },
+  { id: 'solar', text: 'On-site solar + batteries', tone: 'mint', at: V3(28.5, 2.6, -17) },
+];
+const tagLayer = $('#tags');
+TAGS.forEach((t) => {
+  t.el = document.createElement('div');
+  t.el.className = 'tag'; t.el.dataset.tone = t.tone;
+  t.el.innerHTML = `<i></i><span>${t.text}</span>`;
+  tagLayer.appendChild(t.el);
+  t.v = 0;
+});
+const tag = Object.fromEntries(TAGS.map((t) => [t.id, t]));
+
+/* ==========================================================================
+   Bill stub + line chart (SVG)
+   ========================================================================== */
+const sparkPts = YEARS.map((y, i) => [i / (YEARS.length - 1) * 224, 32 - (PRICE[i] - 12.5) / (19.2 - 12.5) * 30]);
+$('#b-spark-bg').setAttribute('points', sparkPts.map((p) => p.join(',')).join(' '));
+const bAmt = $('#b-amt'), bYear = $('#b-year'), bRate = $('#b-rate'), bRateM = $('#b-rate-m'), bDelta = $('#b-delta'), bSpark = $('#b-spark'), bDot = $('#b-dot');
+let lastBill = '';
+function renderBill() {
+  const y = S.year;
+  const p = priceAt(y);
+  const amt = Math.round(KWH * p / 100);
+  const key = `${amt}|${Math.round(y * 20)}`;
+  if (key === lastBill) return;
+  lastBill = key;
+  bAmt.textContent = `$${amt}`;
+  bYear.textContent = y >= 2025.95 ? 'Apr 2026' : String(Math.floor(y + 0.02));
+  bRate.textContent = `${p.toFixed(1)}¢ / kWh`;
+  bRateM.textContent = `${p.toFixed(1)}¢/kWh`;
+  const base = Math.round(KWH * PRICE[0] / 100);
+  const d = Math.round((amt / base - 1) * 100);
+  bDelta.textContent = d > 0 ? `▲ ${d}% since 2020` : 'baseline 2020';
+  bDelta.classList.toggle('zero', d <= 0);
+  const t = (y - 2020) / 6;
+  const pts = [];
+  sparkPts.forEach(([x, yy], i) => { if (i / 6 <= t + 1e-6) pts.push(`${x},${yy}`); });
+  const ex = t * 224, ey = 32 - (p - 12.5) / (19.2 - 12.5) * 30;
+  pts.push(`${ex},${ey}`);
+  bSpark.setAttribute('points', pts.join(' '));
+  bDot.setAttribute('cx', ex); bDot.setAttribute('cy', ey);
+}
+
+// line chart in chapter 6
+{
+  const W = 400, H = 170, L = 34, R = 22, T = 16, B = 26;
+  const x = (i) => L + i * (W - L - R) / 6;
+  const bills = PRICE.map((p) => Math.round(KWH * p / 100));
+  const y = (v) => T + (1 - (v - 100) / (180 - 100)) * (H - T - B);
+  const grid = $('#lc-grid');
+  [100, 120, 140, 160, 180].forEach((v) => {
+    grid.insertAdjacentHTML('beforeend', `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"></line><text x="${L - 6}" y="${y(v) + 3.5}" text-anchor="end">$${v}</text>`);
+  });
+  YEARS.forEach((yr, i) => grid.insertAdjacentHTML('beforeend', `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${i === 6 ? '’26*' : '’' + String(yr).slice(2)}</text>`));
+  const d = bills.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('');
+  $('#lc-line').setAttribute('d', d);
+  $('#lc-area').setAttribute('d', `${d}L${x(6)} ${H - B}L${x(0)} ${H - B}Z`);
+  $('#lc-labels').innerHTML = `<circle class="end" cx="${x(0)}" cy="${y(bills[0])}" r="3.5"></circle><text class="lbl" x="${x(0)}" y="${y(bills[0]) - 10}" text-anchor="start">$${bills[0]}</text>
+    <circle class="end" cx="${x(6)}" cy="${y(bills[6])}" r="4.5"></circle><text class="lbl" x="${x(6)}" y="${y(bills[6]) - 11}" text-anchor="end">$${bills[6]}</text>`;
+}
+
+/* ==========================================================================
+   Sizing — the scene is framed off-centre so the story card never covers it
+   ========================================================================== */
+let VW = 1, VH = 1, wide = true;
+function resize() {
+  VW = innerWidth; VH = innerHeight;
+  wide = VW > 820;
+  renderer.setSize(VW, VH, false);
+  composer.setSize(VW, VH);
+  bloom.resolution.set(VW, VH);
+  camera.aspect = VW / VH;
+  camera.fov = wide ? 34 : 46;
+  if (wide) camera.setViewOffset(VW, VH, -VW * 0.16, 0, VW, VH);
+  else camera.setViewOffset(VW, VH, 0, VH * 0.16, VW, VH);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+/* ==========================================================================
+   The scroll timeline
+   Each chapter is 170vh. Chapter i's card settles when the page has scrolled i × 170vh,
+   so its scene change plays over the viewport-height of scroll just before that.
+   ========================================================================== */
+// charts start empty; the timeline draws them in
+utils.set('#cap-chart .bar i', { scaleY: 0 });
+utils.set(['#lc-area', '#lc-labels'], { opacity: 0 });
+
+const N = 9, CH = 170, VIEW = 100, TOTAL = N * CH - VIEW, T = 10000;
+const at = (i) => T * (i * CH) / TOTAL;            // card i settles
+const D = T * VIEW / TOTAL;                        // one viewport of scroll
+const C = T * CH / TOTAL;                          // one chapter of scroll
+const into = (i) => at(i) - 0.92 * D;              // start of the scene change for chapter i
+
+const CAMS = [
+  { px: 38, py: 50, pz: 74, tx: 3, ty: 0, tz: -2 },         // 0 overview at night
+  { px: -1, py: 5.2, pz: 29, tx: -12.5, ty: 1.2, tz: 17 },  // 1 your home
+  { px: -6, py: 24, pz: 38, tx: 14, ty: 2, tz: 4 },        // 2 along the grid to the plant
+  { px: -10, py: 17, pz: 15, tx: 12, ty: 2.5, tz: -10 },   // 3 the data center rises
+  { px: 32, py: 28, pz: 36, tx: 4, ty: 1, tz: -3 },         // 4 crowded grid
+  { px: 44, py: 33, pz: -27, tx: 17, ty: 2, tz: -2 },      // 5 new line + substation
+  { px: -2, py: 6.5, pz: 30, tx: -13, ty: 1.4, tz: 15.5 },  // 6 back home
+  { px: 2, py: 34, pz: 24, tx: 24, ty: 0, tz: -8 },        // 7 solar + fair share
+  { px: 22, py: 46, pz: 66, tx: -2, ty: 0, tz: -2 },        // 8 dawn over the whole town
+];
+const YEAR_AT = [2020, 2020, 2021, 2023, 2024, 2025, 2026, 2026, 2026];
+
+const tl = createTimeline({
+  defaults: { ease: 'inOutSine' },
+  autoplay: onScroll({ target: '#story', enter: 'top top', leave: 'bottom bottom', sync: reduceMotion ? true : 0.6 }),
+});
+
+for (let i = 1; i < N; i++) {
+  const from = CAMS[i - 1], to = CAMS[i];
+  const props = {};
+  Object.keys(to).forEach((k) => { props[k] = [from[k], to[k]]; });
+  tl.add(cam, { ...props, duration: 0.92 * D, ease: 'inOutCubic' }, into(i));
+  if (YEAR_AT[i] !== YEAR_AT[i - 1]) tl.add(S, { year: [YEAR_AT[i - 1], YEAR_AT[i]], duration: 0.8 * D }, into(i) + 0.1 * D);
+}
+const show = (id, on, off) => {
+  tl.add(tag[id], { v: [0, 1], duration: 0.25 * D, ease: 'outQuad' }, on);
+  if (off != null) tl.add(tag[id], { v: [1, 0], duration: 0.2 * D, ease: 'inQuad' }, off);
+};
+
+// 01 — your home
+tl.add(S, { homeRing: [0, 1], duration: 0.4 * D }, at(1) - 0.45 * D)
+  .add(S, { homeRing: [1, 0], duration: 0.3 * D }, into(3));
+show('home', at(1) - 0.35 * D, into(3));
+
+// 02 — the grid
+tl.add(S, { fMain: [0.55, 1], fFeed: [0.55, 1], duration: 0.6 * D }, into(2));
+show('plant', at(2) - 0.4 * D, into(3));
+show('lines', at(2) - 0.3 * D, into(3));
+show('sub', at(2) - 0.2 * D, into(3));
+show('streets', at(2) - 0.1 * D, into(3));
+
+// 03 — a data center moves in
+tl.add(crane.scale, { y: [0.001, 1], duration: 0.3 * D, ease: 'outBack' }, into(3))
+  .add(spurParts.map((m) => m.scale), { y: [0.001, 1], duration: 0.3 * D, delay: stagger(0.08 * D) }, into(3) + 0.2 * D)
+  .add(spurWire.material, { opacity: [0, 0.6], duration: 0.2 * D }, into(3) + 0.45 * D)
+  .add(dcSub.scale, { x: [0.001, 1], y: [0.001, 1], z: [0.001, 1], duration: 0.3 * D, ease: 'outBack' }, into(3) + 0.3 * D)
+  .add(dcHalls.map((h) => h.scale), { y: [0.001, 1], duration: 0.55 * D, delay: stagger(0.04 * D), ease: 'outCubic' }, into(3) + 0.25 * D)
+  .add(S, { dcLights: [0, 1], duration: 0.25 * D }, at(3) - 0.1 * D)
+  .add(S, { fSpur: [0, 0.6], duration: 0.3 * D }, at(3))
+  .add(crane.scale, { y: [1, 0.001], duration: 0.3 * D, ease: 'inBack' }, into(4));
+show('dc', at(3) - 0.15 * D, into(5));
+
+// 04 — a crowded grid
+tl.add(S, { fSpur: [0.6, 1], duration: 0.5 * D }, into(4) + 0.2 * D)
+  .add('#cap-chart .bar i', { scaleY: [0, 1], duration: 0.5 * D, delay: stagger(0.12 * D), ease: 'outCubic' }, at(4) - 0.5 * D);
+
+// 05 — the build-out
+tl.add(newLine.pylons.map((p) => p.scale), { y: [0.001, 1.12], duration: 0.3 * D, delay: stagger(0.1 * D, { from: 'last' }), ease: 'outBack' }, into(5))
+  .add(newSub.scale, { x: [0.001, 1.35], y: [0.001, 1.35], z: [0.001, 1.35], duration: 0.3 * D, ease: 'outBack' }, into(5) + 0.15 * D)
+  .add(newLine.spans.map((l) => l.material), { opacity: [0, 0.6], duration: 0.25 * D }, into(5) + 0.55 * D)
+  .add(S, { fNew: [0, 1], duration: 0.3 * D }, at(5) - 0.2 * D)
+  .add(S, { cHome: [0, 1], duration: 0.4 * D }, at(5) - 0.15 * D);
+show('newline', at(5) - 0.3 * D, into(6));
+show('newsub', at(5) - 0.2 * D, into(6));
+show('costs', at(5) - 0.05 * D, into(6) + 0.3 * D);
+
+// 06 — back home
+tl.add(S, { homeRing: [0, 1], duration: 0.35 * D }, at(6) - 0.4 * D)
+  .add(S, { homeRing: [1, 0], duration: 0.3 * D }, into(7));
+show('home', at(6) - 0.3 * D, into(7));
+tl.add(svg.createDrawable('#lc-line'), { draw: ['0 0', '0 1'], duration: 0.6 * D, ease: 'inOutQuad' }, at(6) - 0.55 * D)
+  .add('#lc-area', { opacity: [0, 1], duration: 0.3 * D }, at(6) - 0.1 * D)
+  .add('#lc-labels', { opacity: [0, 1], duration: 0.2 * D }, at(6) - 0.05 * D)
+  .add('#bill', { scale: [1, 1.07], duration: 0.25 * D, ease: 'outQuad' }, at(6) - 0.4 * D)
+  .add('#bill', { scale: [1.07, 1], duration: 0.3 * D, ease: 'inOutQuad' }, at(6) - 0.15 * D);
+
+// 07 — a fairer deal
+tl.add(solarRows.map((r) => r.scale), { x: [0.001, 1], y: [0.001, 1], z: [0.001, 1], duration: 0.3 * D, delay: stagger(0.06 * D), ease: 'outBack' }, into(7) + 0.1 * D)
+  .add(S, { cHome: [1, 0], duration: 0.4 * D }, at(7) - 0.4 * D)
+  .add(S, { cDC: [0, 1], fSolar: [0, 1], duration: 0.4 * D }, at(7) - 0.25 * D);
+show('dcpays', at(7) - 0.2 * D, into(8) + 0.3 * D);
+show('solar', at(7) - 0.1 * D, into(8) + 0.3 * D);
+
+// 08 — dawn
+tl.add(S, { dawn: [0, 1], duration: 1.3 * D, ease: 'inOutQuad' }, into(8) - 0.2 * D);
+
+// pad the timeline to its full length so scroll maps 1:1
+tl.add(S, { solar: [0, 1], duration: 1 }, T - 1);
+
+/* ==========================================================================
+   Card text: each card's lines rise in once, the first time it comes into view.
+   Cards already on screen at load are left as they are.
+   ========================================================================== */
+if (!reduceMotion && 'IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      animate([...e.target.children], { opacity: [0, 1], y: [26, 0], delay: stagger(70), duration: 700, ease: 'outCubic' });
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.chap:not(.hero) .card').forEach((card) => {
+    if (card.getBoundingClientRect().top < innerHeight) return;
+    utils.set([...card.children], { opacity: 0 });
+    io.observe(card);
+  });
+}
+
+/* ==========================================================================
+   Petition — a front-end prototype; nothing is sent.
+   ========================================================================== */
+const form = $('#sign');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = $('#f-name'), email = $('#f-email'), zip = $('#f-zip'), err = $('#f-err');
+  const bad = [];
+  [name, email, zip].forEach((el) => el.setAttribute('aria-invalid', 'false'));
+  if (!name.value.trim()) bad.push([name, 'Enter your name.']);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) bad.push([email, 'Enter an email address like name@example.com.']);
+  if (!/^\d{5}$/.test(zip.value.trim())) bad.push([zip, 'Enter a 5-digit ZIP code.']);
+  if (bad.length) {
+    bad.forEach(([el]) => el.setAttribute('aria-invalid', 'true'));
+    err.textContent = bad.map((b) => b[1]).join(' ');
+    bad[0][0].focus();
+    return;
+  }
+  err.textContent = '';
+  const first = name.value.trim().split(/\s+/)[0];
+  $('#done-title').textContent = `Thank you, ${first}.`;
+  $('#petition').classList.add('signed');
+  $('#bill').classList.add('has-signed');
+  celebrate();
+});
+const wave = { t: -1 };
+function celebrate() {
+  if (reduceMotion) return;
+  animate(wave, { t: [0, 1], duration: 2600, ease: 'outQuad' });
+  animate(ring2.scale, { x: [1, 14], z: [1, 14], duration: 2200, ease: 'outQuart' });
+  animate(ring2.material, { opacity: [1, 0], duration: 2200, ease: 'inQuad' });
+}
+
+/* ==========================================================================
+   Render loop
+   ========================================================================== */
+const clock = new THREE.Clock();
+const camTarget = new THREE.Vector3();
+const tmp = new THREE.Vector3();
+const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
+addEventListener('pointermove', (e) => { pointer.x = e.clientX / innerWidth - 0.5; pointer.y = e.clientY / innerHeight - 0.5; });
+const winCol = new THREE.Color();
+const hemiNight = new THREE.Color('#7084c8'), hemiDawn = new THREE.Color('#ffd3b8');
+// anything that grows in from zero stays hidden until it does
+const growables = [...dcHalls, ...solarRows, ...newLine.pylons, ...spurParts];
+const heroPos = new THREE.Vector3(houses[HERO].x, 0, houses[HERO].z);
+let frame = 0;
+
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+  frame++;
+  const motion = reduceMotion ? 0 : 1;
+
+  // camera with a slow idle drift and pointer parallax
+  pointer.sx += (pointer.x - pointer.sx) * 0.04;
+  pointer.sy += (pointer.y - pointer.sy) * 0.04;
+  const drift = Math.sin(t * 0.12) * 0.8 * motion;
+  const lift = intro.k * 22;
+  camera.position.set(cam.px + pointer.sx * 2.2 * motion + drift, cam.py - pointer.sy * 1.4 * motion + lift, cam.pz + lift * 0.6);
+  camTarget.set(cam.tx, cam.ty, cam.tz);
+  camera.lookAt(camTarget);
+
+  // time of day
+  const k = S.dawn;
+  skyMat.uniforms.uDawn.value = k;
+  starMat.opacity = 1 - k * 0.95;
+  moonDisc.material.opacity = 1 - k * 0.7;
+  scene.fog.color.copy(fogNight).lerp(fogDawn, k);
+  scene.fog.density = 0.0055 - k * 0.002;
+  hemi.intensity = 2.1 + k * 0.6;
+  hemi.color.copy(hemiNight).lerp(hemiDawn, k);
+  moon.intensity = 2.2 * (1 - k * 0.5);
+  sun.intensity = k * 2.2;
+  bloom.strength = 0.7 - k * 0.3;
+
+  // windows: warm, with a little life, plus the petition wave
+  const wt = wave.t;
+  for (let i = 0; i < houses.length; i++) {
+    const h = houses[i];
+    const d = Math.hypot(h.x - heroPos.x, h.z - heroPos.z) / 30;
+    const w = wt >= 0 ? Math.max(0, 1 - Math.abs(wt * 1.4 - d) * 6) * (1 - wt) : 0;
+    for (let j = 0; j < 3; j++) {
+      const idx = i * 3 + j;
+      let b = winBase[idx] * (1 - k * 0.55);
+      if (i === HERO) b = 1.4;
+      b += w * 2.2;
+      winIM.setColorAt(idx, winCol.copy(winColor).multiplyScalar(b * 2.4));
+    }
+  }
+  winIM.instanceColor.needsUpdate = true;
+
+  // your-home ring
+  ring.material.opacity = S.homeRing * (0.55 + 0.45 * Math.sin(t * 3) * motion);
+  ring.scale.setScalar(1 + Math.sin(t * 1.5) * 0.04 * motion);
+  ring.visible = S.homeRing > 0.01;
+  ring2.visible = ring2.material.opacity > 0.01 && wt >= 0;
+
+  // data center
+  dcStrips[0].opacity = S.dcLights * (0.85 + 0.15 * Math.sin(t * 2.3));
+  dcStrips[1].opacity = S.dcLights * 0.5;
+  dcStrips[2].opacity = S.dcLights;
+  dcGroup.userData.cars.visible = S.dcLights > 0.5;
+  fanBlades.forEach((b, i) => { b.rotation.y += dt * (6 + (i % 5)) * S.dcLights * motion; });
+  dcSub.visible = dcSub.scale.x > 0.01;
+  newSub.visible = newSub.scale.x > 0.01;
+  crane.visible = crane.scale.y > 0.01;
+  growables.forEach((o) => { o.visible = o.scale.y > 0.01; });
+
+  // generation details
+  rotors.forEach(([r, s]) => { r.rotation.z -= dt * s * 2 * motion; });
+  blinkers.forEach((b, i) => { b.visible = Math.sin(t * 3 + i * 1.3) > -0.2; });
+  for (let i = 0; i < steam.N; i++) {
+    const [a, b, c] = steam.seeds[i];
+    const life = (t * (0.05 + c * 0.04) * motion + a) % 1;
+    const src = i % 3 === 0 ? V3(PLANT.x + 4.6, 12.4, PLANT.z + (i % 2 ? 1.6 : -1.6)) : V3(TOWER.x, 8.6, TOWER.z);
+    steam.pos[i * 3] = src.x + (b - 0.5) * 2 + life * 4;
+    steam.pos[i * 3 + 1] = src.y + life * 9;
+    steam.pos[i * 3 + 2] = src.z + (c - 0.5) * 2 - life * 1.5;
+  }
+  steam.geo.attributes.position.needsUpdate = true;
+
+  // flows
+  F.main.amount = S.fMain;
+  F.feeds.forEach((f) => { f.amount = S.fFeed; });
+  F.spur.amount = S.fSpur;
+  F.newL.amount = S.fNew;
+  F.solar.amount = S.fSolar;
+  F.costArc.amount = S.cHome;
+  F.costFeeds.forEach((f) => { f.amount = S.cHome; });
+  F.costDC.amount = S.cDC;
+  flows.forEach((f) => updateFlow(f, dt * (reduceMotion ? 0.35 : 1)));
+
+  composer.render();
+
+  // tags
+  TAGS.forEach((tg) => {
+    if (tg.v < 0.01) { tg.el.style.opacity = 0; return; }
+    tmp.copy(tg.at).project(camera);
+    const x = (tmp.x * 0.5 + 0.5) * VW, y = (-tmp.y * 0.5 + 0.5) * VH;
+    const behind = tmp.z > 1;
+    tg.el.style.opacity = behind ? 0 : tg.v;
+    tg.el.style.transform = `translate(${(x - 3.5).toFixed(1)}px, ${(y - 12 - (1 - tg.v) * 10).toFixed(1)}px)`;
+  });
+
+  renderBill();
+}
+
+renderer.setAnimationLoop(tick);
+if (new URLSearchParams(location.search).has('debug')) window.__story = { tl, S, cam };
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  $('#boot').classList.add('done');
+  if (!reduceMotion) animate(intro, { k: 0, duration: 2600, ease: 'outQuart' });
+}));
+</script>
+</body>
+</html>
