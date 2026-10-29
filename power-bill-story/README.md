@@ -22,7 +22,7 @@ Each story card has a thin progress bar and Back / Next buttons. The cards have 
 
 ## How it is built
 
-- **Anime.js 4**: one `createTimeline()` linked to scroll with `onScroll({ sync })`. It controls the camera path, the year on the bill, every building that grows in, the flow amounts, the 3D tags, and the charts (`svg.createDrawable` draws the line). Each story card also has its own scroll-linked entrance.
+- **Anime.js 4**: one `createTimeline()` linked to scroll with `onScroll({ sync })`. It controls the camera path, the year on the bill, every building that grows in, the flow amounts, the 3D tags, and the charts (`svg.createDrawable` draws the line). Each story card's text rises in once, the first time the card comes into view.
 - **Three.js**: the town is procedural. It uses instanced houses, trees and windows, lattice pylons with sagging wires, a hyperboloid cooling tower with steam, wind turbines, and a data center with spinning rooftop fans. Unreal bloom makes the lights glow.
 
 ## Data
