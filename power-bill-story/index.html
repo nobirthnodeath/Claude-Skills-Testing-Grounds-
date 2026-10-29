@@ -71,13 +71,15 @@ a { color: var(--amber); text-underline-offset: 3px; }
 .bill {
   position: fixed; z-index: 8; right: calc(var(--gutter-r) + 12px); bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
   width: 260px; padding: 16px 18px 14px; color: #1d1a16;
-  background: #f6f1e7; border-radius: 6px 6px 2px 2px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.45), 0 2px 0 rgba(0,0,0,.08);
+  background: #fbfaf7; border-radius: 12px;
+  /* --hl (0–1) is driven by the timeline at chapter 6: a coral ring and a deeper shadow */
+  --hl: 0;
+  box-shadow:
+    0 0 0 calc(var(--hl) * 3px) rgba(255, 107, 87, calc(var(--hl) * .95)),
+    0 0 calc(var(--hl) * 44px) rgba(255, 107, 87, calc(var(--hl) * .45)),
+    0 24px 60px rgba(0,0,0,.45);
+  transform-origin: 100% 100%;
   font: 400 11px/1.35 var(--f-mono); letter-spacing: .02em;
-}
-.bill::after { /* perforated tear edge */
-  content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 8px;
-  background: radial-gradient(circle at 5px 0, transparent 4px, #f6f1e7 4.5px) 0 0 / 10px 8px repeat-x;
 }
 .bill header { display: flex; justify-content: space-between; align-items: baseline; text-transform: uppercase; letter-spacing: .12em; font-size: 9.5px; color: #6c655a; }
 .bill header b { color: #1d1a16; font-weight: 500; }
@@ -229,8 +231,8 @@ a { color: var(--amber); text-underline-offset: 3px; }
   .bill {
     top: calc(env(safe-area-inset-top, 0px) + 10px); bottom: auto; left: var(--gutter-l); right: var(--gutter-r); width: auto;
     padding: 10px 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 14px; align-items: center;
+    transform-origin: 50% 0;
   }
-  .bill::after { display: none; }
   .bill header { grid-column: 1 / -1; }
   .bill .amt { margin: 0; } .bill .amt strong { font-size: 28px; }
   .bill dl, .bill svg, .bill .years { display: none; }
@@ -1133,11 +1135,14 @@ const chevron = (g, x, y, s) => {
 };
 const drawRateTag = (g, w, h) => {
   const ph = 84, r = ph / 2, top = 6;
+  // dark chip with coral type, matching the HTML labels; coral stem and pin
   g.fillStyle = '#ff6b57';
-  g.beginPath(); g.roundRect(8, top, w - 16, ph, r); g.fill();
   g.fillRect(w / 2 - 2.5, top + ph - 2, 5, h - ph - top);            // stem
   g.beginPath(); g.arc(w / 2, h - 7, 6, 0, TAU); g.fill();           // pin
-  g.fillStyle = '#fff'; g.strokeStyle = '#fff';
+  g.fillStyle = 'rgba(10, 15, 31, .92)';
+  g.beginPath(); g.roundRect(9, top + 1, w - 18, ph - 2, 14); g.fill();
+  g.lineWidth = 3; g.strokeStyle = 'rgba(255, 107, 87, .7)'; g.stroke();
+  g.fillStyle = '#ff6b57'; g.strokeStyle = '#ff6b57';
   g.font = FONT.replace('{s}', 60); g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillText('$', w / 2 - 22, top + ph / 2 + 3);
   // up arrow: stem + head
@@ -1332,6 +1337,9 @@ const CAMS = [
 ];
 const YEAR_AT = [2020, 2020, 2021, 2023, 2024, 2025, 2026, 2026, 2026];
 
+// phones show the bill as a full-width bar at the top, so it only grows a little there
+const BILL_ZOOM = innerWidth > 820 ? 1.28 : 1.06;
+
 const tl = createTimeline({
   defaults: { ease: 'inOutSine' },
   autoplay: onScroll({ target: '#story', enter: 'top top', leave: 'bottom bottom', sync: reduceMotion ? true : 0.6 }),
@@ -1405,8 +1413,9 @@ show('home', at(6) - 0.3 * D, into(7));
 tl.add(svg.createDrawable('#lc-line'), { draw: ['0 0', '0 1'], duration: 0.6 * D, ease: 'inOutQuad' }, at(6) - 0.55 * D)
   .add('#lc-area', { opacity: [0, 1], duration: 0.3 * D }, at(6) - 0.1 * D)
   .add('#lc-labels', { opacity: [0, 1], duration: 0.2 * D }, at(6) - 0.05 * D)
-  .add('#bill', { scale: [1, 1.07], duration: 0.25 * D, ease: 'outQuad' }, at(6) - 0.4 * D)
-  .add('#bill', { scale: [1.07, 1], duration: 0.3 * D, ease: 'inOutQuad' }, at(6) - 0.15 * D);
+  // the bill steps forward for the whole of chapter 6, then settles back as chapter 7 begins
+  .add('#bill', { scale: [1, BILL_ZOOM], '--hl': [0, 1], duration: 0.35 * D, ease: 'outBack(1.6)' }, at(6) - 0.45 * D)
+  .add('#bill', { scale: [BILL_ZOOM, 1], '--hl': [1, 0], duration: 0.35 * D, ease: 'inOutQuad' }, into(7));
 
 // 07 — a fairer deal
 tl.add(solarRows.map((r) => r.scale), { x: [0.001, 1], y: [0.001, 1], z: [0.001, 1], duration: 0.3 * D, delay: stagger(0.06 * D), ease: 'outBack' }, into(7) + 0.1 * D)
