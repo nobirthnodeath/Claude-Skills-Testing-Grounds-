@@ -97,7 +97,7 @@ a { color: var(--amber); text-underline-offset: 3px; }
 #story { position: relative; z-index: 2; }
 .chap { position: relative; display: flow-root; height: 170vh; padding-bottom: 24vh; padding-left: calc(var(--gutter-l) + clamp(0px, 3vw, 40px)); padding-right: var(--gutter-r); }
 .card {
-  position: sticky; top: 13vh; width: min(470px, 100%);
+  position: sticky; top: 13vh; width: min(490px, 100%);
   background: var(--panel); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
   border: 1px solid rgba(255,255,255,.08); border-radius: 10px;
   padding: 26px 28px 28px; box-shadow: 0 30px 80px rgba(0,0,0,.35);
@@ -122,6 +122,24 @@ a { color: var(--amber); text-underline-offset: 3px; }
 .parts b { font-weight: 500; color: var(--ink); }
 
 /* hero */
+/* tall cards step down in two stages so they fit the screen (set by fitCards() in the script) */
+.card.fit-1 { padding: 20px 24px 22px; font-size: 17px; line-height: 1.5; }
+.card.fit-1 h2 { font-size: clamp(26px, 2.5vw, 34px); margin-bottom: 10px; }
+.card.fit-1 .eyebrow { margin-bottom: 10px; }
+.card.fit-1 p { margin-bottom: 10px; }
+.card.fit-1 .small, .card.fit-1 .parts li, .card.fit-1 .asks li { font-size: 15px; }
+.card.fit-1 .stat { margin: 12px 0; padding: 10px 0; }
+.card.fit-1 .stat strong { font-size: 38px; }
+.card.fit-1 .bars { height: 112px; }
+.card.fit-1 .chart { margin: 10px 0 4px; }
+.card.fit-1 .parts, .card.fit-1 .asks { gap: 8px; margin-bottom: 10px; }
+.card.fit-1 .card-nav { margin-top: 14px; padding-top: 10px; }
+.card.fit-2 { font-size: 16px; }
+.card.fit-2 .src { display: none; }
+.card.fit-2 .line-chart svg { max-height: 128px; }
+.card.fit-2 .bars { height: 92px; }
+.card.fit-2 .letter { font-size: 14px; }
+.card.fit-2 .field input { padding: 9px 12px; }
 .card-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--rule); }
 .card-nav button, .cue {
   appearance: none; background: none; cursor: pointer; color: var(--ink);
@@ -145,7 +163,7 @@ a { color: var(--amber); text-underline-offset: 3px; }
 .chart { margin: 16px 0 6px; }
 .chart figcaption { font: 500 10.5px/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 .bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: end; height: 150px; border-bottom: 1px solid var(--rule); }
-.bar { display: grid; align-content: end; justify-items: center; gap: 6px; height: 100%; }
+.bar { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; height: 100%; }
 .bar b { font: 600 15px/1 var(--f-display); font-variant-numeric: tabular-nums; }
 .bar i { display: block; width: 100%; background: linear-gradient(var(--coral), #b8402f); border-radius: 3px 3px 0 0; transform-origin: bottom; }
 .bar.low i { background: linear-gradient(#8a93a8, #59617a); }
@@ -1100,25 +1118,51 @@ const F = {
    In the fairer-deal chapter the cost line goes to the data center instead.
    ========================================================================== */
 const CORAL = new THREE.Color('#ff6b57');
-function disc(draw) {
-  const c = document.createElement('canvas'); c.width = c.height = 128;
+// A small price tag: "$" with an up-chevron, pinned to a short stem so it reads as attached to the house.
+function tagMaterial(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
   const g = c.getContext('2d');
-  g.fillStyle = '#ff6b57'; g.beginPath(); g.arc(64, 64, 58, 0, TAU); g.fill();
-  g.lineWidth = 5; g.strokeStyle = 'rgba(255,255,255,.9)'; g.stroke();
-  g.fillStyle = '#fff'; draw(g);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  return new THREE.SpriteMaterial({ map: t, color: '#d6d6d6', depthWrite: false });
+  draw(g, w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  return new THREE.SpriteMaterial({ map: t, color: '#e2e2e2', depthWrite: false });
 }
-const upMat = disc((g) => { g.beginPath(); g.moveTo(64, 26); g.lineTo(98, 66); g.lineTo(76, 66); g.lineTo(76, 100); g.lineTo(52, 100); g.lineTo(52, 66); g.lineTo(30, 66); g.closePath(); g.fill(); });
-const dollarMat = disc((g) => { g.font = '800 78px "Bricolage Grotesque", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('$', 64, 70); });
+const FONT = '700 {s}px "Bricolage Grotesque", "Avenir Next", Arial, sans-serif';
+const chevron = (g, x, y, s) => {
+  g.lineWidth = s * 0.22; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath(); g.moveTo(x - s * 0.42, y + s * 0.2); g.lineTo(x, y - s * 0.25); g.lineTo(x + s * 0.42, y + s * 0.2); g.stroke();
+};
+const drawRateTag = (g, w, h) => {
+  const ph = 84, r = ph / 2, top = 6;
+  g.fillStyle = '#ff6b57';
+  g.beginPath(); g.roundRect(8, top, w - 16, ph, r); g.fill();
+  g.fillRect(w / 2 - 2.5, top + ph - 2, 5, h - ph - top);            // stem
+  g.beginPath(); g.arc(w / 2, h - 7, 6, 0, TAU); g.fill();           // pin
+  g.fillStyle = '#fff'; g.strokeStyle = '#fff';
+  g.font = FONT.replace('{s}', 60); g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('$', w / 2 - 22, top + ph / 2 + 3);
+  // up arrow: stem + head
+  const ax = w / 2 + 26, ay = top + ph / 2;
+  g.lineWidth = 7; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath(); g.moveTo(ax, ay + 20); g.lineTo(ax, ay - 18); g.stroke();
+  chevron(g, ax, ay - 8, 30);
+};
+const rateMat = tagMaterial(176, 150, drawRateTag);
+const dollarMat = tagMaterial(128, 128, (g) => {
+  g.fillStyle = '#ff6b57'; g.beginPath(); g.arc(64, 64, 52, 0, TAU); g.fill();
+  g.fillStyle = '#fff'; g.font = FONT.replace('{s}', 66); g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('$', 64, 68);
+});
+const TAG = new THREE.Vector2(0.62, 0.53);  // world size of a house tag
 const badges = houses.map((h) => {
-  const b = new THREE.Sprite(upMat);
-  b.position.set(h.x, h.h + 1.35, h.z); b.scale.setScalar(0.001);
+  const b = new THREE.Sprite(rateMat);
+  b.center.set(0.5, 0);                     // anchor at the pin, so the tag stands on the roof
+  b.position.set(h.x, h.h + 0.5, h.z); b.scale.setScalar(0.001);
   scene.add(b);
   return b;
 });
-const dcBadge = new THREE.Sprite(upMat);
-dcBadge.position.set(DC.x, 6.6, DC.z); dcBadge.scale.setScalar(0.001);
+const dcBadge = new THREE.Sprite(rateMat);
+dcBadge.center.set(0.5, 0);
+dcBadge.position.set(DC.x, 3.9, DC.z); dcBadge.scale.setScalar(0.001);
 scene.add(dcBadge);
 const ripple = new THREE.Mesh(new THREE.RingGeometry(0.97, 1, 128).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ff6b57', transparent: true, depthWrite: false }));
 const rippleFill = new THREE.Mesh(new THREE.CircleGeometry(1, 96).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ff6b57', transparent: true, depthWrite: false, opacity: 0 }));
@@ -1132,7 +1176,7 @@ function costLink(to, height) {
   const line = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: '#e8604d' }));
   geo.setDrawRange(0, 0);
   const token = new THREE.Sprite(dollarMat);
-  token.scale.setScalar(1.5);
+  token.scale.setScalar(1.15);
   scene.add(line, token);
   return { curve, geo, line, token, total: geo.index.count };
 }
@@ -1179,7 +1223,7 @@ const TAGS = [
   { id: 'newsub', text: 'New substation', tone: 'coral', at: V3(NEW_SUB.x, 4.2, NEW_SUB.z) },
   { id: 'costlink', text: 'Cost of the new grid', tone: 'coral', at: V3(10.5, 9.4, 1.4) },
   { id: 'costs', text: 'Utility raises rates for everyone', tone: 'coral', at: V3(SUB.x, 4.4, SUB.z) },
-  { id: 'dcpays', text: 'Paid by the data center', tone: 'mint', at: V3(DC.x, 9.7, DC.z) },
+  { id: 'dcpays', text: 'Paid by the data center', tone: 'mint', at: V3(DC.x, 7.6, DC.z) },
   { id: 'solar', text: 'On-site solar + batteries', tone: 'mint', at: V3(28.5, 2.6, -17) },
 ];
 const tagLayer = $('#tags');
@@ -1281,7 +1325,7 @@ const CAMS = [
   { px: -6, py: 24, pz: 38, tx: 14, ty: 2, tz: 4 },        // 2 along the grid to the plant
   { px: -10, py: 17, pz: 15, tx: 12, ty: 2.5, tz: -10 },   // 3 the data center rises
   { px: 32, py: 28, pz: 36, tx: 4, ty: 1, tz: -3 },         // 4 crowded grid
-  { px: 44, py: 33, pz: -27, tx: 17, ty: 2, tz: -2 },      // 5 new line + substation
+  { px: 16, py: 30, pz: 34, tx: -17, ty: 0, tz: 8 },       // 5 follows the cost to the utility and the homes it serves
   { px: -2, py: 6.5, pz: 30, tx: -13, ty: 1.4, tz: 15.5 },  // 6 back home
   { px: 2, py: 34, pz: 24, tx: 24, ty: 0, tz: -8 },        // 7 solar + fair share
   { px: 22, py: 46, pz: 66, tx: -2, ty: 0, tz: -2 },        // 8 dawn over the whole town
@@ -1293,7 +1337,16 @@ const tl = createTimeline({
   autoplay: onScroll({ target: '#story', enter: 'top top', leave: 'bottom bottom', sync: reduceMotion ? true : 0.6 }),
 });
 
+// Chapter 5 starts on the new line and substation, then follows the cost to the neighborhood.
+const BUILD_OUT = { px: 44, py: 33, pz: -27, tx: 17, ty: 2, tz: -2 };
+const camProps = (from, to) => Object.fromEntries(Object.keys(to).map((k) => [k, [from[k], to[k]]]));
 for (let i = 1; i < N; i++) {
+  if (i === 5) {
+    tl.add(cam, { ...camProps(CAMS[4], BUILD_OUT), duration: 0.92 * D, ease: 'inOutCubic' }, into(5));
+    tl.add(cam, { ...camProps(BUILD_OUT, CAMS[5]), duration: 0.55 * D, ease: 'inOutSine' }, at(5) - 0.12 * D);
+    tl.add(S, { year: [YEAR_AT[4], YEAR_AT[5]], duration: 0.8 * D }, into(5) + 0.1 * D);
+    continue;
+  }
   const from = CAMS[i - 1], to = CAMS[i];
   const props = {};
   Object.keys(to).forEach((k) => { props[k] = [from[k], to[k]]; });
@@ -1337,9 +1390,9 @@ tl.add(newLine.pylons.map((p) => p.scale), { y: [0.001, 1.12], duration: 0.3 * D
   .add(newSub.scale, { x: [0.001, 1.35], y: [0.001, 1.35], z: [0.001, 1.35], duration: 0.3 * D, ease: 'outBack' }, into(5) + 0.15 * D)
   .add(newLine.spans.map((l) => l.material), { opacity: [0, 0.6], duration: 0.25 * D }, into(5) + 0.55 * D)
   .add(S, { fNew: [0, 1], duration: 0.3 * D }, at(5) - 0.2 * D)
-  .add(S, { link: [0, 1], duration: 0.35 * D, ease: 'inOutQuad' }, at(5) - 0.25 * D)
-  .add(S, { rateOn: [0, 1], duration: 0.02 * C }, at(5) + 0.08 * D)
-  .add(S, { ripple: [0, 1], duration: 0.38 * C, ease: 'linear' }, at(5) + 0.08 * D);
+  .add(S, { link: [0, 1], duration: 0.5 * D, ease: 'inOutSine' }, at(5) - 0.2 * D)
+  .add(S, { rateOn: [0, 1], duration: 0.02 * C }, at(5) + 0.3 * D)
+  .add(S, { ripple: [0, 1], duration: 0.3 * C, ease: 'outSine' }, at(5) + 0.3 * D);
 show('newline', at(5) - 0.3 * D, into(6));
 show('newsub', at(5) - 0.2 * D, into(6));
 show('costlink', at(5) - 0.15 * D, into(6) + 0.3 * D);
@@ -1391,17 +1444,52 @@ chapEls.forEach((sec, i) => {
   progBars.push({ i, el: card.querySelector('.card-prog i') });
 });
 $('#start').addEventListener('click', () => goTo(1));
+// Wide screens: tall cards step down in size, then sit centred if there is room (13vh from the top at most).
+function fitCards() {
+  const wideNow = innerWidth > 820;
+  chapEls.forEach((sec, i) => {
+    if (i === 0) return;
+    const card = sec.querySelector('.card');
+    card.classList.remove('fit-1', 'fit-2');
+    card.style.top = '';
+    if (!wideNow) return;
+    const avail = innerHeight - 32;
+    if (card.offsetHeight > avail) card.classList.add('fit-1');
+    if (card.offsetHeight > avail) card.classList.add('fit-2');
+    card.style.top = `${Math.round(Math.max(16, Math.min(innerHeight * 0.13, (innerHeight - card.offsetHeight) / 2)))}px`;
+  });
+}
+// Each bar runs from the moment its card settles to the moment it starts to move up.
+// On phones (no sticky cards) it runs until the whole card has come into view.
+function measureProgress() {
+  const maxScroll = document.documentElement.scrollHeight - innerHeight;
+  const wideNow = innerWidth > 820;
+  progBars.forEach((b) => {
+    const sec = chapEls[b.i], card = sec.querySelector('.card');
+    const cardTop = sec.offsetTop + card.offsetTop;
+    if (wideNow) {
+      const stick = parseFloat(getComputedStyle(card).top) || 0;
+      const padB = parseFloat(getComputedStyle(sec).paddingBottom) || 0;
+      b.start = cardTop - stick;
+      b.end = sec.offsetTop + sec.offsetHeight - padB - card.offsetHeight - stick;
+    } else {
+      b.start = cardTop - innerHeight;
+      b.end = cardTop + card.offsetHeight - innerHeight;
+    }
+    b.end = Math.max(b.start + 1, Math.min(b.end, maxScroll));
+  });
+}
 function updateProgress() {
-  const ch = chapPx();
-  const end = N * ch - innerHeight;
-  progBars.forEach(({ i, el }) => {
-    const a = i * ch, b = Math.min((i + 1) * ch, end);
-    const p = Math.min(1, Math.max(0, (scrollY - a + innerHeight * 0.25) / (b - a + innerHeight * 0.25)));
+  progBars.forEach(({ el, start, end }) => {
+    const p = Math.min(1, Math.max(0, (scrollY - start) / (end - start)));
     el.style.transform = `scaleX(${p.toFixed(4)})`;
   });
 }
+function relayout() { fitCards(); measureProgress(); updateProgress(); }
 addEventListener('scroll', updateProgress, { passive: true });
-updateProgress();
+addEventListener('resize', relayout);
+document.fonts?.ready.then(relayout);
+relayout();
 
 /* ==========================================================================
    Card text: each card's lines rise in once, the first time it comes into view.
@@ -1563,15 +1651,17 @@ function tick() {
     const h = houses[i];
     const d = Math.hypot(h.x - SUB.x, h.z - SUB.z);
     const r = S.rateOn * Math.min(1, Math.max(0, (R - d) / 3));
-    badges[i].scale.setScalar(Math.max(0.001, outBack(r) * 0.62));
+    const k = Math.max(0.001, outBack(r));
+    badges[i].scale.set(TAG.x * k, TAG.y * k, 1);
     badges[i].visible = r > 0.01;
-    badges[i].position.y = h.h + 1.15 + Math.sin(t * 2 + i) * 0.07 * motion;
-    roofIM.setColorAt(i, winCol.copy(roofBase).lerp(CORAL, r * 0.6));
+    badges[i].position.y = h.h + 0.5 + Math.sin(t * 2 + i) * 0.04 * motion;
+    roofIM.setColorAt(i, winCol.copy(roofBase).lerp(CORAL, r * 0.85));
   }
   roofIM.instanceColor.needsUpdate = true;
-  dcBadge.scale.setScalar(Math.max(0.001, outBack(S.dcPays) * 2.4));
+  const kd = Math.max(0.001, outBack(S.dcPays) * 3.2);
+  dcBadge.scale.set(TAG.x * kd, TAG.y * kd, 1);
   dcBadge.visible = S.dcPays > 0.01;
-  dcBadge.position.y = 6.6 + Math.sin(t * 2) * 0.12 * motion;
+  dcBadge.position.y = 3.9 + Math.sin(t * 2) * 0.08 * motion;
   flows.forEach((f) => updateFlow(f, dt * (reduceMotion ? 0.35 : 1)));
 
   composer.render();
