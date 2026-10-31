@@ -5,7 +5,7 @@
 <style>
 /* PROTOTYPE, throwaway. Answers: "Does a moving mesh gradient (@mesh-gradient/core) suit Graphite better than the custom three.js shader?"
    Each phone has one MeshGradient canvas. An inline SVG filter splits it into red, green and blue and offsets them (chromatic aberration).
-   A dark scrim keeps the lists readable. Three palettes switch with #nightfall / #prism / #smoke, the bar, or arrow keys.
+   A mask pins the moving gradient to the top-left corner. Three palettes switch with #smoke / #nightfall / #prism, the bar, or arrow keys.
    Layout: header, then Home (full length) and Inventory side by side. A floating bar holds palette, color split, speed and motion controls. */
 :root {
   --page: #F3F3F1; --page-ink: #1D1F1E; --page-muted: #656967; --page-rule: #DCDDDA; --page-card: #FFFFFF;
@@ -40,11 +40,12 @@ figcaption { font-size: 13px; color: var(--page-muted); padding-left: 8px; }
   --alert-bg: linear-gradient(140deg, rgba(255,92,92,.18) 0%, rgba(255,92,92,.07) 100%); --alert-edge: rgba(255,110,110,.26);
   --card-bg: linear-gradient(140deg, rgba(140,150,255,.22) 0%, rgba(140,150,255,.08) 55%, rgba(255,255,255,.04) 100%); --card-edge: rgba(170,178,255,.24);
   --glass: blur(18px) saturate(1.3);
-  background: var(--bg) radial-gradient(60% 34% at 84% 4%, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 70%); }
-.app canvas.fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; display: block; filter: url(#ca); opacity: 0; transition: opacity .6s ease; }
+  --glow: 420px;
+  background: var(--bg) radial-gradient(calc(var(--glow) * .8) calc(var(--glow) * .7) at 0% 0%, rgba(225,230,240,.16) 0%, rgba(225,230,240,0) 75%); }
+.app canvas.fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; display: block; filter: url(#ca); opacity: 0; transition: opacity .6s ease;
+  -webkit-mask-image: radial-gradient(var(--glow) calc(var(--glow) * .85) at 0% 0%, #000 0%, rgba(0,0,0,.55) 40%, rgba(0,0,0,0) 100%);
+  mask-image: radial-gradient(var(--glow) calc(var(--glow) * .85) at 0% 0%, #000 0%, rgba(0,0,0,.55) 40%, rgba(0,0,0,0) 100%); }
 .app canvas.fx.on { opacity: 1; }
-.app .scrim { position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: linear-gradient(180deg, rgba(15,16,17,.10) 0%, rgba(15,16,17,.38) 34%, rgba(15,16,17,.78) 62%, rgba(15,16,17,.9) 100%); }
 .app .scroll { position: absolute; inset: 0; padding-bottom: 100px; }
 .full .app { position: relative; }
 .full .app .scroll { position: relative; padding-bottom: 104px; }
@@ -56,6 +57,8 @@ figcaption { font-size: 13px; color: var(--page-muted); padding-left: 8px; }
 svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .hd { padding: 14px 20px 18px; display: flex; justify-content: space-between; align-items: end; }
 .hd small { display: block; font-size: 14px; color: var(--mut); margin-bottom: 4px; }
+.hd.slim { padding: 10px 20px 16px; align-items: center; }
+.hd.slim .date { font-size: 15px; font-weight: 600; color: var(--ink); }
 .hd h3 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
 .hd .link { font-weight: 500; font-size: 14px; color: var(--mut); }
 .card { margin: 0 16px; display: flex; align-items: center; gap: 12px; padding: 16px 12px 16px 18px; border-radius: 18px; backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); color: var(--ink); text-decoration: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 30px -18px rgba(0,0,0,.7); }
@@ -107,18 +110,19 @@ svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wid
 
 <div class="wrap">
   <header class="intro">
-    <span class="tagline">Prototype · throwaway · Round 8 · Graphite only</span>
+    <span class="tagline">Prototype · throwaway · Round 9 · Graphite only</span>
     <h1>Graphite with a moving mesh gradient</h1>
-    <p>The background is <b>@mesh-gradient/core</b>, a small WebGL library that moves four colors like a SwiftUI mesh gradient. The library has no chromatic aberration, so an SVG filter splits the image into red, green and blue and shifts them apart a few pixels. A dark layer fades in lower on the screen to keep the lists easy to read. Use the bar at the bottom to change palette, color split, speed and motion.</p>
+    <p>The background is <b>@mesh-gradient/core</b>, a small WebGL library that moves four colors like a SwiftUI mesh gradient. The library has no chromatic aberration, so an SVG filter splits the image into red, green and blue and shifts them apart a few pixels. The moving gradient is now pinned to the top-left corner and fades out before it reaches the content below. Home no longer has the “Our kitchen” title. Use the bar at the bottom to change palette, glow size, color split, speed and motion.</p>
   </header>
   <main id="stage"></main>
 </div>
 <div class="ctrl" role="toolbar" aria-label="Prototype controls">
   <button id="prev" aria-label="Previous palette">←</button>
-  <span class="lab" id="lab">Nightfall</span>
+  <span class="lab" id="lab">Smoke</span>
   <button id="next" aria-label="Next palette">→</button>
   <span class="sep"></span>
   <label for="split">Color split <input id="split" type="range" min="0" max="10" step="0.5" value="4"></label>
+  <label for="glow">Glow size <input id="glow" type="range" min="220" max="620" step="10" value="420"></label>
   <label for="speed">Speed <input id="speed" type="range" min="0.2" max="2" step="0.1" value="0.6"></label>
   <span class="sep"></span>
   <button id="play" aria-label="Pause motion">Pause</button>
@@ -160,8 +164,8 @@ const tabbar = on => `<nav class="tabbar">
   <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span><span class="it">${IC.list}List</span>
   <span class="it"><span class="add">${IC.add}</span></span>
   <span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span><span class="it">${IC.gear}Settings</span></nav>`;
-const home = () => `<canvas class="fx" aria-hidden="true"></canvas><span class="scrim"></span><div class="scroll">${status}
-  <div class="hd"><div><small>Saturday, October 31</small><h3>Our kitchen</h3></div><span class="link">Settings</span></div>
+const home = () => `<canvas class="fx" aria-hidden="true"></canvas><div class="scroll">${status}
+  <div class="hd slim"><span class="date">Saturday, October 31</span><span class="link">Settings</span></div>
   <a class="card alert"><span class="tx"><b>9 things expired</b><span>Leftover curry, milk and 7 more</span></span><span class="go">Sort${IC.chev}</span></a>
   <section class="sec"><span class="lbl">This week</span>
     <p class="stmt">You tossed 1 thing, about $3.</p>
@@ -170,7 +174,7 @@ const home = () => `<canvas class="fx" aria-hidden="true"></canvas><span class="
   <section class="sec"><div class="sh"><h4>Use these soon</h4><span>About $14</span></div>
     ${soon.map(s => `<div class="row"><span class="tile">${FG[s.k]}</span><span class="nm">${s.n}</span>${when(s.d)}</div>`).join('')}</section>
   </div>${tabbar('home')}`;
-const inv = () => `<canvas class="fx" aria-hidden="true"></canvas><span class="scrim"></span><div class="scroll">${status}
+const inv = () => `<canvas class="fx" aria-hidden="true"></canvas><div class="scroll">${status}
   <div class="hd"><h3>Inventory</h3><span class="link">Invite</span></div>
   <div class="tabs"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
   <section class="grp"><div class="sh"><h4>Produce</h4><span>9 items</span></div>
@@ -180,12 +184,12 @@ const inv = () => `<canvas class="fx" aria-hidden="true"></canvas><span class="s
   </div>${tabbar('inv')}`;
 
 const LOOKS = [
+  { key: 'smoke', name: 'Smoke', colors: ['#565D6B', '#2A2E36', '#8A92A3', '#554D78'], freq: { x: 10e-5, y: 22e-5 },
+    about: 'Cool grey smoke with a hint of violet, pinned to the top-left corner. A fixed soft light sits in that corner, and the smoke moves slowly through it. The rest of the page stays plain graphite.' },
   { key: 'nightfall', name: 'Nightfall', colors: ['#0F1011', '#24306B', '#0F4A5A', '#4B2370'], freq: { x: 14e-5, y: 29e-5 },
     about: 'Deep indigo, teal and plum moving slowly over near-black. The calmest option. The color split shows as faint cyan and magenta edges where colors meet.' },
   { key: 'prism', name: 'Prism', colors: ['#0F1011', '#6A2BB8', '#0F7C99', '#B0287A'], freq: { x: 26e-5, y: 50e-5 },
     about: 'Brighter violet, cyan and magenta, with about twice the default frequency, so the shapes fold into more bands. The color split is easiest to see here. The boldest option.' },
-  { key: 'smoke', name: 'Smoke', colors: ['#0F1011', '#2A2D33', '#3A3F4A', '#2C2747'], freq: { x: 10e-5, y: 22e-5 },
-    about: 'Almost grey. Cool smoke that moves under the glass, with only a hint of violet. The color split adds a thin rainbow edge to the smoke.' },
 ];
 
 document.getElementById('stage').innerHTML = `<section class="look"><h2 id="lookName"></h2><p id="lookAbout"></p></section>
@@ -194,7 +198,7 @@ document.getElementById('stage').innerHTML = `<section class="look"><h2 id="look
     <figure class="shot"><div class="phone"><div class="app">${inv()}</div></div><figcaption>Inventory · Kind</figcaption></figure>
   </div></div>`;
 
-const idx = () => Math.max(0, LOOKS.findIndex(l => l.key === (location.hash || '#nightfall').slice(1).toLowerCase()));
+const idx = () => Math.max(0, LOOKS.findIndex(l => l.key === (location.hash || '#smoke').slice(1).toLowerCase()));
 const state = { speed: 0.6, playing: true };
 const grads = [];
 let ready = false;
@@ -228,6 +232,7 @@ import('https://cdn.jsdelivr.net/npm/@mesh-gradient/core@2.0.2/dist/index.mjs').
 const go = step => { location.hash = LOOKS[(idx() + step + LOOKS.length) % LOOKS.length].key; };
 document.getElementById('prev').addEventListener('click', () => go(-1));
 document.getElementById('next').addEventListener('click', () => go(1));
+document.getElementById('glow').addEventListener('input', e => document.querySelectorAll('.app').forEach(a => a.style.setProperty('--glow', e.target.value + 'px')));
 document.getElementById('split').addEventListener('input', e => setSplit(+e.target.value));
 document.getElementById('speed').addEventListener('input', e => { state.speed = +e.target.value; grads.forEach(g => g.setAnimationSpeed(state.speed)); });
 const playBtn = document.getElementById('play');

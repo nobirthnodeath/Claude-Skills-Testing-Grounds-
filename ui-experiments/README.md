@@ -34,3 +34,7 @@ Each direction shows Home (quiet week), Home (9 expired), the sort screen, and I
 ## Round 8
 
 - `prototype-mesh-gradient.html`: Graphite with a moving background from `@mesh-gradient/core` 2.0.2 (loaded from jsDelivr). An SVG filter adds the chromatic-aberration color split. Three palettes: Nightfall, Prism, Smoke (`#nightfall`, `#prism`, `#smoke`). The bottom bar has palette, color split, speed and pause controls.
+
+## Round 9
+
+- `prototype-mesh-gradient.html` updated: the moving gradient is masked to the top-left corner over a fixed soft light. Smoke is the default palette. A glow size slider is added. "Our kitchen" is removed from Home.
