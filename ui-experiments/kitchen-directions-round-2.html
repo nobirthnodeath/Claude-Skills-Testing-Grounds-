@@ -1,0 +1,483 @@
+<title>Kitchen App Directions, Round 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Gabarito:wght@500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: presentation page. A feedback recap, then one band per direction: short brief + a sideways row of four phones.
+   Page chrome follows the viewer theme. Phone mockups use fixed colors on purpose: they are the designs under review. */
+:root {
+  --page: #F2F3EF; --page-ink: #1C1F1D; --page-muted: #5E6560; --page-rule: #D6D9D5; --page-card: #FFFFFF;
+  --f-page: "Instrument Sans", system-ui, sans-serif; --f-page-mono: "Geist Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #171614; --page-ink: #EDEAE5; --page-muted: #A29C93; --page-rule: #2F2C28; --page-card: #211F1C; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #171614; --page-ink: #EDEAE5; --page-muted: #A29C93; --page-rule: #2F2C28; --page-card: #211F1C; color-scheme: dark }
+
+body { background: var(--page); color: var(--page-ink); font-family: var(--f-page); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1640px; margin: 0 auto; padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.intro { display: grid; gap: 10px; margin-bottom: 36px; }
+.intro > * { max-width: 70ch; }
+.intro h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.intro p { margin: 0; color: var(--page-muted); }
+.eyebrow { font-family: var(--f-page-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--page-muted); }
+.heard { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 980px !important; margin: 8px 0 0; padding: 0; list-style: none; }
+.heard li { background: var(--page-card); border: 1px solid var(--page-rule); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.heard b { display: block; font-family: var(--f-page-mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--page-muted); margin-bottom: 2px; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.toc a { font-family: var(--f-page-mono); font-size: 13px; color: var(--page-ink); text-decoration: none; border: 1px solid var(--page-rule); background: var(--page-card); padding: 6px 12px; border-radius: 999px; }
+.toc a:hover, .toc a:focus-visible { border-color: var(--page-ink); }
+
+.direction { border-top: 1px solid var(--page-rule); padding-block: 36px; display: grid; gap: 24px; }
+.brief { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (min-width: 900px) { .brief { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; } }
+.brief h2 { margin: 4px 0 6px; font-size: clamp(24px, 3vw, 30px); letter-spacing: -0.015em; line-height: 1.15; }
+.brief p { margin: 0; color: var(--page-muted); max-width: 62ch; }
+.specs { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 14px; margin: 0; }
+.specs dt { font-family: var(--f-page-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--page-muted); padding-top: 2px; }
+.specs dd { margin: 0; }
+.swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+.sw { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); }
+
+.rail { overflow-x: auto; padding-bottom: 12px; scrollbar-width: thin; }
+.phones { display: flex; gap: 24px; width: max-content; }
+figure.shot { margin: 0; display: grid; gap: 10px; }
+figcaption { font-family: var(--f-page-mono); font-size: 12px; color: var(--page-muted); letter-spacing: .03em; }
+.phone { width: 360px; height: 760px; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 0 0 8px #0E0F0E, 0 24px 48px -20px rgba(0,0,0,.35); margin: 8px; }
+.screen { position: absolute; inset: 0; overflow: hidden; }
+.screen > .scroll { position: absolute; inset: 0; padding-bottom: 110px; }
+.status { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; font: 600 14px/1 -apple-system, "Instrument Sans", sans-serif; }
+.status .ind { display: flex; gap: 5px; align-items: center; }
+.status .ind i { display: block; width: 16px; height: 9px; border-radius: 2px; background: currentColor; opacity: .85; }
+.status .ind i:first-child { width: 14px; height: 8px; border-radius: 1px; opacity: .6; }
+.status .ind i:last-child { width: 22px; height: 10px; border-radius: 3px; }
+svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: no-preference) { .phone { transition: transform .25s ease; } .phone:hover { transform: translateY(-4px); } }
+
+/* =========================================================
+   DIRECTION A — FRESH PICKS
+   Market Stall, refined. One green, one yellow, one red.
+   Food groups get soft tinted icon tiles instead of loud colors.
+   ========================================================= */
+.da { --bg: #F1F6EC; --card: #FFFFFF; --ink: #17321F; --mut: #627668; --leaf: #2E9D5A; --leaf-t: #DDF0E1; --tomato: #E5482F; --tomato-t: #FDE3DC; --sun: #FFCE45; --line: #E5ECDF;
+  --t-p: #DDF0E1; --t-d: #DDEBF7; --t-m: #FBE3E8; --t-l: #FBEBD3; --t-g: #F2E8D8;
+  --c-p: #2E8B50; --c-d: #3576B5; --c-m: #C04A68; --c-l: #B5741F; --c-g: #8C6A3A;
+  --fd: "Bricolage Grotesque", "Figtree", sans-serif; --fb: "Figtree", system-ui, sans-serif;
+  background: var(--bg); color: var(--ink); font-family: var(--fb); }
+.da .status { color: var(--ink); }
+.da .head { display: flex; justify-content: space-between; align-items: end; padding: 12px 20px 14px; }
+.da .head small { display: block; font-size: 14px; font-weight: 600; color: var(--mut); margin-bottom: 4px; }
+.da .head h3 { font: 800 32px/1 var(--fd); letter-spacing: -0.03em; margin: 0; }
+.da .head .link { font-weight: 600; font-size: 14px; color: var(--mut); }
+.da .stack { display: grid; gap: 12px; padding: 0 14px; }
+.da .card { background: var(--card); border-radius: 24px; padding: 16px 18px; }
+.da .alert { background: var(--card); border-radius: 24px; padding: 14px 14px 14px 16px; display: flex; align-items: center; gap: 12px; }
+.da .alert .badge { width: 44px; height: 44px; border-radius: 15px; background: var(--tomato); color: #fff; display: grid; place-items: center; font: 800 20px/1 var(--fd); flex: none; }
+.da .alert .tx { flex: 1; min-width: 0; }
+.da .alert b { display: block; font: 800 18px/1.15 var(--fd); }
+.da .alert span { font-size: 13.5px; color: var(--mut); }
+.da .alert .go { background: var(--tomato-t); color: var(--tomato); font-weight: 700; font-size: 14px; padding: 10px 14px; border-radius: 999px; white-space: nowrap; }
+.da .toss { display: grid; gap: 12px; }
+.da .lbl { font-size: 13px; font-weight: 600; color: var(--mut); }
+.da .big { font: 800 40px/0.95 var(--fd); letter-spacing: -0.03em; }
+.da .big small { font-size: 17px; font-weight: 600; letter-spacing: 0; color: var(--mut); margin-left: 4px; }
+.da .barrow { display: grid; grid-template-columns: 70px 1fr 36px; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--mut); font-variant-numeric: tabular-nums; }
+.da .barrow .t { height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.da .barrow .t i { display: block; height: 100%; border-radius: 99px; }
+.da .bars { display: grid; gap: 6px; }
+.da .foot { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; }
+.da .foot a { color: var(--leaf); }
+.da .cheer { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; font-weight: 700; background: var(--leaf-t); color: var(--leaf); padding: 5px 10px; border-radius: 99px; justify-self: start; }
+.da .cook { background: var(--sun); border-radius: 24px; padding: 18px; display: grid; gap: 12px; position: relative; overflow: hidden; }
+.da .cook h4 { font: 800 23px/1 var(--fd); margin: 0; letter-spacing: -0.02em; }
+.da .cook p { margin: 0; font-size: 14px; line-height: 1.4; max-width: 25ch; }
+.da .cook .cta { justify-self: start; background: var(--ink); color: #fff; font-weight: 700; font-size: 15px; padding: 13px 18px; border-radius: 999px; }
+.da .cook .pot { position: absolute; right: 14px; bottom: 14px; width: 84px; height: 84px; }
+.da .sec-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.da .sec-h h4 { font: 800 19px/1 var(--fd); margin: 0; }
+.da .tag { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 99px; background: var(--bg); }
+.da .row { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 12px; padding: 8px 0; }
+.da .row + .row { border-top: 1px solid var(--line); }
+.da .tile { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; }
+.da .tile svg { width: 18px; height: 18px; }
+.da .nm { font-weight: 600; font-size: 15.5px; line-height: 1.2; }
+.da .nm small { display: block; font-size: 12px; color: var(--mut); font-weight: 500; }
+.da .when { font-size: 13px; font-weight: 600; color: var(--mut); font-variant-numeric: tabular-nums; }
+.da .when.soon { color: var(--tomato); font-weight: 700; }
+.da .when.today { background: var(--tomato-t); color: var(--tomato); font-weight: 700; padding: 4px 9px; border-radius: 99px; }
+.da .nav { position: absolute; left: 14px; right: 14px; bottom: 22px; height: 64px; background: var(--ink); color: #A9C4B3; border-radius: 999px; display: flex; align-items: center; justify-content: space-around; padding: 0 10px; }
+.da .nav .it { display: grid; justify-items: center; gap: 2px; font-size: 11px; font-weight: 600; }
+.da .nav .it.on { color: #fff; }
+.da .nav .add { width: 48px; height: 48px; border-radius: 50%; background: var(--sun); color: var(--ink); display: grid; place-items: center; }
+.da .seg { display: flex; gap: 6px; padding: 0 14px 12px; }
+.da .seg span { flex: 1; text-align: center; font-weight: 700; font-size: 14px; padding: 10px 0; border-radius: 99px; background: var(--card); color: var(--mut); }
+.da .seg span.on { background: var(--ink); color: #fff; }
+.da .grp-h { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.da .grp-h h4 { font: 800 19px/1 var(--fd); margin: 0; flex: 1; }
+.da .grp-h .cnt { font: 700 13px/1 var(--fb); padding: 6px 10px; border-radius: 99px; }
+.da .back { font-weight: 700; font-size: 14px; color: var(--leaf); padding: 8px 20px 0; }
+.da .sheet-top { padding: 4px 20px 14px; display: grid; gap: 6px; }
+.da .sheet-top h3 { font: 800 28px/1.05 var(--fd); margin: 0; letter-spacing: -0.03em; }
+.da .sheet-top p { margin: 0; color: var(--mut); font-size: 14px; }
+.da .choice { display: flex; gap: 4px; }
+.da .choice span { font-size: 13px; font-weight: 700; padding: 8px 11px; border-radius: 99px; background: var(--bg); color: var(--mut); }
+.da .choice .u { background: var(--leaf); color: #fff; }
+.da .choice .t { background: var(--tomato); color: #fff; }
+.da .done { position: absolute; left: 14px; right: 14px; bottom: 26px; background: var(--ink); color: #fff; border-radius: 999px; padding: 18px; text-align: center; font-weight: 700; font-size: 16px; }
+
+/* =========================================================
+   DIRECTION B — SORBET
+   Soft pastel color blocks, rounded type, sticker labels.
+   Sorting expired items becomes one card at a time.
+   ========================================================= */
+.db { --bg: #FFF8F1; --card: #FFFFFF; --ink: #2B2340; --mut: #6F6787; --peach: #FFD9C7; --peach-d: #E2552F; --pist: #D7EFC6; --pist-d: #3E7F2A; --lilac: #E5DBFF; --lilac-d: #5B3FC4; --butter: #FFEDA8; --line: #F0E8E0;
+  --fd: "Fredoka", "Nunito", sans-serif; --fb: "Nunito", system-ui, sans-serif;
+  background: var(--bg); color: var(--ink); font-family: var(--fb); }
+.db .status { color: var(--ink); }
+.db .head { padding: 10px 20px 14px; display: flex; justify-content: space-between; align-items: center; }
+.db .head h3 { margin: 0; font: 600 32px/1 var(--fd); letter-spacing: -0.01em; }
+.db .head .link { font: 500 14px/1 var(--fd); color: var(--mut); background: var(--card); padding: 9px 14px; border-radius: 99px; }
+.db .stack { display: grid; gap: 12px; padding: 0 14px; }
+.db .blk { border-radius: 28px; padding: 18px; }
+.db .blk.peach { background: var(--peach); }
+.db .blk.pist { background: var(--pist); }
+.db .blk.lilac { background: var(--lilac); }
+.db .blk.white { background: var(--card); }
+.db .alert { display: flex; align-items: center; gap: 14px; }
+.db .alert .tx { flex: 1; min-width: 0; }
+.db .alert b { display: block; font: 600 20px/1.1 var(--fd); }
+.db .alert span { font-size: 13.5px; font-weight: 600; opacity: .75; }
+.db .alert .go { background: var(--ink); color: #fff; font: 500 15px/1 var(--fd); padding: 12px 16px; border-radius: 99px; white-space: nowrap; }
+.db .stickers { display: flex; margin-right: -4px; }
+.db .stk { width: 38px; height: 38px; border-radius: 50%; border: 3px solid var(--peach); margin-left: -10px; display: grid; place-items: center; font: 600 13px/1 var(--fd); }
+.db .stk:first-child { margin-left: 0; }
+.db .tossed { display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; align-items: end; }
+.db .tossed .lbl { grid-column: 1 / -1; font-weight: 700; font-size: 13px; opacity: .8; }
+.db .tossed .big { font: 600 36px/1 var(--fd); }
+.db .tossed .big small { font-size: 17px; font-weight: 500; opacity: .75; }
+.db .tossed .typ { text-align: right; font-size: 13px; font-weight: 700; opacity: .8; line-height: 1.3; }
+.db .tossed .typ a { display: block; color: var(--pist-d); font-family: var(--fd); font-weight: 500; font-size: 14px; }
+.db .jar { grid-column: 1 / -1; display: flex; gap: 4px; }
+.db .jar i { flex: 1; height: 12px; border-radius: 99px; background: rgba(43,35,64,.12); }
+.db .jar i.f { background: var(--pist-d); }
+.db .cook { display: grid; gap: 10px; }
+.db .cook h4 { margin: 0; font: 600 22px/1.05 var(--fd); }
+.db .cook p { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.4; opacity: .85; }
+.db .cook .cta { background: var(--lilac-d); color: #fff; font: 500 16px/1 var(--fd); padding: 15px; text-align: center; border-radius: 99px; }
+.db .hl { background: #fff; padding: 1px 7px; border-radius: 99px; font-weight: 800; color: var(--lilac-d); }
+.db .sec-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.db .sec-h h4 { margin: 0; font: 600 20px/1 var(--fd); }
+.db .tag { font: 500 13px/1 var(--fd); padding: 6px 10px; border-radius: 99px; background: var(--butter); }
+.db .row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 10px 0; font-size: 16px; font-weight: 700; }
+.db .row + .row { border-top: 2px dotted var(--line); }
+.db .st { font: 500 13px/1 var(--fd); padding: 6px 11px; border-radius: 99px; background: var(--line); color: var(--mut); white-space: nowrap; }
+.db .st.today { background: var(--peach-d); color: #fff; transform: rotate(-4deg); box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+.db .st.soon { background: var(--peach); color: var(--peach-d); }
+.db .st.ok { background: var(--pist); color: var(--pist-d); }
+.db .nav { position: absolute; left: 0; right: 0; bottom: 0; height: 88px; background: var(--card); border-radius: 28px 28px 0 0; display: flex; justify-content: space-around; padding-top: 12px; box-shadow: 0 -6px 20px rgba(43,35,64,.06); }
+.db .nav .it { display: grid; justify-items: center; gap: 4px; font: 500 11.5px/1 var(--fd); color: var(--mut); align-content: start; }
+.db .nav .it svg { padding: 5px 14px; box-sizing: content-box; border-radius: 99px; }
+.db .nav .it.on { color: var(--ink); }
+.db .nav .it.on svg { background: var(--butter); }
+.db .seg { display: flex; gap: 6px; padding: 0 14px 12px; }
+.db .seg span { flex: 1; text-align: center; font: 500 15px/1 var(--fd); padding: 11px 0; border-radius: 99px; background: var(--card); color: var(--mut); }
+.db .seg span.on { background: var(--ink); color: #fff; }
+.db .grp-h { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: 20px; margin: -6px -6px 4px; }
+.db .grp-h h4 { margin: 0; font: 600 19px/1 var(--fd); }
+.db .grp-h span { font: 600 15px/1 var(--fd); width: 30px; height: 30px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+.db .back { font: 500 15px/1 var(--fd); color: var(--mut); padding: 10px 20px 0; }
+.db .prog { display: flex; gap: 5px; padding: 0 20px 6px; }
+.db .prog i { flex: 1; height: 6px; border-radius: 99px; background: var(--line); }
+.db .prog i.f { background: var(--ink); }
+.db .tcount { padding: 10px 20px 14px; font: 500 15px/1 var(--fd); color: var(--mut); }
+.db .deck { position: relative; margin: 0 22px; height: 400px; }
+.db .deck .c { position: absolute; inset: 0; border-radius: 32px; }
+.db .deck .c.b2 { background: var(--lilac); transform: rotate(5deg) translate(10px, 8px); }
+.db .deck .c.b1 { background: var(--pist); transform: rotate(-3deg) translate(-6px, 4px); }
+.db .deck .c.top { background: var(--peach); display: grid; align-content: center; justify-items: center; gap: 10px; text-align: center; padding: 24px; }
+.db .deck .bowl { width: 120px; height: 120px; border-radius: 50%; background: #fff; display: grid; place-items: center; color: var(--peach-d); }
+.db .deck .bowl svg { width: 60px; height: 60px; stroke-width: 1.6; }
+.db .deck h3 { margin: 6px 0 0; font: 600 30px/1.05 var(--fd); }
+.db .deck p { margin: 0; font-weight: 700; opacity: .7; }
+.db .deck .q { font: 500 17px/1 var(--fd); margin-top: 6px; }
+.db .bigbtns { position: absolute; left: 22px; right: 22px; bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.db .bigbtns span { border-radius: 99px; padding: 18px 0; text-align: center; font: 600 17px/1 var(--fd); }
+.db .bigbtns .t { background: var(--card); color: var(--peach-d); box-shadow: inset 0 0 0 2px var(--peach); }
+.db .bigbtns .u { background: var(--ink); color: #fff; }
+.db .skip { position: absolute; left: 0; right: 0; bottom: 96px; text-align: center; font: 500 14px/1 var(--fd); color: var(--mut); }
+
+/* =========================================================
+   DIRECTION C — EVENING KITCHEN (warm dark)
+   Market Stall’s friendliness at night. Espresso and cocoa
+   surfaces, butter-yellow light, tomato for urgency.
+   ========================================================= */
+.dc { --bg: #1C1512; --card: #2A201B; --card2: #33271F; --ink: #F7EDE2; --mut: #B9A797; --butter: #FFCF6B; --tomato: #FF7B5C; --sage: #A9D18E; --line: #3B2E26; --glow: rgba(255, 207, 107, .14);
+  --fd: "Gabarito", "Figtree", sans-serif; --fb: "Figtree", system-ui, sans-serif;
+  background: radial-gradient(90% 45% at 20% -5%, #3A2618 0%, transparent 70%), var(--bg); color: var(--ink); font-family: var(--fb); }
+.dc .status { color: var(--ink); }
+.dc .head { padding: 10px 20px 16px; display: flex; justify-content: space-between; align-items: end; }
+.dc .head small { display: block; font-size: 14px; color: var(--butter); font-weight: 600; margin-bottom: 4px; }
+.dc .head h3 { margin: 0; font: 800 32px/1 var(--fd); letter-spacing: -0.02em; }
+.dc .head .link { font-size: 14px; font-weight: 600; color: var(--mut); }
+.dc .stack { display: grid; gap: 12px; padding: 0 14px; }
+.dc .card { background: var(--card); border-radius: 24px; padding: 16px 18px; }
+.dc .alert { display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 24px; padding: 14px 14px 14px 16px; box-shadow: inset 0 0 0 1.5px rgba(255,123,92,.45); }
+.dc .alert .tx { flex: 1; min-width: 0; }
+.dc .alert b { display: block; font: 700 18px/1.15 var(--fd); color: var(--tomato); }
+.dc .alert span { font-size: 13.5px; color: var(--mut); }
+.dc .alert .go { background: var(--tomato); color: #2A110A; font-weight: 700; font-size: 14px; padding: 10px 14px; border-radius: 99px; white-space: nowrap; }
+.dc .lbl { font-size: 13px; font-weight: 600; color: var(--mut); }
+.dc .toss { display: grid; gap: 12px; }
+.dc .big { font: 800 38px/0.95 var(--fd); letter-spacing: -0.02em; }
+.dc .big small { font-size: 17px; font-weight: 600; color: var(--mut); letter-spacing: 0; margin-left: 4px; }
+.dc .plates { display: flex; gap: 6px; align-items: center; }
+.dc .plates i { width: 22px; height: 22px; border-radius: 50%; border: 2px dashed #5A4739; }
+.dc .plates i.f { border: 0; background: var(--tomato); box-shadow: inset 0 0 0 5px #C95A3F; }
+.dc .plates span { font-size: 12px; color: var(--mut); font-weight: 600; margin-left: 6px; }
+.dc .foot { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--mut); }
+.dc .foot a { color: var(--butter); }
+.dc .cheer { justify-self: start; font-size: 12.5px; font-weight: 700; color: var(--sage); background: rgba(169,209,142,.14); padding: 5px 10px; border-radius: 99px; }
+.dc .cook { background: linear-gradient(160deg, #4A3420 0%, #3A2919 100%); border-radius: 24px; padding: 18px; display: grid; gap: 12px; box-shadow: inset 0 0 0 1px rgba(255,207,107,.22); position: relative; overflow: hidden; }
+.dc .cook::after { content: ""; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(255,207,107,.35), transparent 65%); }
+.dc .cook h4 { margin: 0; font: 800 22px/1 var(--fd); color: var(--butter); }
+.dc .cook p { margin: 0; font-size: 14px; color: #E6D5C3; line-height: 1.4; max-width: 30ch; }
+.dc .cook .cta { justify-self: start; background: var(--butter); color: #2B1D0E; font-weight: 700; font-size: 15px; padding: 13px 18px; border-radius: 99px; position: relative; z-index: 1; }
+.dc .sec-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.dc .sec-h h4 { margin: 0; font: 700 19px/1 var(--fd); }
+.dc .tag { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 99px; background: var(--card2); color: var(--butter); }
+.dc .row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 10px 0; }
+.dc .row + .row { border-top: 1px solid var(--line); }
+.dc .nm { font-size: 15.5px; font-weight: 600; line-height: 1.2; }
+.dc .nm small { display: block; font-size: 12px; color: var(--mut); font-weight: 500; }
+.dc .fr { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--mut); font-variant-numeric: tabular-nums; }
+.dc .dots { display: flex; gap: 3px; }
+.dc .dots i { width: 7px; height: 7px; border-radius: 50%; background: #4A3A30; }
+.dc .dots i.f { background: var(--sage); }
+.dc .dots.w i.f { background: var(--butter); }
+.dc .dots.h i.f { background: var(--tomato); }
+.dc .fr.h { color: var(--tomato); }
+.dc .nav { position: absolute; left: 0; right: 0; bottom: 0; height: 86px; background: #231A16; border-top: 1px solid var(--line); display: flex; justify-content: space-around; padding-top: 12px; }
+.dc .nav .it { display: grid; justify-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--mut); align-content: start; }
+.dc .nav .it.on { color: var(--butter); }
+.dc .nav .add { width: 44px; height: 44px; border-radius: 50%; background: var(--butter); color: #2B1D0E; display: grid; place-items: center; margin-top: -4px; }
+.dc .seg { display: flex; gap: 4px; margin: 0 14px 12px; background: var(--card); border-radius: 99px; padding: 4px; }
+.dc .seg span { flex: 1; text-align: center; font-size: 14px; font-weight: 700; padding: 9px 0; border-radius: 99px; color: var(--mut); }
+.dc .seg span.on { background: var(--butter); color: #2B1D0E; }
+.dc .grp-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.dc .grp-h h4 { margin: 0; font: 700 19px/1 var(--fd); }
+.dc .grp-h span { font-size: 13px; font-weight: 700; color: var(--butter); }
+.dc .back { font-weight: 700; font-size: 14px; color: var(--butter); padding: 8px 20px 0; }
+.dc .sheet-top { padding: 6px 20px 14px; display: grid; gap: 6px; }
+.dc .sheet-top h3 { margin: 0; font: 800 28px/1.05 var(--fd); letter-spacing: -0.02em; }
+.dc .sheet-top p { margin: 0; color: var(--mut); font-size: 14px; }
+.dc .rb { display: flex; gap: 8px; }
+.dc .rb span { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--card2); color: var(--mut); }
+.dc .rb span svg { width: 18px; height: 18px; }
+.dc .rb .u { background: var(--sage); color: #1B2A12; }
+.dc .rb .t { background: var(--tomato); color: #2A110A; }
+.dc .legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--mut); font-weight: 600; padding: 0 20px 10px; }
+.dc .legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dc .legend i { width: 10px; height: 10px; border-radius: 50%; }
+.dc .done { position: absolute; left: 14px; right: 14px; bottom: 26px; background: var(--butter); color: #2B1D0E; border-radius: 99px; padding: 18px; text-align: center; font-weight: 700; font-size: 16px; }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Visual exploration · Round 2</span>
+    <h1>Kitchen app: three easygoing directions</h1>
+    <p>All three build on what you liked in Market Stall. Features and tasks stay the same. Each direction shows Home (quiet week), Home (9 expired), the sort screen, and Inventory.</p>
+    <ul class="heard">
+      <li><b>Keep</b>Market Stall’s light-hearted, friendly feel</li>
+      <li><b>Drop</b>The utilitarian Label Maker look</li>
+      <li><b>Change</b>Any dark mode should be warm, not cold blue</li>
+    </ul>
+    <nav class="toc" aria-label="Directions">
+      <a href="#fresh-picks">A · Fresh Picks</a>
+      <a href="#sorbet">B · Sorbet</a>
+      <a href="#evening-kitchen">C · Evening Kitchen</a>
+    </nav>
+  </header>
+  <main id="directions"></main>
+</div>
+
+<script>
+const IC = {
+  home: '<svg class="ic" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg>',
+  add: '<svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  list: '<svg class="ic" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 6l1.5 1.5L7.5 5M4 12h3v3H4z"/></svg>',
+  inv: '<svg class="ic" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 10h14M8 6v2M8 13v3"/></svg>',
+  gear: '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+  check: '<svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  bin: '<svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+};
+// Food group icons
+const FG = {
+  p: '<svg class="ic" viewBox="0 0 24 24"><path d="M5 19C5 11 11 5 19 5c0 8-6 14-14 14zM5 19l7-7"/></svg>',
+  d: '<svg class="ic" viewBox="0 0 24 24"><path d="M8 3h8v3l2 3v12H6V9l2-3zM6 12h12"/></svg>',
+  m: '<svg class="ic" viewBox="0 0 24 24"><circle cx="14.5" cy="9.5" r="5.5"/><path d="M10.5 13.5L5 19M4 17l3 3"/></svg>',
+  l: '<svg class="ic" viewBox="0 0 24 24"><path d="M3 11h18a9 9 0 0 1-18 0zM9 7c0-2 2-2 2-4M14 7c0-2 2-2 2-4"/></svg>',
+  g: '<svg class="ic" viewBox="0 0 24 24"><path d="M5 10a4 4 0 0 1 2-6h10a4 4 0 0 1 2 6v10H5z"/></svg>',
+};
+const status = '<div class="status"><span>6:12</span><span class="ind"><i></i><i></i><i></i></span></div>';
+
+// Shared content, taken from the current app screens
+const soon = [
+  { n: 'Cherry tomatoes', d: 0, k: 'p' }, { n: 'Celery', d: 2, k: 'p' }, { n: 'Cabbage', d: 4, k: 'p' },
+  { n: 'Chicken thighs', d: 4, k: 'm' }, { n: 'Cilantro', d: 5, k: 'p' },
+];
+const expired = [
+  { n: 'Leftover curry', w: 'Fridge · 2 days ago', k: 'l', a: 'used' }, { n: 'Milk', w: 'Fridge · yesterday', k: 'd', a: 'used' },
+  { n: 'Greek yogurt', w: 'Fridge · 3 days ago', k: 'd', a: 'toss' }, { n: 'Spinach', w: 'Crisper · yesterday', k: 'p' },
+  { n: 'Strawberries', w: 'Fridge · today', k: 'p' }, { n: 'Hummus', w: 'Fridge · 4 days ago', k: 'l' },
+  { n: 'Flour tortillas', w: 'Pantry · yesterday', k: 'g' }, { n: 'Deli turkey', w: 'Fridge · 2 days ago', k: 'm' },
+  { n: 'Sour cream', w: 'Fridge · today', k: 'd' },
+];
+const produce = [['Bananas', 3], ['Cherry tomatoes', 3], ['Blueberries', 5], ['Cabbage', 5], ['Celery', 5], ['Grapes', 5], ['Lettuce', 5], ['Apples', 28], ['Baby carrots', 28]];
+const dairy = [['Milk', 5], ['Plain yogurt', 6]];
+const days = d => d === 0 ? 'Today' : d >= 14 ? `${Math.round(d / 7)} weeks` : `${d} day${d > 1 ? 's' : ''}`;
+const toss = { quiet: { n: 2, usd: 9, tn: 5, tusd: 22 }, nine: { n: 1, usd: 3, tn: 4, tusd: 18 } };
+
+/* ---------------- A: Fresh Picks ---------------- */
+const aTile = k => `<span class="tile" style="background:var(--t-${k});color:var(--c-${k})">${FG[k]}</span>`;
+const aWhen = d => d === 0 ? '<span class="when today">Today</span>' : `<span class="when ${d <= 2 ? 'soon' : ''}">${days(d)}</span>`;
+const aNav = on => `<nav class="nav">
+  <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span><span class="it">${IC.list}List</span>
+  <span class="add" aria-label="Add">${IC.add}</span>
+  <span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span><span class="it">${IC.gear}Settings</span></nav>`;
+const aPot = '<svg class="pot" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="46" r="34" fill="#fff" opacity=".55"/><path d="M18 44h48v6a18 18 0 0 1-18 18H36a18 18 0 0 1-18-18z" fill="#17321F"/><rect x="14" y="40" width="56" height="6" rx="3" fill="#17321F"/><circle cx="34" cy="32" r="7" fill="#E5482F"/><circle cx="47" cy="30" r="6" fill="#E5482F"/><path d="M52 34c4-10 12-12 14-12-2 6-6 12-14 12z" fill="#2E9D5A"/></svg>';
+const aHome = mode => { const t = toss[mode]; return `<div class="scroll">${status}
+  <div class="head"><div><small>Good evening</small><h3>Our kitchen</h3></div></div>
+  <div class="stack">
+  ${mode === 'nine' ? `<section class="alert"><span class="badge">9</span><span class="tx"><b>Things expired</b><span>Leftover curry, milk + 7 more</span></span><span class="go">Sort</span></section>` : ''}
+  <section class="card toss">${mode === 'quiet' ? '<span class="cheer">Nice. Less waste than usual</span>' : ''}<span class="lbl">Tossed this week</span>
+    <div class="big">${t.n} thing${t.n > 1 ? 's' : ''}<small>· about $${t.usd}</small></div>
+    <div class="bars"><div class="barrow"><span>This week</span><span class="t"><i style="width:${t.usd / t.tusd * 100}%;background:var(--leaf)"></i></span><span>$${t.usd}</span></div>
+    <div class="barrow"><span>Typical</span><span class="t"><i style="width:100%;background:#CFDDD2"></i></span><span>$${t.tusd}</span></div></div>
+    <div class="foot"><span style="color:var(--mut)">Typically ${t.tn} things</span><a>History →</a></div></section>
+  <section class="cook">${aPot}<h4>Cook something</h4><p>4 dishes use the cherry tomatoes and celery you should get through this week.</p><span class="cta">What could I make?</span></section>
+  <section class="card"><div class="sec-h"><h4>Use these soon</h4><span class="tag">Est. $14</span></div>
+  ${soon.map(s => `<div class="row">${aTile(s.k)}<span class="nm">${s.n}</span>${aWhen(s.d)}</div>`).join('')}</section>
+  </div></div>${aNav('home')}`; };
+const aTriage = () => `<div class="scroll">${status}
+  <div class="back">← Home</div>
+  <div class="sheet-top"><h3>What happened to these?</h3><p>Tap Used or Tossed. 6 left to sort.</p></div>
+  <div class="stack"><section class="card" style="padding:6px 14px">
+  ${expired.slice(0, 8).map(e => `<div class="row">${aTile(e.k)}<span class="nm">${e.n}<small>${e.w}</small></span>
+    <span class="choice"><span class="${e.a === 'used' ? 'u' : ''}">Used</span><span class="${e.a === 'toss' ? 't' : ''}">Tossed</span></span></div>`).join('')}
+  </section></div></div><div class="done">Save · 3 of 9 sorted</div>`;
+const aInv = () => `<div class="scroll">${status}
+  <div class="head"><h3>Inventory</h3><span class="link">Invite</span></div>
+  <div class="seg"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
+  <div class="stack"><section class="card">
+  <div class="grp-h">${aTile('p')}<h4>Produce</h4><span class="cnt" style="background:var(--t-p);color:var(--c-p)">9</span></div>
+  ${produce.map(([n, d]) => `<div class="row" style="grid-template-columns:1fr auto"><span class="nm">${n}</span>${aWhen(d)}</div>`).join('')}</section>
+  <section class="card"><div class="grp-h">${aTile('d')}<h4>Dairy &amp; eggs</h4><span class="cnt" style="background:var(--t-d);color:var(--c-d)">5</span></div>
+  ${dairy.map(([n, d]) => `<div class="row" style="grid-template-columns:1fr auto"><span class="nm">${n}</span>${aWhen(d)}</div>`).join('')}</section>
+  </div></div>${aNav('inv')}`;
+
+/* ---------------- B: Sorbet ---------------- */
+const bSt = d => d === 0 ? '<span class="st today">today!</span>' : d <= 3 ? `<span class="st soon">${days(d)}</span>` : d >= 14 ? `<span class="st ok">${days(d)}</span>` : `<span class="st">${days(d)}</span>`;
+const bNav = on => `<nav class="nav">
+  <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span><span class="it">${IC.add}Add</span>
+  <span class="it">${IC.list}List</span><span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span></nav>`;
+const bHome = mode => { const t = toss[mode]; return `<div class="scroll">${status}
+  <div class="head"><h3>Our kitchen</h3><span class="link">Settings</span></div>
+  <div class="stack">
+  ${mode === 'nine' ? `<section class="blk peach alert"><span class="tx"><b>9 things expired</b><span>Leftover curry, milk + 7 more</span></span><span class="go">Sort</span></section>` : ''}
+  <section class="blk pist tossed"><span class="lbl">Tossed this week</span>
+    <span class="big">${t.n} thing${t.n > 1 ? 's' : ''} <small>· $${t.usd}</small></span><span class="typ">Usually ${t.tn}<a>History →</a></span>
+    <span class="jar">${Array.from({ length: t.tn }, (_, i) => `<i class="${i < t.n ? 'f' : ''}"></i>`).join('')}</span></section>
+  <section class="blk lilac cook"><h4>Cook something</h4><p>4 dishes use the <span class="hl">cherry tomatoes</span> and <span class="hl">celery</span> you should get through this week.</p><span class="cta">What could I make?</span></section>
+  <section class="blk white"><div class="sec-h"><h4>Use these soon</h4><span class="tag">≈ $14</span></div>
+  ${soon.map(s => `<div class="row"><span>${s.n}</span>${bSt(s.d)}</div>`).join('')}</section>
+  </div></div>${bNav('home')}`; };
+const bTriage = () => `<div class="scroll">${status}
+  <div class="back">← Home</div>
+  <div class="tcount">3 of 9 sorted</div>
+  <div class="prog">${Array.from({ length: 9 }, (_, i) => `<i class="${i < 3 ? 'f' : ''}"></i>`).join('')}</div>
+  <div style="height:26px"></div>
+  <div class="deck"><div class="c b2"></div><div class="c b1"></div>
+    <div class="c top"><span class="bowl">${FG.p}</span><h3>Spinach</h3><p>Crisper · expired yesterday</p><span class="q">Did it get used?</span></div></div>
+  </div><div class="skip">Not sure? Skip for now</div>
+  <div class="bigbtns"><span class="t">Tossed it</span><span class="u">Used it</span></div>`;
+const bInv = () => `<div class="scroll">${status}
+  <div class="head"><h3>Inventory</h3><span class="link">Invite</span></div>
+  <div class="seg"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
+  <div class="stack"><section class="blk white"><div class="grp-h" style="background:var(--pist)"><h4>Produce</h4><span>9</span></div>
+  ${produce.map(([n, d]) => `<div class="row"><span>${n}</span>${bSt(d)}</div>`).join('')}</section>
+  <section class="blk white"><div class="grp-h" style="background:#DCEBFF"><h4>Dairy &amp; eggs</h4><span>5</span></div>
+  ${dairy.map(([n, d]) => `<div class="row"><span>${n}</span>${bSt(d)}</div>`).join('')}</section>
+  </div></div>${bNav('inv')}`;
+
+/* ---------------- C: Evening Kitchen ---------------- */
+const cFr = d => { const lvl = d >= 14 ? 5 : Math.max(1, Math.min(5, Math.ceil(d))); const cls = d <= 2 ? 'h' : d <= 4 ? 'w' : '';
+  return `<span class="fr ${d <= 2 ? 'h' : ''}">${days(d)}<span class="dots ${cls}">${Array.from({ length: 5 }, (_, i) => `<i class="${i < lvl ? 'f' : ''}"></i>`).join('')}</span></span>`; };
+const cNav = on => `<nav class="nav">
+  <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span><span class="it">${IC.list}List</span>
+  <span class="add" aria-label="Add">${IC.add}</span>
+  <span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span><span class="it">${IC.gear}Settings</span></nav>`;
+const cHome = mode => { const t = toss[mode]; return `<div class="scroll">${status}
+  <div class="head"><div><small>Good evening</small><h3>Our kitchen</h3></div></div>
+  <div class="stack">
+  ${mode === 'nine' ? `<section class="alert"><span class="tx"><b>9 things expired</b><span>Leftover curry, milk + 7 more</span></span><span class="go">Sort</span></section>` : ''}
+  <section class="card toss">${mode === 'quiet' ? '<span class="cheer">Quiet week. Nice work</span>' : ''}<span class="lbl">Tossed this week</span>
+    <div class="big">${t.n} thing${t.n > 1 ? 's' : ''}<small>· about $${t.usd}</small></div>
+    <div class="plates">${Array.from({ length: t.tn }, (_, i) => `<i class="${i < t.n ? 'f' : ''}"></i>`).join('')}<span>vs. ${t.tn} in a typical week</span></div>
+    <div class="foot"><span>Typically about $${t.tusd}</span><a>History →</a></div></section>
+  <section class="cook"><h4>Cook something</h4><p>4 dishes use the cherry tomatoes and celery you should get through this week.</p><span class="cta">What could I make?</span></section>
+  <section class="card"><div class="sec-h"><h4>Use these soon</h4><span class="tag">Est. $14</span></div>
+  ${soon.map(s => `<div class="row"><span class="nm">${s.n}</span>${cFr(s.d)}</div>`).join('')}</section>
+  </div></div>${cNav('home')}`; };
+const cTriage = () => `<div class="scroll">${status}
+  <div class="back">← Home</div>
+  <div class="sheet-top"><h3>Sort 9 expired items</h3><p>Did each one get used or tossed?</p></div>
+  <div class="legend"><span><i style="background:var(--sage)"></i>Used</span><span><i style="background:var(--tomato)"></i>Tossed</span></div>
+  <div class="stack"><section class="card" style="padding:4px 16px">
+  ${expired.slice(0, 8).map(e => `<div class="row"><span class="nm">${e.n}<small>${e.w}</small></span>
+    <span class="rb"><span class="${e.a === 'used' ? 'u' : ''}" aria-label="Used">${IC.check}</span><span class="${e.a === 'toss' ? 't' : ''}" aria-label="Tossed">${IC.bin}</span></span></div>`).join('')}
+  </section></div></div><div class="done">Save · 6 left</div>`;
+const cInv = () => `<div class="scroll">${status}
+  <div class="head"><h3>Inventory</h3><span class="link">Invite</span></div>
+  <div class="seg"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
+  <div class="stack"><section class="card"><div class="grp-h"><h4>Produce</h4><span>9</span></div>
+  ${produce.map(([n, d]) => `<div class="row"><span class="nm">${n}</span>${cFr(d)}</div>`).join('')}</section>
+  <section class="card"><div class="grp-h"><h4>Dairy &amp; eggs</h4><span>5</span></div>
+  ${dairy.map(([n, d]) => `<div class="row"><span class="nm">${n}</span>${cFr(d)}</div>`).join('')}</section>
+  </div></div>${cNav('inv')}`;
+
+const DIRS = [
+  { id: 'fresh-picks', cls: 'da', n: 'Direction A', name: 'Fresh Picks',
+    pitch: 'Market Stall, calmed down. It keeps the chunky type, the yellow cook card and the floating tab bar. Food groups now use soft tinted tiles with simple icons instead of solid colors. Red is used only for urgency, so “today” and the expired alert stand out right away. A small, kind message appears on quiet weeks.',
+    type: 'Bricolage Grotesque (display), Figtree (body)', sw: ['#F1F6EC', '#17321F', '#2E9D5A', '#FFCE45', '#E5482F', '#DDEBF7', '#FBE3E8'],
+    layout: 'Same structure as today. The expired alert becomes a white card with a red count badge, so the page feels less alarming.',
+    risk: 'Closest to the current app. Safe, but less of a step change.',
+    screens: [['Home · quiet week', aHome('quiet')], ['Home · 9 expired', aHome('nine')], ['Sort expired items', aTriage()], ['Inventory · Kind', aInv()]] },
+  { id: 'sorbet', cls: 'db', n: 'Direction B', name: 'Sorbet',
+    pitch: 'The most playful option. Each home section is a soft pastel block (peach, pistachio, lilac), with round friendly type. Expiry dates become little stickers, and “today!” tilts to catch your eye. Sorting expired items is one card at a time with two big buttons, so a pile of 9 feels quick, not like a chore.',
+    type: 'Fredoka (display), Nunito (body)', sw: ['#FFF8F1', '#2B2340', '#FFD9C7', '#D7EFC6', '#E5DBFF', '#FFEDA8', '#E2552F'],
+    layout: 'Color blocks instead of white cards. Full-width tab bar with a soft highlight. Sort screen uses a card stack.',
+    risk: 'Pastels can drift toward “kids’ app”. Keep the ink color dark and the copy grown-up.',
+    screens: [['Home · quiet week', bHome('quiet')], ['Home · 9 expired', bHome('nine')], ['Sort expired items', bTriage()], ['Inventory · Kind', bInv()]] },
+  { id: 'evening-kitchen', cls: 'dc', n: 'Direction C', name: 'Evening Kitchen',
+    pitch: 'A warm dark mode. Espresso and cocoa surfaces, with butter-yellow like a lamp over the counter. Five dots show freshness and change from green to yellow to red as the date gets close. Tossed items show as filled plates against a typical week. It should feel like your kitchen at night.',
+    type: 'Gabarito (display), Figtree (body)', sw: ['#1C1512', '#2A201B', '#F7EDE2', '#FFCF6B', '#FF7B5C', '#A9D18E'],
+    layout: 'Full-width tab bar with a yellow Add button. Sort screen uses round check and bin buttons.',
+    risk: 'Could pair with Fresh Picks as its dark theme instead of standing alone.',
+    screens: [['Home · quiet week', cHome('quiet')], ['Home · 9 expired', cHome('nine')], ['Sort expired items', cTriage()], ['Inventory · Kind', cInv()]] },
+];
+
+document.getElementById('directions').innerHTML = DIRS.map(d => `
+<section class="direction" id="${d.id}">
+  <div class="brief">
+    <div><span class="eyebrow">${d.n}</span><h2>${d.name}</h2><p>${d.pitch}</p></div>
+    <dl class="specs">
+      <dt>Palette</dt><dd><span class="swatches">${d.sw.map(c => `<span class="sw" style="background:${c}" title="${c}"></span>`).join('')}</span></dd>
+      <dt>Type</dt><dd>${d.type}</dd>
+      <dt>Layout</dt><dd>${d.layout}</dd>
+      <dt>Watch</dt><dd>${d.risk}</dd>
+    </dl>
+  </div>
+  <div class="rail"><div class="phones">
+    ${d.screens.map(([cap, html]) => `<figure class="shot"><div class="phone ${d.cls}"><div class="screen">${html}</div></div><figcaption>${cap}</figcaption></figure>`).join('')}
+  </div></div>
+</section>`).join('');
+</script>
