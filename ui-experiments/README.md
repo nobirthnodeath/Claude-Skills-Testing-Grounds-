@@ -21,3 +21,8 @@ Each direction shows Home (quiet week), Home (9 expired), the sort screen, and I
 ## Round 5
 
 - `prototype-themes.html` updated: the expired alert is now a red-tinted card with "9 things expired" as text (no number circle). Graphite dark has no warm or brown tones.
+
+## Round 6
+
+- `prototype-themes.html` now shows only Light and Graphite, side by side, with full-length Home screens. No yellow. Green primary actions. Text-only cook card with a periwinkle tint. "Sort" text link on the expired card. Faint color fringes in the Graphite background.
+- `design-principles.md`: principle 2 updated for green actions and no yellow.

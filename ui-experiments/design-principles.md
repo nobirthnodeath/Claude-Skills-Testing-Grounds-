@@ -26,9 +26,11 @@ When two principles conflict, the higher one wins.
 
 **Why.** If red and green also decorate, users can no longer trust them as signals.
 
-**Do.** Use a warm neutral base, dark ink, and one brand accent (butter yellow) for main actions. Use red only for "today", "expired" and the expired count. Use green only for "less than usual" and "used".
+**Do.** Use a neutral base and dark ink. Use green for primary actions and for good news ("used"). Use red only for "today", "expired" and the expired alert. Give the cook card its own soft cool tint (periwinkle), not green and not red.
 
-**Don't.** Give food groups strong colors, make the brand color green or red, or use red for anything that is only "important".
+**Don't.** Use yellow anywhere. Give food groups strong colors, or use red for anything that is only "important".
+
+**Round 6 change.** Green was first kept only for good news. It is now the primary action color, by your choice. Good news and actions are both positive, so they can share it.
 
 **Trade-off.** Food groups are harder to tell apart by color. They are told apart by headings and icons instead.
 
@@ -88,7 +90,7 @@ When two principles conflict, the higher one wins.
 |---|---|---|
 | Sorbet: rounded font, tilted "today!" sticker | 1 | Fails. Too playful. |
 | Market Stall: strong color for each food group | 2 | Fails. Competes with red and green. |
-| Fresh Picks: green as the brand color | 2 | Fails. Green must mean only good news. |
+| Fresh Picks: green as the brand color | 2 | Passes after the round 6 change. |
 | Fresh Picks and Evening Kitchen: bar or circles against "typical" | 5 | Fails. The benchmark changes. |
 | Evening Kitchen: freshness dots on every row | 5 | Mostly fails. The day count already says it. |
 | Evening Kitchen: warm dark surfaces, butter-yellow actions | 1, 2, 3 | Passes. Keep. |
