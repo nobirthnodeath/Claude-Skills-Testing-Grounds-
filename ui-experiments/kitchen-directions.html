@@ -1,0 +1,471 @@
+<title>Kitchen App Directions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a presentation page. Each direction is a band with a short brief and a horizontal row of four phone mockups.
+   Page chrome follows the viewer theme. Phone mockups use fixed colors on purpose: they are the designs under review. */
+:root {
+  --page: #F1F2F0; --page-ink: #1C1F1D; --page-muted: #5E6560; --page-rule: #D6D9D5; --page-card: #FFFFFF;
+  --f-page: "Instrument Sans", system-ui, sans-serif;
+  --f-page-mono: "Geist Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #151816; --page-ink: #E8ECE9; --page-muted: #98A19B; --page-rule: #2C312E; --page-card: #1D211F; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #151816; --page-ink: #E8ECE9; --page-muted: #98A19B; --page-rule: #2C312E; --page-card: #1D211F; color-scheme: dark }
+
+body { background: var(--page); color: var(--page-ink); font-family: var(--f-page); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1640px; margin: 0 auto; padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.intro { max-width: 68ch; display: grid; gap: 10px; margin-bottom: 40px; }
+.intro h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.intro p { margin: 0; color: var(--page-muted); }
+.eyebrow { font-family: var(--f-page-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--page-muted); }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.toc a { font-family: var(--f-page-mono); font-size: 13px; color: var(--page-ink); text-decoration: none; border: 1px solid var(--page-rule); background: var(--page-card); padding: 6px 12px; border-radius: 999px; }
+.toc a:hover, .toc a:focus-visible { border-color: var(--page-ink); }
+
+.direction { border-top: 1px solid var(--page-rule); padding-block: 36px; display: grid; gap: 24px; }
+.brief { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (min-width: 900px) { .brief { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; } }
+.brief h2 { margin: 4px 0 6px; font-size: clamp(24px, 3vw, 30px); letter-spacing: -0.015em; line-height: 1.15; }
+.brief p { margin: 0; color: var(--page-muted); max-width: 62ch; }
+.specs { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 14px; margin: 0; }
+.specs dt { font-family: var(--f-page-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--page-muted); padding-top: 2px; }
+.specs dd { margin: 0; }
+.swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+.sw { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); }
+
+.rail { overflow-x: auto; padding-bottom: 12px; scrollbar-width: thin; }
+.phones { display: flex; gap: 24px; width: max-content; }
+figure.shot { margin: 0; display: grid; gap: 10px; }
+figcaption { font-family: var(--f-page-mono); font-size: 12px; color: var(--page-muted); letter-spacing: .03em; }
+.phone { width: 360px; height: 760px; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 0 0 8px #0E0F0E, 0 24px 48px -20px rgba(0,0,0,.35); margin: 8px; }
+.screen { position: absolute; inset: 0; overflow: hidden; }
+.screen > .scroll { position: absolute; inset: 0 0 0 0; padding-bottom: 110px; }
+.status { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; font: 600 14px/1 -apple-system, "Instrument Sans", sans-serif; }
+.status .ind { display: flex; gap: 5px; align-items: center; }
+.status .ind i { display: block; width: 16px; height: 9px; border-radius: 2px; background: currentColor; opacity: .85; }
+.status .ind i:first-child { width: 14px; height: 8px; border-radius: 1px; opacity: .6; }
+.status .ind i:last-child { width: 22px; height: 10px; border-radius: 3px; }
+svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (prefers-reduced-motion: no-preference) { .phone { transition: transform .25s ease; } .phone:hover { transform: translateY(-4px); } }
+
+/* =========================================================
+   DIRECTION 1 — MARKET STALL
+   Bright produce colors, chunky type, food-group color coding,
+   freshness shown as a draining meter.
+   ========================================================= */
+.d1 { --bg: #EEF5E9; --card: #FFFFFF; --ink: #143222; --mut: #5B7365; --leaf: #2E9D5A; --tomato: #E8462F; --citrus: #FFC93C; --sky: #3D9BE9; --berry: #EC6F96; --oat: #E7B25C; --line: #E1EADB;
+  --fd: "Bricolage Grotesque", "Figtree", sans-serif; --fb: "Figtree", system-ui, sans-serif;
+  background: var(--bg); color: var(--ink); font-family: var(--fb); }
+.d1 .status { color: var(--ink); }
+.d1 .head { display: flex; justify-content: space-between; align-items: end; padding: 14px 20px 14px; }
+.d1 .head h3 { font: 800 34px/1 var(--fd); letter-spacing: -0.03em; margin: 0; }
+.d1 .head .link { font-weight: 600; font-size: 14px; color: var(--mut); }
+.d1 .stack { display: grid; gap: 12px; padding: 0 14px; }
+.d1 .alert { background: var(--tomato); color: #fff; border-radius: 26px; padding: 16px 16px 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.d1 .alert b { display: block; font: 800 22px/1.05 var(--fd); letter-spacing: -0.01em; }
+.d1 .alert span { font-size: 14px; opacity: .92; }
+.d1 .pill-btn { background: #fff; color: var(--tomato); font: 700 15px/1 var(--fb); padding: 12px 16px; border-radius: 999px; white-space: nowrap; }
+.d1 .card { background: var(--card); border-radius: 26px; padding: 18px 20px; }
+.d1 .toss { display: grid; gap: 14px; }
+.d1 .toss .lbl { font-size: 13px; font-weight: 600; color: var(--mut); }
+.d1 .toss .big { font: 800 44px/0.95 var(--fd); letter-spacing: -0.03em; }
+.d1 .toss .big small { font-size: 18px; font-weight: 600; letter-spacing: 0; color: var(--mut); margin-left: 4px; }
+.d1 .bars { display: grid; gap: 6px; }
+.d1 .barrow { display: grid; grid-template-columns: 74px 1fr 40px; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--mut); font-variant-numeric: tabular-nums; }
+.d1 .barrow .t { height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.d1 .barrow .t i { display: block; height: 100%; border-radius: 99px; }
+.d1 .toss .foot { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; }
+.d1 .toss .foot a { color: var(--leaf); }
+.d1 .cook { background: var(--citrus); border-radius: 26px; padding: 18px 20px; display: grid; gap: 12px; position: relative; overflow: hidden; }
+.d1 .cook h4 { font: 800 24px/1 var(--fd); margin: 0; letter-spacing: -0.02em; max-width: 60%; }
+.d1 .cook p { margin: 0; font-size: 14px; line-height: 1.4; max-width: 30ch; }
+.d1 .cook .cta { justify-self: start; background: var(--ink); color: #fff; font-weight: 700; font-size: 15px; padding: 13px 18px; border-radius: 999px; }
+.d1 .cook .blobs { position: absolute; right: -10px; top: -14px; width: 120px; height: 100px; }
+.d1 .cook .blobs i { position: absolute; border-radius: 50%; }
+.d1 .sec-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.d1 .sec-h h4 { font: 800 20px/1 var(--fd); margin: 0; letter-spacing: -0.01em; }
+.d1 .tag { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 99px; background: var(--bg); color: var(--ink); }
+.d1 .row { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px; padding: 9px 0; }
+.d1 .row + .row { border-top: 1px solid var(--line); }
+.d1 .dot { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; font: 800 13px/1 var(--fd); color: #fff; }
+.d1 .row .nm { font-weight: 600; font-size: 16px; }
+.d1 .fresh { display: grid; justify-items: end; gap: 4px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.d1 .meter { width: 56px; height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.d1 .meter i { display: block; height: 100%; border-radius: 99px; }
+.d1 .nav { position: absolute; left: 14px; right: 14px; bottom: 22px; height: 64px; background: var(--ink); color: #A9C4B3; border-radius: 999px; display: flex; align-items: center; justify-content: space-around; padding: 0 10px; }
+.d1 .nav .it { display: grid; justify-items: center; gap: 2px; font-size: 11px; font-weight: 600; }
+.d1 .nav .it.on { color: #fff; }
+.d1 .nav .add { width: 48px; height: 48px; border-radius: 50%; background: var(--citrus); color: var(--ink); display: grid; place-items: center; }
+.d1 .seg { display: flex; gap: 6px; padding: 0 14px 12px; }
+.d1 .seg span { flex: 1; text-align: center; font-weight: 700; font-size: 14px; padding: 10px 0; border-radius: 99px; background: var(--card); color: var(--mut); }
+.d1 .seg span.on { background: var(--ink); color: #fff; }
+.d1 .grp-h { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.d1 .grp-h h4 { font: 800 20px/1 var(--fd); margin: 0; flex: 1; }
+.d1 .grp-h .cnt { font: 800 13px/1 var(--fd); padding: 6px 10px; border-radius: 99px; color: #fff; }
+.d1 .sheet-top { padding: 4px 20px 14px; display: grid; gap: 6px; }
+.d1 .sheet-top h3 { font: 800 30px/1.02 var(--fd); margin: 0; letter-spacing: -0.03em; }
+.d1 .sheet-top p { margin: 0; color: var(--mut); font-size: 14px; }
+.d1 .back { font-weight: 700; font-size: 14px; color: var(--leaf); padding: 8px 20px 0; }
+.d1 .tri { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; }
+.d1 .tri + .tri { border-top: 1px solid var(--line); }
+.d1 .tri .nm { font-weight: 600; font-size: 15px; line-height: 1.2; }
+.d1 .tri .nm small { display: block; font-size: 12px; color: var(--mut); font-weight: 500; }
+.d1 .choice { display: flex; gap: 4px; }
+.d1 .choice span { font-size: 13px; font-weight: 700; padding: 8px 11px; border-radius: 99px; background: var(--bg); color: var(--mut); }
+.d1 .choice .used { background: var(--leaf); color: #fff; }
+.d1 .choice .toss-on { background: var(--tomato); color: #fff; }
+.d1 .done { position: absolute; left: 14px; right: 14px; bottom: 26px; background: var(--ink); color: #fff; border-radius: 999px; padding: 18px; text-align: center; font-weight: 700; font-size: 16px; }
+.d1 .quiet { background: var(--card); border-radius: 26px; padding: 18px 20px; display: grid; gap: 12px; }
+.d1 .win { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 700; background: #DDF2E3; color: var(--leaf); padding: 5px 10px; border-radius: 99px; justify-self: start; }
+
+/* =========================================================
+   DIRECTION 2 — LABEL MAKER
+   Utilitarian pantry ledger. Condensed caps, monospace countdowns,
+   embossed label tape for expired items, highlighter for urgency.
+   ========================================================= */
+.d2 { --bg: #ECECE7; --paper: #FAFAF6; --ink: #121212; --mut: #6C6C66; --rule: #CBCBC3; --hi: #F4DF2E; --tape: #161616; --warn: #D93A1E;
+  --fd: "Archivo", "Arial Narrow", sans-serif; --fm: "Martian Mono", ui-monospace, monospace;
+  background: var(--bg); color: var(--ink); font-family: var(--fd); }
+.d2 .status { color: var(--ink); }
+.d2 .head { padding: 10px 18px 14px; display: grid; gap: 6px; border-bottom: 2px solid var(--ink); margin: 0 18px; padding-left: 0; padding-right: 0; }
+.d2 .head .meta { display: flex; justify-content: space-between; font: 500 10.5px/1 var(--fm); letter-spacing: .04em; text-transform: uppercase; color: var(--mut); }
+.d2 .head h3 { margin: 0; font: 800 42px/0.9 var(--fd); font-stretch: 68%; text-transform: uppercase; letter-spacing: -0.005em; }
+.d2 .body { padding: 14px 18px 0; display: grid; gap: 16px; }
+.d2 .tape { background: var(--tape); color: #F2F2EE; border-radius: 6px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 2px 0 rgba(0,0,0,.2); transform: rotate(-0.6deg); }
+.d2 .tape b { font: 700 15px/1.2 var(--fm); letter-spacing: .14em; text-transform: uppercase; text-shadow: 0 1px 0 rgba(255,255,255,.18), 0 -1px 0 rgba(0,0,0,.6); }
+.d2 .tape span { display: block; font: 400 10.5px/1.4 var(--fm); letter-spacing: .06em; color: #A8A8A2; text-transform: uppercase; margin-top: 3px; }
+.d2 .tape .go { font: 700 12px/1 var(--fm); letter-spacing: .1em; background: var(--hi); color: var(--ink); padding: 8px 10px; border-radius: 3px; white-space: nowrap; }
+.d2 .ledger { background: var(--paper); border: 1px solid var(--rule); padding: 14px 16px; display: grid; gap: 10px; }
+.d2 .lbl { font: 500 10.5px/1 var(--fm); letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
+.d2 .ledger .figs { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); }
+.d2 .ledger .fig { padding-top: 10px; display: grid; gap: 4px; }
+.d2 .ledger .fig + .fig { border-left: 1px solid var(--rule); padding-left: 14px; }
+.d2 .ledger .num { font: 800 40px/0.9 var(--fd); font-stretch: 75%; font-variant-numeric: tabular-nums; }
+.d2 .ledger .num em { font-style: normal; color: var(--mut); font-size: 22px; }
+.d2 .ledger .ticks { display: flex; gap: 3px; }
+.d2 .ledger .ticks i { width: 12px; height: 12px; border: 1.5px solid var(--ink); }
+.d2 .ledger .ticks i.f { background: var(--ink); }
+.d2 .ledger .ticks i.g { border-style: dashed; border-color: var(--mut); }
+.d2 .ledger .row-end { display: flex; justify-content: space-between; font: 500 11px/1 var(--fm); text-transform: uppercase; letter-spacing: .05em; }
+.d2 .cook { border: 2px solid var(--ink); background: var(--paper); padding: 14px 16px; display: grid; gap: 10px; }
+.d2 .cook h4 { margin: 0; font: 800 24px/0.95 var(--fd); font-stretch: 70%; text-transform: uppercase; }
+.d2 .cook p { margin: 0; font-size: 14px; line-height: 1.35; font-stretch: 100%; }
+.d2 .mk { background: linear-gradient(transparent 52%, var(--hi) 52%, var(--hi) 92%, transparent 92%); padding: 0 2px; font-weight: 700; }
+.d2 .cook .cta { background: var(--ink); color: var(--paper); font: 700 12px/1 var(--fm); text-transform: uppercase; letter-spacing: .1em; padding: 14px; text-align: center; }
+.d2 .tbl-h { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+.d2 .tbl-h h4 { margin: 0; font: 800 22px/1 var(--fd); font-stretch: 70%; text-transform: uppercase; }
+.d2 .tr { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 16px; font-weight: 500; }
+.d2 .cd { font: 500 12px/1 var(--fm); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.d2 .cd.hot { background: var(--hi); padding: 4px 6px; font-weight: 700; }
+.d2 .cd.exp { color: var(--warn); font-weight: 700; }
+.d2 .nav { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: var(--paper); border-top: 2px solid var(--ink); display: flex; justify-content: space-around; padding-top: 12px; }
+.d2 .nav .it { display: grid; justify-items: center; gap: 5px; font: 500 9.5px/1 var(--fm); letter-spacing: .08em; text-transform: uppercase; color: var(--mut); align-content: start; }
+.d2 .nav .it.on { color: var(--ink); font-weight: 700; }
+.d2 .nav .it.on svg { background: var(--hi); border-radius: 2px; }
+.d2 .tabs { display: flex; margin: 12px 18px 0; border: 1.5px solid var(--ink); }
+.d2 .tabs span { flex: 1; text-align: center; padding: 9px 0; font: 500 11px/1 var(--fm); letter-spacing: .08em; text-transform: uppercase; }
+.d2 .tabs span + span { border-left: 1.5px solid var(--ink); }
+.d2 .tabs span.on { background: var(--ink); color: var(--paper); font-weight: 700; }
+.d2 .grp { display: grid; }
+.d2 .grp .tbl-h .cnt { font: 500 12px/1 var(--fm); }
+.d2 .back { font: 500 11px/1 var(--fm); text-transform: uppercase; letter-spacing: .08em; padding: 10px 18px 0; color: var(--mut); }
+.d2 .tri { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--rule); }
+.d2 .tri .nm { font-size: 16px; font-weight: 600; line-height: 1.15; }
+.d2 .tri .nm small { display: block; font: 400 10.5px/1.4 var(--fm); color: var(--mut); letter-spacing: .03em; text-transform: uppercase; }
+.d2 .sw2 { display: flex; border: 1.5px solid var(--ink); }
+.d2 .sw2 span { font: 500 10.5px/1 var(--fm); text-transform: uppercase; letter-spacing: .06em; padding: 8px 9px; }
+.d2 .sw2 span + span { border-left: 1.5px solid var(--ink); }
+.d2 .sw2 .on { background: var(--ink); color: var(--paper); font-weight: 700; }
+.d2 .sw2 .on.t { background: var(--warn); color: #fff; }
+.d2 .done { position: absolute; left: 18px; right: 18px; bottom: 28px; background: var(--ink); color: var(--paper); font: 700 12px/1 var(--fm); text-transform: uppercase; letter-spacing: .1em; padding: 18px; display: flex; justify-content: space-between; }
+.d2 .clear { border: 1.5px dashed var(--mut); padding: 12px 14px; font: 500 11px/1.4 var(--fm); text-transform: uppercase; letter-spacing: .06em; color: var(--mut); display: flex; justify-content: space-between; }
+
+/* =========================================================
+   DIRECTION 3 — COLD STORAGE
+   Dark, calm, cool. A week strip shows when things expire.
+   Rings and soft frosted panels; amber only for urgency.
+   ========================================================= */
+.d3 { --bg: #0D1820; --bg2: #13232E; --panel: rgba(173, 214, 235, 0.07); --edge: rgba(190, 228, 245, 0.12); --ink: #E9F3F7; --mut: #86A0AE; --ice: #7FD8EA; --amber: #FFB765; --coral: #FF8A7A; --mint: #79E2B4;
+  --fd: "Instrument Sans", system-ui, sans-serif; --fm: "Geist Mono", ui-monospace, monospace;
+  background: radial-gradient(120% 60% at 80% -10%, #1C3A4A 0%, transparent 60%), var(--bg); color: var(--ink); font-family: var(--fd); }
+.d3 .status { color: var(--ink); }
+.d3 .head { padding: 10px 20px 16px; display: flex; justify-content: space-between; align-items: end; }
+.d3 .head h3 { margin: 0; font: 600 30px/1 var(--fd); letter-spacing: -0.025em; }
+.d3 .head .sub { font: 400 12px/1 var(--fm); color: var(--mut); margin-bottom: 8px; display: block; letter-spacing: .02em; }
+.d3 .head .link { width: 36px; height: 36px; border-radius: 50%; background: var(--panel); border: 1px solid var(--edge); display: grid; place-items: center; color: var(--mut); }
+.d3 .head .link svg { width: 18px; height: 18px; }
+.d3 .body { padding: 0 14px; display: grid; gap: 12px; }
+.d3 .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 22px; padding: 16px 18px; }
+.d3 .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.d3 .day { display: grid; justify-items: center; gap: 6px; padding: 8px 0 10px; border-radius: 14px; }
+.d3 .day .dn { font: 500 10px/1 var(--fm); color: var(--mut); text-transform: uppercase; letter-spacing: .06em; }
+.d3 .day .dd { font: 600 15px/1 var(--fd); font-variant-numeric: tabular-nums; }
+.d3 .day.today { background: rgba(255, 183, 101, 0.14); }
+.d3 .day.today .dn { color: var(--amber); }
+.d3 .pips { display: flex; flex-direction: column; gap: 3px; min-height: 22px; }
+.d3 .pips i { width: 6px; height: 6px; border-radius: 50%; background: var(--ice); }
+.d3 .pips i.a { background: var(--amber); }
+.d3 .wk-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.d3 .wk-h b { font: 600 15px/1 var(--fd); }
+.d3 .wk-h span { font: 400 11px/1 var(--fm); color: var(--mut); }
+.d3 .sortbar { display: flex; align-items: center; gap: 12px; background: linear-gradient(90deg, rgba(255,138,122,.18), rgba(255,138,122,.06)); border: 1px solid rgba(255,138,122,.3); border-radius: 22px; padding: 12px 14px 12px 12px; }
+.d3 .sortbar .n { width: 40px; height: 40px; border-radius: 14px; background: var(--coral); color: #2A0F0B; display: grid; place-items: center; font: 600 18px/1 var(--fd); flex: none; }
+.d3 .sortbar .tx { flex: 1; min-width: 0; }
+.d3 .sortbar b { display: block; font: 600 15px/1.2 var(--fd); }
+.d3 .sortbar span { font-size: 13px; color: var(--mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.d3 .sortbar .go { font: 600 13px/1 var(--fd); color: var(--coral); white-space: nowrap; }
+.d3 .ringrow { display: grid; grid-template-columns: 92px 1fr; gap: 16px; align-items: center; }
+.d3 .ring { position: relative; width: 92px; height: 92px; }
+.d3 .ring svg { width: 92px; height: 92px; transform: rotate(-90deg); }
+.d3 .ring .c { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.d3 .ring .c b { font: 600 22px/1 var(--fd); display: block; }
+.d3 .ring .c span { font: 400 10px/1 var(--fm); color: var(--mut); }
+.d3 .ringrow h4 { margin: 0 0 4px; font: 600 17px/1.25 var(--fd); }
+.d3 .ringrow p { margin: 0; font-size: 13px; color: var(--mut); line-height: 1.4; }
+.d3 .ringrow a { display: inline-block; margin-top: 8px; font: 500 12px/1 var(--fm); color: var(--ice); }
+.d3 .cook { border-radius: 22px; padding: 16px 18px; background: linear-gradient(135deg, #1E4656 0%, #173444 60%, #1A2E3B 100%); border: 1px solid rgba(127, 216, 234, 0.25); display: grid; gap: 10px; }
+.d3 .cook h4 { margin: 0; font: 600 19px/1.15 var(--fd); }
+.d3 .cook p { margin: 0; font-size: 13px; color: #A9C5D2; line-height: 1.4; }
+.d3 .cook .cta { background: var(--ice); color: #08232C; border-radius: 14px; padding: 13px; text-align: center; font: 600 14px/1 var(--fd); }
+.d3 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.d3 .chip { font: 500 11px/1 var(--fm); padding: 6px 8px; border-radius: 99px; background: rgba(127, 216, 234, .12); color: var(--ice); }
+.d3 .chip.a { background: rgba(255, 183, 101, .14); color: var(--amber); }
+.d3 .sec-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.d3 .sec-h b { font: 600 15px/1 var(--fd); }
+.d3 .sec-h span { font: 400 11px/1 var(--fm); color: var(--mut); }
+.d3 .row { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 12px; padding: 10px 0; }
+.d3 .row + .row { border-top: 1px solid var(--edge); }
+.d3 .mini { width: 28px; height: 28px; }
+.d3 .mini svg { width: 28px; height: 28px; transform: rotate(-90deg); }
+.d3 .row .nm { font-size: 15px; font-weight: 500; }
+.d3 .row .dl { font: 400 12px/1 var(--fm); color: var(--mut); font-variant-numeric: tabular-nums; }
+.d3 .row .dl.a { color: var(--amber); }
+.d3 .nav { position: absolute; left: 14px; right: 14px; bottom: 20px; height: 66px; border-radius: 24px; background: rgba(21, 38, 49, 0.85); backdrop-filter: blur(14px); border: 1px solid var(--edge); display: flex; justify-content: space-around; align-items: center; }
+.d3 .nav .it { display: grid; justify-items: center; gap: 3px; font: 500 10.5px/1 var(--fd); color: var(--mut); }
+.d3 .nav .it.on { color: var(--ice); }
+.d3 .seg { display: flex; margin: 0 14px 12px; background: var(--panel); border: 1px solid var(--edge); border-radius: 14px; padding: 3px; }
+.d3 .seg span { flex: 1; text-align: center; padding: 8px 0; font: 500 13px/1 var(--fd); color: var(--mut); border-radius: 11px; }
+.d3 .seg span.on { background: rgba(127, 216, 234, .16); color: var(--ink); }
+.d3 .back { font: 500 13px/1 var(--fd); color: var(--ice); padding: 8px 20px 0; }
+.d3 .sheet-top { padding: 12px 20px 14px; display: grid; gap: 6px; }
+.d3 .sheet-top h3 { margin: 0; font: 600 26px/1.1 var(--fd); letter-spacing: -0.02em; }
+.d3 .sheet-top p { margin: 0; color: var(--mut); font-size: 14px; }
+.d3 .prog { height: 4px; border-radius: 99px; background: var(--edge); overflow: hidden; margin-top: 6px; }
+.d3 .prog i { display: block; height: 100%; width: 33%; background: var(--ice); border-radius: 99px; }
+.d3 .tri { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 9px 0; }
+.d3 .tri + .tri { border-top: 1px solid var(--edge); }
+.d3 .tri .nm { font-size: 15px; font-weight: 500; line-height: 1.2; }
+.d3 .tri .nm small { display: block; font: 400 11px/1.4 var(--fm); color: var(--mut); }
+.d3 .sw3 { display: flex; gap: 4px; background: rgba(0,0,0,.2); border-radius: 12px; padding: 3px; }
+.d3 .sw3 span { font: 500 12px/1 var(--fd); padding: 8px 10px; border-radius: 9px; color: var(--mut); }
+.d3 .sw3 .u { background: rgba(121, 226, 180, .18); color: var(--mint); }
+.d3 .sw3 .t { background: rgba(255, 138, 122, .2); color: var(--coral); }
+.d3 .done { position: absolute; left: 14px; right: 14px; bottom: 26px; background: var(--ice); color: #08232C; border-radius: 18px; padding: 17px; text-align: center; font: 600 15px/1 var(--fd); }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Visual exploration · 3 directions</span>
+    <h1>Kitchen app: three ways it could look</h1>
+    <p>Same features, same tasks, new look and feel. Each direction shows the home screen in two states (a quiet week, and 9 expired items to sort), the sort sheet, and Inventory. Phones scroll sideways on small screens.</p>
+    <nav class="toc" aria-label="Directions">
+      <a href="#market-stall">1 · Market Stall</a>
+      <a href="#label-maker">2 · Label Maker</a>
+      <a href="#cold-storage">3 · Cold Storage</a>
+    </nav>
+  </header>
+  <main id="directions"></main>
+</div>
+
+<script>
+const IC = {
+  home: '<svg class="ic" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg>',
+  add: '<svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  list: '<svg class="ic" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 6l1.5 1.5L7.5 5M4 12h3v3H4z"/></svg>',
+  inv: '<svg class="ic" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 10h14M8 6v2M8 13v3"/></svg>',
+  gear: '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+};
+const status = '<div class="status"><span>6:12</span><span class="ind"><i></i><i></i><i></i></span></div>';
+
+// Shared content, taken from the current app screens
+const soon = [
+  { n: 'Cherry tomatoes', d: 0, k: 'p' }, { n: 'Celery', d: 2, k: 'p' }, { n: 'Cabbage', d: 4, k: 'p' },
+  { n: 'Chicken thighs', d: 4, k: 'm' }, { n: 'Cilantro', d: 5, k: 'p' },
+];
+const expired = [
+  { n: 'Leftover curry', w: 'Fridge · 2 days ago', k: 'l', a: 'used' }, { n: 'Milk', w: 'Fridge · yesterday', k: 'd', a: 'used' },
+  { n: 'Greek yogurt', w: 'Fridge · 3 days ago', k: 'd', a: 'toss' }, { n: 'Spinach', w: 'Crisper · yesterday', k: 'p' },
+  { n: 'Strawberries', w: 'Fridge · today', k: 'p' }, { n: 'Hummus', w: 'Fridge · 4 days ago', k: 'l' },
+  { n: 'Flour tortillas', w: 'Pantry · yesterday', k: 'g' }, { n: 'Deli turkey', w: 'Fridge · 2 days ago', k: 'm' },
+  { n: 'Sour cream', w: 'Fridge · today', k: 'd' },
+];
+const produce = [
+  ['Bananas', 3, 'about 3 days'], ['Cherry tomatoes', 3, 'about 3 days'], ['Blueberries', 5, 'about 5 days'], ['Cabbage', 5, 'about 5 days'],
+  ['Celery', 5, 'about 5 days'], ['Grapes', 5, 'about 5 days'], ['Lettuce', 5, 'about 5 days'], ['Apples', 28, 'about 4 weeks'], ['Baby carrots', 28, 'about 4 weeks'],
+];
+const dairy = [['Milk', 5, 'about 5 days'], ['Plain yogurt', 6, 'about 6 days']];
+
+/* ---------------- Direction 1: Market Stall ---------------- */
+const D1K = { p: ['var(--leaf)', 'P'], d: ['var(--sky)', 'D'], m: ['var(--berry)', 'M'], l: ['var(--oat)', 'L'], g: ['var(--oat)', 'G'] };
+const d1meter = d => { const pct = Math.max(8, Math.min(100, d / 7 * 100)); const c = d <= 1 ? 'var(--tomato)' : d <= 3 ? 'var(--citrus)' : 'var(--leaf)'; return `<span class="meter"><i style="width:${pct}%;background:${c}"></i></span>`; };
+const d1when = d => d === 0 ? '<span style="color:var(--tomato)">Today</span>' : d >= 14 ? `${Math.round(d / 7)} wks` : `${d} day${d > 1 ? 's' : ''}`;
+const d1nav = on => `<nav class="nav">
+  <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span>
+  <span class="it ${on === 'list' ? 'on' : ''}">${IC.list}List</span>
+  <span class="add" aria-label="Add">${IC.add}</span>
+  <span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span>
+  <span class="it">${IC.gear}Settings</span></nav>`;
+const d1soon = () => `<section class="card">
+  <div class="sec-h"><h4>Use these soon</h4><span class="tag">Est. $14</span></div>
+  ${soon.map(s => `<div class="row"><span class="dot" style="background:${D1K[s.k][0]}">${D1K[s.k][1]}</span><span class="nm">${s.n}</span><span class="fresh">${d1when(s.d)}${d1meter(s.d)}</span></div>`).join('')}
+</section>`;
+const d1cook = () => `<section class="cook">
+  <div class="blobs" aria-hidden="true"><i style="width:64px;height:64px;background:var(--tomato);right:30px;top:24px"></i><i style="width:46px;height:46px;background:var(--leaf);right:0;top:52px"></i><i style="width:30px;height:30px;background:#fff;right:74px;top:62px;opacity:.7"></i></div>
+  <h4>Cook something</h4>
+  <p>4 dishes use the cherry tomatoes and celery you should get through this week.</p>
+  <span class="cta">What could I make?</span>
+</section>`;
+const d1home = mode => `<div class="scroll">${status}
+  <div class="head"><h3>Our kitchen</h3></div>
+  <div class="stack">
+  ${mode === 'nine' ? `<section class="alert"><div><b>9 things expired</b><span>Leftover curry, milk + 7 more</span></div><span class="pill-btn">Sort them</span></section>
+  <section class="card toss"><span class="lbl">Tossed this week</span><div class="big">1 thing<small>· about $3</small></div>
+    <div class="bars"><div class="barrow"><span>This week</span><span class="t"><i style="width:17%;background:var(--leaf)"></i></span><span>$3</span></div>
+    <div class="barrow"><span>Typical</span><span class="t"><i style="width:100%;background:#C9D8CD"></i></span><span>$18</span></div></div>
+    <div class="foot"><span>4 things less than usual</span><a>History →</a></div></section>`
+  : `<section class="quiet"><span class="win">Quiet week</span><div class="toss" style="gap:10px"><span class="lbl">Tossed this week</span><div class="big">2 things<small>· about $9</small></div>
+    <div class="bars"><div class="barrow"><span>This week</span><span class="t"><i style="width:41%;background:var(--leaf)"></i></span><span>$9</span></div>
+    <div class="barrow"><span>Typical</span><span class="t"><i style="width:100%;background:#C9D8CD"></i></span><span>$22</span></div></div>
+    <div class="foot"><span>Typically 5 things</span><a>History →</a></div></div></section>`}
+  ${d1cook()}
+  ${d1soon()}
+  </div></div>${d1nav('home')}`;
+const d1triage = () => `<div class="scroll">${status}
+  <div class="back">← Home</div>
+  <div class="sheet-top"><h3>What happened to these?</h3><p>Tap Used or Tossed. 6 left to sort.</p></div>
+  <div class="stack"><section class="card" style="padding:8px 16px">
+  ${expired.slice(0, 8).map(e => `<div class="tri"><span class="dot" style="background:${D1K[e.k][0]}">${D1K[e.k][1]}</span><span class="nm">${e.n}<small>${e.w}</small></span>
+    <span class="choice"><span class="${e.a === 'used' ? 'used' : ''}">Used</span><span class="${e.a === 'toss' ? 'toss-on' : ''}">Tossed</span></span></div>`).join('')}
+  </section></div></div><div class="done">Save · 3 of 9 sorted</div>`;
+const d1inv = () => `<div class="scroll">${status}
+  <div class="head"><h3>Inventory</h3><span class="link">Invite</span></div>
+  <div class="seg"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
+  <div class="stack"><section class="card">
+  <div class="grp-h"><h4>Produce</h4><span class="cnt" style="background:var(--leaf)">9</span></div>
+  ${produce.map(([n, d]) => `<div class="row" style="grid-template-columns:1fr auto"><span class="nm">${n}</span><span class="fresh">${d1when(d)}${d1meter(d)}</span></div>`).join('')}
+  </section>
+  <section class="card"><div class="grp-h"><h4>Dairy &amp; eggs</h4><span class="cnt" style="background:var(--sky)">5</span></div>
+  ${dairy.map(([n, d]) => `<div class="row" style="grid-template-columns:1fr auto"><span class="nm">${n}</span><span class="fresh">${d1when(d)}${d1meter(d)}</span></div>`).join('')}</section>
+  </div></div>${d1nav('inv')}`;
+
+/* ---------------- Direction 2: Label Maker ---------------- */
+const d2cd = d => d === 0 ? '<span class="cd hot">TODAY</span>' : d >= 14 ? `<span class="cd">${Math.round(d / 7)}W</span>` : `<span class="cd ${d <= 2 ? 'hot' : ''}">${String(d).padStart(2, '0')}D</span>`;
+const d2nav = on => `<nav class="nav">
+  <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span><span class="it">${IC.add}Add</span>
+  <span class="it ${on === 'list' ? 'on' : ''}">${IC.list}List</span><span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span></nav>`;
+const d2ticks = (n, typ) => Array.from({ length: Math.max(n, typ) }, (_, i) => `<i class="${i < n ? 'f' : 'g'}"></i>`).join('');
+const d2home = mode => `<div class="scroll">${status}
+  <div class="head"><div class="meta"><span>Sat 31 Oct · Wk 44</span><span>Settings</span></div><h3>Our kitchen</h3></div>
+  <div class="body">
+  ${mode === 'nine' ? `<div class="tape"><div><b>9 expired</b><span>Leftover curry, milk +7</span></div><span class="go">SORT →</span></div>` : ''}
+  <section class="ledger"><span class="lbl">Tossed this week</span>
+    <div class="figs"><div class="fig"><span class="num">${mode === 'nine' ? '1' : '2'}<em> ITEMS</em></span><div class="ticks">${mode === 'nine' ? d2ticks(1, 4) : d2ticks(2, 5)}</div></div>
+    <div class="fig"><span class="num">$${mode === 'nine' ? '3' : '9'}</span><span class="lbl">Typical $${mode === 'nine' ? '18' : '22'}</span></div></div>
+    <div class="row-end"><span style="color:var(--mut)">Dashed = typical week</span><span>History →</span></div></section>
+  <section class="cook"><h4>Cook something</h4><p>4 dishes use the <span class="mk">cherry tomatoes</span> and <span class="mk">celery</span> you should get through this week.</p><span class="cta">What could I make?</span></section>
+  <section><div class="tbl-h"><h4>Use these soon</h4><span class="cd">EST. $14</span></div>
+  ${soon.map(s => `<div class="tr"><span>${s.n}</span>${d2cd(s.d)}</div>`).join('')}</section>
+  </div></div>${d2nav('home')}`;
+const d2triage = () => `<div class="scroll">${status}
+  <div class="back">← Home</div>
+  <div class="head" style="border-bottom-width:2px"><div class="meta"><span>3 of 9 sorted</span><span>Expired</span></div><h3>Used or tossed?</h3></div>
+  <div class="body" style="gap:0">
+  ${expired.slice(0, 9).map(e => `<div class="tri"><span class="nm">${e.n}<small>${e.w}</small></span>
+    <span class="sw2"><span class="${e.a === 'used' ? 'on' : ''}">Used</span><span class="${e.a === 'toss' ? 'on t' : ''}">Tossed</span></span></div>`).join('')}
+  </div></div><div class="done"><span>Save</span><span>6 left</span></div>`;
+const d2inv = () => `<div class="scroll">${status}
+  <div class="head"><div class="meta"><span>14 items · 2 people</span><span>Invite</span></div><h3>Inventory</h3></div>
+  <div class="tabs"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
+  <div class="body">
+  <section class="grp"><div class="tbl-h"><h4>Produce</h4><span class="cnt">09</span></div>
+  ${produce.map(([n, d]) => `<div class="tr"><span>${n}</span>${d2cd(d)}</div>`).join('')}</section>
+  <section class="grp"><div class="tbl-h"><h4>Dairy &amp; eggs</h4><span class="cnt">05</span></div>
+  ${dairy.map(([n, d]) => `<div class="tr"><span>${n}</span>${d2cd(d)}</div>`).join('')}</section>
+  </div></div>${d2nav('inv')}`;
+
+/* ---------------- Direction 3: Cold Storage ---------------- */
+const ring = (pct, color, r, sw) => { const c = 2 * Math.PI * r, s = r * 2 + sw * 2; return `<svg viewBox="0 0 ${s} ${s}"><circle cx="${s / 2}" cy="${s / 2}" r="${r}" fill="none" stroke="rgba(190,228,245,.12)" stroke-width="${sw}"/><circle cx="${s / 2}" cy="${s / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c * pct} ${c}"/></svg>`; };
+const d3days = [['Sat', 31, 'aa'], ['Sun', 1, ''], ['Mon', 2, 'i'], ['Tue', 3, ''], ['Wed', 4, 'ii'], ['Thu', 5, 'i'], ['Fri', 6, '']];
+const d3week = () => `<section class="panel"><div class="wk-h"><b>This week</b><span>5 items expiring</span></div><div class="week">
+  ${d3days.map(([n, d, p], i) => `<div class="day ${i === 0 ? 'today' : ''}"><span class="dn">${n}</span><span class="dd">${d}</span><span class="pips">${[...p].map(x => `<i class="${x === 'a' ? 'a' : ''}"></i>`).join('')}</span></div>`).join('')}
+  </div></section>`;
+const d3nav = on => `<nav class="nav">
+  <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span><span class="it">${IC.add}Add</span>
+  <span class="it ${on === 'list' ? 'on' : ''}">${IC.list}List</span><span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span></nav>`;
+const d3col = d => d === 0 ? 'var(--amber)' : d <= 2 ? 'var(--amber)' : 'var(--ice)';
+const d3row = (n, d, label) => `<div class="row"><span class="mini">${ring(Math.max(.06, Math.min(1, d / 7)), d3col(d), 10, 3)}</span><span class="nm">${n}</span><span class="dl ${d <= 2 ? 'a' : ''}">${label}</span></div>`;
+const d3lab = d => d === 0 ? 'today' : d >= 14 ? `~${Math.round(d / 7)} wks` : `${d} days`;
+const d3home = mode => `<div class="scroll">${status}
+  <div class="head"><div><span class="sub">Saturday, Oct 31</span><h3>Our kitchen</h3></div><span class="link" aria-label="Settings">${IC.gear}</span></div>
+  <div class="body">
+  ${mode === 'nine' ? `<section class="sortbar"><span class="n">9</span><span class="tx"><b>Expired items to sort</b><span>Leftover curry, milk and 7 more</span></span><span class="go">Sort →</span></section>` : d3week()}
+  <section class="panel ringrow"><div class="ring">${ring(mode === 'nine' ? 3 / 18 : 9 / 22, 'var(--mint)', 38, 7)}<div class="c"><div><b>$${mode === 'nine' ? 3 : 9}</b><span>of $${mode === 'nine' ? 18 : 22}</span></div></div></div>
+    <div><h4>${mode === 'nine' ? '1 thing' : '2 things'} tossed this week</h4><p>Typically ${mode === 'nine' ? '4 things, about $18' : '5 things, about $22'}.</p><a>History →</a></div></section>
+  <section class="cook"><h4>Cook something</h4><div class="chips"><span class="chip a">Cherry tomatoes</span><span class="chip a">Celery</span></div><p>4 dishes use what you should get through this week.</p><span class="cta">What could I make?</span></section>
+  <section class="panel"><div class="sec-h"><b>Use these soon</b><span>est. $14</span></div>
+  ${soon.map(s => d3row(s.n, s.d, d3lab(s.d))).join('')}</section>
+  </div></div>${d3nav('home')}`;
+const d3triage = () => `<div class="scroll">${status}
+  <div class="back">← Home</div>
+  <div class="sheet-top"><h3>Sort 9 expired items</h3><p>Did you use it or toss it?</p><div class="prog"><i></i></div></div>
+  <div class="body"><section class="panel" style="padding:6px 16px">
+  ${expired.slice(0, 8).map(e => `<div class="tri"><span class="nm">${e.n}<small>${e.w}</small></span><span class="sw3"><span class="${e.a === 'used' ? 'u' : ''}">Used</span><span class="${e.a === 'toss' ? 't' : ''}">Tossed</span></span></div>`).join('')}
+  </section></div></div><div class="done">Save · 6 left</div>`;
+const d3inv = () => `<div class="scroll">${status}
+  <div class="head"><div><span class="sub">14 items · shared with Sam</span><h3>Inventory</h3></div><span class="link" aria-label="Invite">${IC.add}</span></div>
+  <div class="seg"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
+  <div class="body"><section class="panel"><div class="sec-h"><b>Produce</b><span>9 items</span></div>
+  ${produce.map(([n, d]) => d3row(n, d, d3lab(d))).join('')}</section>
+  <section class="panel"><div class="sec-h"><b>Dairy &amp; eggs</b><span>5 items</span></div>
+  ${dairy.map(([n, d]) => d3row(n, d, d3lab(d))).join('')}</section></div></div>${d3nav('inv')}`;
+
+const DIRS = [
+  { id: 'market-stall', cls: 'd1', n: 'Direction 1', name: 'Market Stall',
+    pitch: 'Bright and friendly, like a farmers’ market. Each food group gets its own color, so you can scan a long list by color first. A small freshness meter drains as an item gets close to its date. The expired alert is a bold tomato-red block that is hard to ignore.',
+    type: 'Bricolage Grotesque (display), Figtree (body)', sw: ['#EEF5E9', '#143222', '#2E9D5A', '#E8462F', '#FFC93C', '#3D9BE9', '#EC6F96'],
+    layout: 'Floating dark tab bar with a raised Add button. Tossed stats become a bar chart against a typical week.',
+    risk: 'Many colors. Needs strict rules so category color and urgency color do not compete.',
+    screens: [['Home · quiet week', d1home('quiet')], ['Home · 9 expired', d1home('nine')], ['Sort expired items', d1triage()], ['Inventory · Kind', d1inv()]] },
+  { id: 'label-maker', cls: 'd2', n: 'Direction 2', name: 'Label Maker',
+    pitch: 'A pantry ledger. Condensed capitals and a monospace countdown (03D, 2W) make long lists fast to scan and line up. Expired items appear on embossed label-maker tape. Yellow highlighter marks only what is urgent, so it stays meaningful.',
+    type: 'Archivo Condensed (display), Martian Mono (data)', sw: ['#ECECE7', '#FAFAF6', '#121212', '#F4DF2E', '#D93A1E'],
+    layout: 'Table-like rows with hard rules. Tossed count shown as filled boxes against dashed boxes for a typical week.',
+    risk: 'Can feel cold or “admin”. Needs warm copy and good food photos in recipes to balance it.',
+    screens: [['Home · quiet week', d2home('quiet')], ['Home · 9 expired', d2home('nine')], ['Sort expired items', d2triage()], ['Inventory · Kind', d2inv()]] },
+  { id: 'cold-storage', cls: 'd3', n: 'Direction 3', name: 'Cold Storage',
+    pitch: 'Dark, calm and cool, like the inside of a fridge at night. A week strip shows when things expire at a glance. Rings show how much time each item has left. Warm amber appears only when something is close, so urgency stands out against the cool palette.',
+    type: 'Instrument Sans (display and body), Geist Mono (dates)', sw: ['#0D1820', '#13232E', '#E9F3F7', '#7FD8EA', '#FFB765', '#FF8A7A', '#79E2B4'],
+    layout: 'Frosted panels and a floating glass tab bar. Settings and Invite move to icon buttons in the header.',
+    risk: 'Dark-first. A light theme would need its own pass. Rings need a text label for accessibility.',
+    screens: [['Home · quiet week', d3home('quiet')], ['Home · 9 expired', d3home('nine')], ['Sort expired items', d3triage()], ['Inventory · Kind', d3inv()]] },
+];
+
+document.getElementById('directions').innerHTML = DIRS.map(d => `
+<section class="direction" id="${d.id}">
+  <div class="brief">
+    <div><span class="eyebrow">${d.n}</span><h2>${d.name}</h2><p>${d.pitch}</p></div>
+    <dl class="specs">
+      <dt>Palette</dt><dd><span class="swatches">${d.sw.map(c => `<span class="sw" style="background:${c}" title="${c}"></span>`).join('')}</span></dd>
+      <dt>Type</dt><dd>${d.type}</dd>
+      <dt>Layout</dt><dd>${d.layout}</dd>
+      <dt>Watch</dt><dd>${d.risk}</dd>
+    </dl>
+  </div>
+  <div class="rail"><div class="phones">
+    ${d.screens.map(([cap, html]) => `<figure class="shot"><div class="phone ${d.cls}"><div class="screen">${html}</div></div><figcaption>${cap}</figcaption></figure>`).join('')}
+  </div></div>
+</section>`).join('');
+</script>
