@@ -26,3 +26,7 @@ Each direction shows Home (quiet week), Home (9 expired), the sort screen, and I
 
 - `prototype-themes.html` now shows only Light and Graphite, side by side, with full-length Home screens. No yellow. Green primary actions. Text-only cook card with a periwinkle tint. "Sort" text link on the expired card. Faint color fringes in the Graphite background.
 - `design-principles.md`: principle 2 updated for green actions and no yellow.
+
+## Round 7
+
+- `prototype-dark-motion.html`: Graphite only, with a live WebGL background (three.js r128 from cdnjs and a custom shader). Three looks: Aurora, Lens, Prism (`#aurora`, `#lens`, `#prism`). The bottom bar has look, strength and pause controls. Motion stops if the viewer has asked for reduced motion.

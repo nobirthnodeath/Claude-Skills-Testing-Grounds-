@@ -1,0 +1,292 @@
+<title>Kitchen Prototype, Graphite Motion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+/* PROTOTYPE, throwaway. Answers: "Can a live, moving, chromatic-aberration background make Graphite feel special without hurting readability?"
+   One WebGL shader (three.js) per phone. Three looks switch with #aurora / #lens / #prism, the bar, or arrow keys.
+   Layout: header, then Home (full length) and Inventory side by side. A floating bar holds the look, strength and motion controls. */
+:root {
+  --page: #F3F3F1; --page-ink: #1D1F1E; --page-muted: #656967; --page-rule: #DCDDDA; --page-card: #FFFFFF;
+  --bar: #1D1F1E; --bar-ink: #FFFFFF;
+  --f-page: "Instrument Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #0C0D0E; --page-ink: #ECEDEE; --page-muted: #9EA0A4; --page-rule: #24262A; --page-card: #17181A; --bar: #ECEDEE; --bar-ink: #0C0D0E; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #0C0D0E; --page-ink: #ECEDEE; --page-muted: #9EA0A4; --page-rule: #24262A; --page-card: #17181A; --bar: #ECEDEE; --bar-ink: #0C0D0E; color-scheme: dark }
+
+body { background: var(--page); color: var(--page-ink); font-family: var(--f-page); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1260px; margin: 0 auto; padding-block: 36px 130px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.intro { display: grid; gap: 8px; margin-bottom: 18px; }
+.intro > * { max-width: 72ch; margin: 0; }
+.tagline { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--page-muted); }
+.intro h1 { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance; }
+.intro p { color: var(--page-muted); }
+.look { border-top: 1px solid var(--page-rule); padding-top: 16px; display: grid; gap: 4px; }
+.look h2 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+.look p { margin: 0; color: var(--page-muted); max-width: 72ch; }
+.rail { overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; }
+.phones { display: flex; gap: 28px; width: max-content; align-items: flex-start; }
+figure.shot { margin: 0; display: grid; gap: 8px; }
+figcaption { font-size: 13px; color: var(--page-muted); padding-left: 8px; }
+.phone { width: 360px; height: 760px; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 0 0 8px #050506, 0 24px 50px -22px rgba(0,0,0,.6); margin: 8px; }
+.phone.full { height: auto; }
+
+/* ---------- App (Graphite) ---------- */
+.app { position: absolute; inset: 0; overflow: hidden; color: var(--ink); font-family: "Hanken Grotesk", system-ui, sans-serif; isolation: isolate;
+  --bg: #0F1011; --ink: #ECEDEE; --mut: #A2A5AA; --rule: rgba(255,255,255,.08); --tile: rgba(255,255,255,.07); --tile-ink: #C9CBCF;
+  --green: #58C788; --on-green: #06150C; --red: #FF6B6B;
+  --alert-bg: linear-gradient(140deg, rgba(255,92,92,.18) 0%, rgba(255,92,92,.07) 100%); --alert-edge: rgba(255,110,110,.26);
+  --card-bg: linear-gradient(140deg, rgba(140,150,255,.22) 0%, rgba(140,150,255,.08) 55%, rgba(255,255,255,.04) 100%); --card-edge: rgba(170,178,255,.24);
+  --glass: blur(18px) saturate(1.3);
+  background: var(--bg) radial-gradient(60% 34% at 84% 4%, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 70%); }
+.app canvas.fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; }
+.app .scroll { position: absolute; inset: 0; padding-bottom: 100px; }
+.full .app { position: relative; }
+.full .app .scroll { position: relative; padding-bottom: 104px; }
+.status { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; font: 600 14px/1 -apple-system, "Instrument Sans", sans-serif; }
+.status .ind { display: flex; gap: 5px; align-items: center; }
+.status .ind i { display: block; width: 16px; height: 9px; border-radius: 2px; background: currentColor; opacity: .85; }
+.status .ind i:first-child { width: 14px; height: 8px; opacity: .6; }
+.status .ind i:last-child { width: 22px; height: 10px; border-radius: 3px; }
+svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.hd { padding: 14px 20px 18px; display: flex; justify-content: space-between; align-items: end; }
+.hd small { display: block; font-size: 14px; color: var(--mut); margin-bottom: 4px; }
+.hd h3 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+.hd .link { font-weight: 500; font-size: 14px; color: var(--mut); }
+.card { margin: 0 16px; display: flex; align-items: center; gap: 12px; padding: 16px 12px 16px 18px; border-radius: 18px; backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); color: var(--ink); text-decoration: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 30px -18px rgba(0,0,0,.7); }
+.card .tx { flex: 1; min-width: 0; }
+.card b { display: block; font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+.card .tx span { display: block; font-size: 14px; line-height: 1.38; color: var(--mut); }
+.alert { background: var(--alert-bg); border: 1px solid var(--alert-edge); padding-block: 14px; }
+.alert b { color: var(--red); font-size: 16px; }
+.alert .go { display: inline-flex; align-items: center; gap: 2px; font-size: 15px; font-weight: 700; padding: 10px 4px 10px 10px; min-height: 44px; box-sizing: border-box; }
+.alert .go svg { width: 18px; height: 18px; stroke-width: 2.2; }
+.cook { background: var(--card-bg); border: 1px solid var(--card-edge); }
+.cook .chev { opacity: .65; }
+.sec { padding: 22px 20px; }
+.lbl { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
+.stmt { margin: 8px 0 10px; font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.015em; text-wrap: balance; }
+.sub { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--mut); gap: 8px; }
+.ulink { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+.sh { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.sh h4 { margin: 0; font-size: 20px; font-weight: 700; }
+.sh span { font-size: 14px; color: var(--mut); }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.row + .row { border-top: 1px solid var(--rule); }
+.row .nm { flex: 1; font-size: 16px; font-weight: 500; }
+.tile { width: 36px; height: 36px; border-radius: 10px; background: var(--tile); color: var(--tile-ink); display: grid; place-items: center; flex: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.tile svg { width: 18px; height: 18px; }
+.when { font-size: 14px; color: var(--mut); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.when.today { color: var(--red); font-weight: 700; }
+.tabs { display: flex; gap: 22px; padding: 0 20px; border-bottom: 1px solid var(--rule); }
+.tabs span { padding: 10px 0 12px; font-size: 15px; font-weight: 600; color: var(--mut); }
+.tabs span.on { color: var(--ink); box-shadow: inset 0 -2.5px 0 var(--ink); }
+.grp { padding: 18px 20px 4px; }
+.grp .sh h4 { font-size: 19px; }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 82px; background: rgba(18,19,21,.62); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); border-top: 1px solid rgba(255,255,255,.08); display: flex; justify-content: space-around; padding-top: 10px; box-sizing: border-box; }
+.tabbar .it { display: grid; justify-items: center; align-content: start; gap: 4px; font-size: 11px; font-weight: 600; color: var(--mut); width: 64px; }
+.tabbar .it.on { color: var(--ink); }
+.tabbar .it.on svg { stroke-width: 2.2; }
+.tabbar .add { width: 44px; height: 44px; border-radius: 14px; background: var(--green); color: var(--on-green); display: grid; place-items: center; margin-top: -2px; }
+
+/* ---------- Prototype controls: clearly not part of the design ---------- */
+.ctrl { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; background: var(--bar); color: var(--bar-ink); border-radius: 22px; padding: 6px 8px; box-shadow: 0 10px 30px -8px rgba(0,0,0,.5); font: 600 14px/1 var(--f-page); width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box; }
+.ctrl button { all: unset; cursor: pointer; min-width: 40px; height: 40px; border-radius: 99px; display: grid; place-items: center; padding: 0 6px; box-sizing: border-box; }
+.ctrl button:hover, .ctrl button:focus-visible { background: rgba(127,127,127,.25); }
+.ctrl button:focus-visible, .ctrl input:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.ctrl .lab { padding: 0 6px; min-width: 64px; text-align: center; }
+.ctrl .sep { width: 1px; height: 22px; background: currentColor; opacity: .2; margin: 0 4px; }
+.ctrl label { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; padding: 0 6px; }
+.ctrl input[type=range] { width: 110px; accent-color: #58C788; }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="tagline">Prototype · throwaway · Round 7 · Graphite only</span>
+    <h1>Graphite with a living background</h1>
+    <p>A WebGL shader runs behind each screen. It warps flowing noise, then samples it three times, once each for red, green and blue, at slightly different offsets. That split makes the color fringes, like a lens with chromatic aberration. The cards and the tab bar are frosted glass, so the motion shows softly through them. Use the bar at the bottom to change the look, the strength and the motion.</p>
+  </header>
+  <main id="stage"></main>
+</div>
+<div class="ctrl" role="toolbar" aria-label="Prototype controls">
+  <button id="prev" aria-label="Previous look">←</button>
+  <span class="lab" id="lab">Aurora</span>
+  <button id="next" aria-label="Next look">→</button>
+  <span class="sep"></span>
+  <label for="amt">Strength <input id="amt" type="range" min="0.2" max="1.6" step="0.05" value="0.7"></label>
+  <span class="sep"></span>
+  <button id="play" aria-label="Pause motion">Pause</button>
+</div>
+
+<script>
+const IC = {
+  home: '<svg class="ic" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg>',
+  add: '<svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  list: '<svg class="ic" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 6l1.5 1.5L7.5 5M4 12h3v3H4z"/></svg>',
+  inv: '<svg class="ic" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 10h14M8 6v2M8 13v3"/></svg>',
+  gear: '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+  chev: '<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+};
+const FG = {
+  p: '<svg class="ic" viewBox="0 0 24 24"><path d="M5 19C5 11 11 5 19 5c0 8-6 14-14 14zM5 19l7-7"/></svg>',
+  m: '<svg class="ic" viewBox="0 0 24 24"><circle cx="14.5" cy="9.5" r="5.5"/><path d="M10.5 13.5L5 19M4 17l3 3"/></svg>',
+};
+const status = '<div class="status"><span>6:12</span><span class="ind"><i></i><i></i><i></i></span></div>';
+
+// Sample content, taken from the current app screens
+const soon = [{ n: 'Cherry tomatoes', d: 0, k: 'p' }, { n: 'Celery', d: 2, k: 'p' }, { n: 'Cabbage', d: 4, k: 'p' }, { n: 'Chicken thighs', d: 4, k: 'm' }, { n: 'Cilantro', d: 5, k: 'p' }];
+const produce = [['Bananas', 3], ['Cherry tomatoes', 3], ['Blueberries', 5], ['Cabbage', 5], ['Celery', 5], ['Grapes', 5], ['Lettuce', 5], ['Apples', 28], ['Baby carrots', 28]];
+const dairy = [['Milk', 5], ['Plain yogurt', 6], ['Eggs', 21]];
+const days = d => d === 0 ? 'Today' : d >= 14 ? `About ${Math.round(d / 7)} weeks` : `${d} days`;
+const when = d => `<span class="when ${d === 0 ? 'today' : ''}">${days(d)}</span>`;
+const tabbar = on => `<nav class="tabbar">
+  <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span><span class="it">${IC.list}List</span>
+  <span class="it"><span class="add">${IC.add}</span></span>
+  <span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span><span class="it">${IC.gear}Settings</span></nav>`;
+const home = () => `<canvas class="fx" aria-hidden="true"></canvas><div class="scroll">${status}
+  <div class="hd"><div><small>Saturday, October 31</small><h3>Our kitchen</h3></div><span class="link">Settings</span></div>
+  <a class="card alert"><span class="tx"><b>9 things expired</b><span>Leftover curry, milk and 7 more</span></span><span class="go">Sort${IC.chev}</span></a>
+  <section class="sec"><span class="lbl">This week</span>
+    <p class="stmt">You tossed 1 thing, about $3.</p>
+    <div class="sub"><span>Usually about 4 things, $18</span><span class="ulink">History</span></div></section>
+  <a class="card cook"><span class="tx"><b>What could I make?</b><span>4 dishes use the cherry tomatoes and celery you should get through this week.</span></span><span class="chev">${IC.chev}</span></a>
+  <section class="sec"><div class="sh"><h4>Use these soon</h4><span>About $14</span></div>
+    ${soon.map(s => `<div class="row"><span class="tile">${FG[s.k]}</span><span class="nm">${s.n}</span>${when(s.d)}</div>`).join('')}</section>
+  </div>${tabbar('home')}`;
+const inv = () => `<canvas class="fx" aria-hidden="true"></canvas><div class="scroll">${status}
+  <div class="hd"><h3>Inventory</h3><span class="link">Invite</span></div>
+  <div class="tabs"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
+  <section class="grp"><div class="sh"><h4>Produce</h4><span>9 items</span></div>
+    ${produce.map(([n, d]) => `<div class="row"><span class="nm">${n}</span>${when(d)}</div>`).join('')}</section>
+  <section class="grp"><div class="sh"><h4>Dairy &amp; eggs</h4><span>5 items</span></div>
+    ${dairy.map(([n, d]) => `<div class="row"><span class="nm">${n}</span>${when(d)}</div>`).join('')}</section>
+  </div>${tabbar('inv')}`;
+
+const LOOKS = [
+  { key: 'aurora', name: 'Aurora', mode: 0, about: 'Slow, folded ribbons of light drift across the top of the screen, like a northern light seen through old glass. The red, green and blue layers drift slightly apart at the edges.' },
+  { key: 'lens', name: 'Lens', mode: 1, about: 'One soft light sits near the top right. Its rim splits into magenta, violet and cyan rings, like light through a thick lens. The light drifts and breathes very slowly.' },
+  { key: 'prism', name: 'Prism', mode: 2, about: 'Thin diagonal bands of color, like the sheen on a soap bubble or holographic foil. The bands bend and slide slowly and fade out toward the bottom of the screen.' },
+];
+
+document.getElementById('stage').innerHTML = `<section class="look"><h2 id="lookName"></h2><p id="lookAbout"></p></section>
+  <div class="rail"><div class="phones">
+    <figure class="shot"><div class="phone full"><div class="app">${home()}</div></div><figcaption>Home · 9 expired · full length</figcaption></figure>
+    <figure class="shot"><div class="phone"><div class="app">${inv()}</div></div><figcaption>Inventory · Kind</figcaption></figure>
+  </div></div>`;
+
+/* ---------- Shader ---------- */
+const FRAG = `
+precision highp float;
+uniform float uTime; uniform vec2 uRes; uniform float uAmt; uniform int uMode;
+varying vec2 vUv;
+float hash(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
+float noise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x), u.y); }
+float fbm(vec2 p){ float v=0.0, a=0.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=0.5; } return v; }
+
+// One scalar "light" value per point. Each look has its own field.
+float field(vec2 p, float t){
+  if (uMode == 0) { // Aurora: domain-warped noise, shaped into ribbons near the top
+    vec2 q = vec2(fbm(p*1.3 + vec2(0.0, t*0.06)), fbm(p*1.3 + vec2(5.2, 1.3) - t*0.05));
+    vec2 r = vec2(fbm(p*1.3 + 3.2*q + vec2(1.7, 9.2) + t*0.07), fbm(p*1.3 + 3.2*q + vec2(8.3, 2.8) - t*0.06));
+    float v = fbm(p*1.3 + 3.0*r);
+    float ribbon = smoothstep(0.36, 0.56, v) * (1.0 - smoothstep(0.56, 0.78, v)) * 2.6 + smoothstep(0.5, 0.85, v) * 0.7;
+    return ribbon * 0.68 * smoothstep(1.35, 0.0, p.y);
+  } else if (uMode == 1) { // Lens: a drifting light with a warped rim
+    vec2 c = vec2(0.78 + 0.06*sin(t*0.21), 0.12 + 0.05*cos(t*0.17));
+    vec2 d = p - c; float r = length(d);
+    float wob = 0.035 * (fbm(d*3.0 + t*0.08) - 0.5) + 0.01*sin(t*0.5);
+    float rim = exp(-pow((r - 0.34 - wob) * 13.0, 2.0)) * 1.3;
+    float rim2 = exp(-pow((r - 0.56 - wob*1.6) * 9.0, 2.0)) * 0.45;
+    float glow = exp(-r * 3.4) * 0.7;
+    float haze = fbm(p*2.0 + vec2(t*0.03, -t*0.02)) * smoothstep(1.4, 0.2, p.y) * 0.35;
+    return rim + rim2 + glow + haze;
+  } else { // Prism: bent diagonal bands, like thin-film sheen
+    float w = fbm(p*1.7 + vec2(t*0.04, t*0.02)) * 5.5;
+    float s = sin((p.x*1.1 + p.y*1.9) * 7.0 + w + t*0.22) * 0.5 + 0.5;
+    float bands = pow(s, 7.0) * 1.4 + pow(s, 2.0) * 0.18;
+    return bands * smoothstep(1.35, 0.1, p.y) * (0.55 + 0.6*fbm(p*2.3 - t*0.03));
+  }
+}
+
+void main(){
+  float aspect = uRes.x / uRes.y;
+  vec2 uv = vec2(vUv.x, 1.0 - vUv.y);           // 0,0 at top left
+  vec2 p = vec2(uv.x, uv.y / aspect * 0.5 + uv.y * 0.5);  // keep shapes round on tall screens
+  float t = uTime;
+  // Chromatic aberration: sample the field three times, pushed apart from the light source.
+  vec2 dir = normalize(p - vec2(0.8, 0.1) + 1e-4);
+  float split = 0.012 + 0.010 * uAmt;
+  float R = field(p + dir*split, t);
+  float G = field(p, t);
+  float B = field(p - dir*split, t);
+  // Cool palette: red channel leans magenta, blue leans cyan, green stays low so it never turns brown.
+  vec3 col = R * vec3(0.95, 0.25, 0.85) + G * vec3(0.30, 0.38, 0.95) + B * vec3(0.10, 0.85, 1.00);
+  col *= 0.30 * uAmt;
+  vec3 base = vec3(0.059, 0.063, 0.067);
+  // Fade the effect lower on the screen so the lists stay calm and readable.
+  float fade = mix(1.0, 0.35, smoothstep(0.25, 0.9, uv.y));
+  vec3 c = base + col * fade;
+  float vig = smoothstep(1.25, 0.35, length(uv - vec2(0.5, 0.35)));
+  c *= mix(0.82, 1.0, vig);
+  c += (hash(gl_FragCoord.xy + fract(t)*91.0) - 0.5) * 0.018;   // fine grain
+  gl_FragColor = vec4(c, 1.0);
+}`;
+const VERT = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }`;
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const state = { mode: 0, amt: 0.7, playing: !reduce, t: 14.0, last: performance.now() };
+const scenes = [];
+if (window.THREE) {
+  document.querySelectorAll('canvas.fx').forEach(cv => {
+    let r;
+    try { r = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false, powerPreference: 'low-power' }); } catch (e) { return; }
+    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2) * 0.6);   // render small; the field is soft anyway
+    const uni = { uTime: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uAmt: { value: state.amt }, uMode: { value: 0 } };
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, uniforms: uni, depthTest: false }));
+    const scene = new THREE.Scene(); scene.add(mesh);
+    const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const s = { cv, r, uni, scene, cam, visible: true };
+    const size = () => { const w = cv.clientWidth, h = cv.clientHeight; if (w && h) { r.setSize(w, h, false); uni.uRes.value.set(w, h); } };
+    size(); new ResizeObserver(size).observe(cv);
+    new IntersectionObserver(es => es.forEach(e => (s.visible = e.isIntersecting))).observe(cv);
+    scenes.push(s);
+  });
+}
+function draw() {
+  scenes.forEach(s => { if (!s.visible) return; s.uni.uTime.value = state.t; s.uni.uAmt.value = state.amt; s.uni.uMode.value = state.mode; s.r.render(s.scene, s.cam); });
+}
+function loop(now) {
+  const dt = Math.min(0.05, (now - state.last) / 1000); state.last = now;
+  if (state.playing && !document.hidden) { state.t += dt; draw(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- Controls ---------- */
+const idx = () => Math.max(0, LOOKS.findIndex(l => l.key === (location.hash || '#aurora').slice(1).toLowerCase()));
+function apply() {
+  const l = LOOKS[idx()];
+  state.mode = l.mode;
+  document.getElementById('lab').textContent = l.name;
+  document.getElementById('lookName').textContent = l.name;
+  document.getElementById('lookAbout').textContent = l.about + (scenes.length ? '' : ' (WebGL is not available here, so a still gradient shows instead.)');
+  draw();
+}
+const go = step => { location.hash = LOOKS[(idx() + step + LOOKS.length) % LOOKS.length].key; };
+document.getElementById('prev').addEventListener('click', () => go(-1));
+document.getElementById('next').addEventListener('click', () => go(1));
+document.getElementById('amt').addEventListener('input', e => { state.amt = +e.target.value; draw(); });
+const playBtn = document.getElementById('play');
+const setPlay = on => { state.playing = on; playBtn.textContent = on ? 'Pause' : 'Play'; playBtn.setAttribute('aria-label', on ? 'Pause motion' : 'Play motion'); };
+playBtn.addEventListener('click', () => setPlay(!state.playing));
+setPlay(state.playing);
+document.addEventListener('keydown', e => {
+  const el = e.target; if (el.closest && el.closest('input, textarea, [contenteditable]')) return;
+  if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1);
+});
+window.addEventListener('hashchange', apply);
+apply();
+</script>
