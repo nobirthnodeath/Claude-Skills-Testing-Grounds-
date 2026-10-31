@@ -80,6 +80,8 @@ When two principles conflict, the higher one wins.
 
 **Trade-off.** Groups of content need careful spacing to stay clear.
 
+**Round 3 decision.** Home has no cards except the cook prompt. That card is one tappable row with a right chevron and no large button inside it. In dark themes, depth comes from soft gradients and slightly see-through layers (the cook card and the tab bar). Keep these effects faint enough that a screenshot in grayscale still reads the same.
+
 ## Check against earlier rounds
 
 | Earlier choice | Principle | Result |

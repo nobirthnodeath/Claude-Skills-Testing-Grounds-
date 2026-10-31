@@ -1,0 +1,229 @@
+<title>Kitchen Prototype, Themes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* PROTOTYPE, throwaway. Answers: "Which theme suits the Calm list layout: light, brown dark, or graphite dark?"
+   One layout (round 3, variant A, with a cook card). Themes switch with #light / #cocoa / #graphite, the bar, or arrow keys.
+   Layout: short header, then one row of three phones for the current theme, plus a small strip comparing all three. */
+:root {
+  --page: #F3F2EE; --page-ink: #1F1B17; --page-muted: #6B645C; --page-rule: #DDD8CF; --page-card: #FFFFFF;
+  --bar: #1F1B17; --bar-ink: #FFFFFF;
+  --f-page: "Instrument Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #141312; --page-ink: #EDEBE8; --page-muted: #A19C96; --page-rule: #2C2A28; --page-card: #1D1B1A; --bar: #EDEBE8; --bar-ink: #141312; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #141312; --page-ink: #EDEBE8; --page-muted: #A19C96; --page-rule: #2C2A28; --page-card: #1D1B1A; --bar: #EDEBE8; --bar-ink: #141312; color-scheme: dark }
+
+body { background: var(--page); color: var(--page-ink); font-family: var(--f-page); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1260px; margin: 0 auto; padding-block: 36px 120px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.intro { display: grid; gap: 8px; margin-bottom: 20px; }
+.intro > * { max-width: 72ch; margin: 0; }
+.tagline { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--page-muted); }
+.intro h1 { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance; }
+.intro p { color: var(--page-muted); }
+.changes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px !important; padding: 0; list-style: none; max-width: none !important; }
+.changes li { font-size: 13px; border: 1px solid var(--page-rule); background: var(--page-card); border-radius: 99px; padding: 5px 12px; }
+.vhead { display: grid; gap: 6px; padding-block: 18px 4px; border-top: 1px solid var(--page-rule); }
+.vhead h2 { margin: 0; font-size: 24px; letter-spacing: -0.01em; }
+.vhead p { margin: 0; color: var(--page-muted); max-width: 72ch; }
+.swatches { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.sw { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--page-muted); }
+.sw i { width: 18px; height: 18px; border-radius: 5px; border: 1px solid rgba(127,127,127,.3); }
+.rail { overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; }
+.phones { display: flex; gap: 22px; width: max-content; }
+figure.shot { margin: 0; display: grid; gap: 8px; }
+figcaption { font-size: 12px; color: var(--page-muted); padding-left: 8px; }
+.phone { width: 360px; height: 760px; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 0 0 8px #0B0B0B, 0 20px 40px -22px rgba(0,0,0,.4); margin: 8px; }
+.compare { margin-top: 28px; border-top: 1px solid var(--page-rule); padding-top: 18px; }
+.compare h3 { margin: 0 0 4px; font-size: 16px; }
+.compare p { margin: 0 0 6px; color: var(--page-muted); font-size: 14px; }
+.compare .phone { width: 300px; height: 420px; }
+.compare a { color: inherit; text-decoration: none; }
+.compare a:focus-visible .phone { outline: 3px solid var(--page-ink); outline-offset: 10px; }
+
+/* ---------- App ---------- */
+.app { position: absolute; inset: 0; overflow: hidden; background: var(--bg); color: var(--ink); font-family: "Hanken Grotesk", system-ui, sans-serif; }
+.app .scroll { position: absolute; inset: 0; padding-bottom: 100px; }
+.status { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; font: 600 14px/1 -apple-system, "Instrument Sans", sans-serif; color: var(--ink); }
+.status .ind { display: flex; gap: 5px; align-items: center; }
+.status .ind i { display: block; width: 16px; height: 9px; border-radius: 2px; background: currentColor; opacity: .85; }
+.status .ind i:first-child { width: 14px; height: 8px; opacity: .6; }
+.status .ind i:last-child { width: 22px; height: 10px; border-radius: 3px; }
+svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* Theme tokens. Status colors keep one meaning in every theme: red = expiring/expired, green = good news. */
+.t-light { --bg: #F8F7F3; --bg-fx: none;
+  --ink: #1F1B17; --mut: #6B645C; --rule: #E4E0D7; --tile: #EFEDE6; --tile-ink: #5D564E;
+  --accent: #F2C14E; --on-accent: #241B0C; --red: #C2412A; --on-red: #FFFFFF; --green: #2D7A4C;
+  --alert-bg: #FFFFFF;
+  --card-bg: linear-gradient(135deg, #FFF6DC 0%, #FFFFFF 70%); --card-edge: #EFE3C2; --card-shadow: 0 1px 0 rgba(0,0,0,.02), 0 10px 24px -18px rgba(80,60,20,.35); --card-blur: none;
+  --icon-bg: var(--accent); --icon-ink: var(--on-accent);
+  --bar-bg: rgba(255,255,255,.88); --bar-edge: #E4E0D7; --bar-blur: blur(12px); }
+.t-cocoa { --bg: #1B1512; --bg-fx: radial-gradient(120% 55% at 15% -8%, rgba(214,140,70,.20) 0%, rgba(214,140,70,0) 60%), radial-gradient(90% 40% at 100% 45%, rgba(255,207,107,.06) 0%, rgba(255,207,107,0) 70%);
+  --ink: #F5EDE3; --mut: #B4A597; --rule: rgba(245,225,205,.09); --tile: rgba(255,236,214,.07); --tile-ink: #D4C3B2;
+  --accent: #FFCF6B; --on-accent: #2B1D0E; --red: #FF8266; --on-red: #2A110A; --green: #9DCC86;
+  --alert-bg: rgba(255,130,102,.07);
+  --card-bg: linear-gradient(140deg, rgba(255,207,107,.16) 0%, rgba(255,236,214,.05) 55%, rgba(255,236,214,.03) 100%); --card-edge: rgba(255,214,150,.18); --card-shadow: inset 0 1px 0 rgba(255,240,220,.08), 0 12px 30px -18px rgba(0,0,0,.6); --card-blur: blur(14px);
+  --icon-bg: var(--accent); --icon-ink: var(--on-accent);
+  --bar-bg: rgba(33,25,21,.72); --bar-edge: rgba(245,225,205,.08); --bar-blur: blur(16px); }
+.t-graphite { --bg: #111213; --bg-fx: radial-gradient(110% 50% at 85% -10%, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 60%), radial-gradient(80% 40% at 0% 40%, rgba(255,207,107,.04) 0%, rgba(255,207,107,0) 70%);
+  --ink: #ECEDEE; --mut: #9C9FA4; --rule: rgba(255,255,255,.075); --tile: rgba(255,255,255,.06); --tile-ink: #C4C6CA;
+  --accent: #FFD27A; --on-accent: #241A08; --red: #FF7F6A; --on-red: #2A0F0A; --green: #8ED39F;
+  --alert-bg: rgba(255,127,106,.06);
+  --card-bg: linear-gradient(140deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.04) 60%, rgba(255,255,255,.03) 100%); --card-edge: rgba(255,255,255,.10); --card-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 12px 30px -18px rgba(0,0,0,.7); --card-blur: blur(14px);
+  --icon-bg: var(--accent); --icon-ink: var(--on-accent);
+  --bar-bg: rgba(24,25,27,.72); --bar-edge: rgba(255,255,255,.07); --bar-blur: blur(16px); }
+.app::before { content: ""; position: absolute; inset: 0; background: var(--bg-fx); pointer-events: none; }
+
+.hd { padding: 14px 20px 18px; display: flex; justify-content: space-between; align-items: end; position: relative; }
+.hd small { display: block; font-size: 14px; color: var(--mut); margin-bottom: 4px; }
+.hd h3 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+.hd .link { font-weight: 500; font-size: 14px; color: var(--mut); }
+.alert { display: flex; gap: 12px; align-items: center; padding: 14px 20px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); background: var(--alert-bg); position: relative; }
+.alert .n { width: 32px; height: 32px; border-radius: 50%; background: var(--red); color: var(--on-red); display: grid; place-items: center; font-weight: 700; font-size: 15px; flex: none; }
+.alert .tx { flex: 1; min-width: 0; }
+.alert b { display: block; font-size: 16px; }
+.alert .tx span { font-size: 14px; color: var(--mut); }
+.btn { display: inline-flex; justify-content: center; align-items: center; background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: 14px; border-radius: 12px; padding: 10px 16px; min-height: 40px; box-sizing: border-box; }
+.sec { padding: 22px 20px; position: relative; }
+.lbl { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
+.stmt { margin: 8px 0 10px; font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.015em; text-wrap: balance; }
+.sub { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--mut); gap: 8px; }
+.ulink { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+.cook { margin: 0 16px; display: flex; align-items: center; gap: 14px; padding: 16px 14px 16px 16px; border-radius: 18px; background: var(--card-bg); border: 1px solid var(--card-edge); box-shadow: var(--card-shadow); backdrop-filter: var(--card-blur); -webkit-backdrop-filter: var(--card-blur); position: relative; color: var(--ink); text-decoration: none; }
+.cook .ico { width: 46px; height: 46px; border-radius: 14px; background: var(--icon-bg); color: var(--icon-ink); display: grid; place-items: center; flex: none; }
+.cook .tx { flex: 1; min-width: 0; }
+.cook b { display: block; font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+.cook .tx span { display: block; font-size: 14px; line-height: 1.35; color: var(--mut); }
+.cook .chev { color: var(--ink); opacity: .7; }
+.sh { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.sh h4 { margin: 0; font-size: 20px; font-weight: 700; }
+.sh span { font-size: 14px; color: var(--mut); }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.row + .row { border-top: 1px solid var(--rule); }
+.row .nm { flex: 1; font-size: 16px; font-weight: 500; }
+.tile { width: 36px; height: 36px; border-radius: 10px; background: var(--tile); color: var(--tile-ink); display: grid; place-items: center; flex: none; }
+.tile svg { width: 18px; height: 18px; }
+.when { font-size: 14px; color: var(--mut); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.when.today { color: var(--red); font-weight: 700; }
+.tabs { display: flex; gap: 22px; padding: 0 20px; border-bottom: 1px solid var(--rule); position: relative; }
+.tabs span { padding: 10px 0 12px; font-size: 15px; font-weight: 600; color: var(--mut); }
+.tabs span.on { color: var(--ink); box-shadow: inset 0 -2.5px 0 var(--ink); }
+.grp { padding: 18px 20px 4px; position: relative; }
+.grp .sh h4 { font-size: 19px; }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 82px; background: var(--bar-bg); backdrop-filter: var(--bar-blur); -webkit-backdrop-filter: var(--bar-blur); border-top: 1px solid var(--bar-edge); display: flex; justify-content: space-around; padding-top: 10px; box-sizing: border-box; }
+.tabbar .it { display: grid; justify-items: center; align-content: start; gap: 4px; font-size: 11px; font-weight: 600; color: var(--mut); width: 64px; }
+.tabbar .it.on { color: var(--ink); }
+.tabbar .it.on svg { stroke-width: 2.2; }
+.tabbar .add { width: 44px; height: 44px; border-radius: 14px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; margin-top: -2px; }
+
+/* ---------- Prototype switcher: clearly not part of the design ---------- */
+.switcher { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; align-items: center; gap: 4px; background: var(--bar); color: var(--bar-ink); border-radius: 99px; padding: 6px; box-shadow: 0 10px 30px -8px rgba(0,0,0,.45); font: 600 14px/1 var(--f-page); max-width: calc(100vw - 32px); }
+.switcher button { all: unset; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+.switcher button:hover, .switcher button:focus-visible { background: rgba(127,127,127,.25); }
+.switcher button:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.switcher .lab { padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.switcher .lab small { opacity: .65; font-weight: 500; margin-left: 6px; }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="tagline">Prototype · throwaway · Round 4</span>
+    <h1>One layout, three themes</h1>
+    <p>This is the Calm list layout with your feedback applied. Only the colors and surface effects change between versions. Use the bar at the bottom or the ← → keys to switch themes.</p>
+    <ul class="changes">
+      <li>Cook prompt is now the only card</li>
+      <li>No button in the card, a chevron instead</li>
+      <li>“Less than usual” tag removed</li>
+      <li>Faint gradients and see-through layers in the dark themes</li>
+    </ul>
+  </header>
+  <main id="stage" aria-live="polite"></main>
+</div>
+<nav class="switcher" aria-label="Prototype themes">
+  <button id="prev" aria-label="Previous theme">←</button>
+  <span class="lab" id="lab">Light</span>
+  <button id="next" aria-label="Next theme">→</button>
+</nav>
+
+<script>
+const IC = {
+  home: '<svg class="ic" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg>',
+  add: '<svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  list: '<svg class="ic" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 6l1.5 1.5L7.5 5M4 12h3v3H4z"/></svg>',
+  inv: '<svg class="ic" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 10h14M8 6v2M8 13v3"/></svg>',
+  gear: '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+  pot: '<svg class="ic" viewBox="0 0 24 24"><path d="M4 10h16v4a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM2 10h20M9 6c0-1.5 1-1.5 1-3M14 6c0-1.5 1-1.5 1-3"/></svg>',
+  chev: '<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+};
+const FG = {
+  p: '<svg class="ic" viewBox="0 0 24 24"><path d="M5 19C5 11 11 5 19 5c0 8-6 14-14 14zM5 19l7-7"/></svg>',
+  d: '<svg class="ic" viewBox="0 0 24 24"><path d="M8 3h8v3l2 3v12H6V9l2-3zM6 12h12"/></svg>',
+  m: '<svg class="ic" viewBox="0 0 24 24"><circle cx="14.5" cy="9.5" r="5.5"/><path d="M10.5 13.5L5 19M4 17l3 3"/></svg>',
+};
+const status = '<div class="status"><span>6:12</span><span class="ind"><i></i><i></i><i></i></span></div>';
+
+// Sample content, taken from the current app screens
+const soon = [{ n: 'Cherry tomatoes', d: 0, k: 'p' }, { n: 'Celery', d: 2, k: 'p' }, { n: 'Cabbage', d: 4, k: 'p' }, { n: 'Chicken thighs', d: 4, k: 'm' }, { n: 'Cilantro', d: 5, k: 'p' }];
+const produce = [['Bananas', 3], ['Cherry tomatoes', 3], ['Blueberries', 5], ['Cabbage', 5], ['Celery', 5], ['Grapes', 5], ['Lettuce', 5], ['Apples', 28], ['Baby carrots', 28]];
+const dairy = [['Milk', 5], ['Plain yogurt', 6], ['Eggs', 21]];
+const week = { quiet: { n: 2, usd: 9, tn: 5, tusd: 22 }, nine: { n: 1, usd: 3, tn: 4, tusd: 18 } };
+const days = d => d === 0 ? 'Today' : d >= 14 ? `About ${Math.round(d / 7)} weeks` : `${d} days`;
+const when = d => `<span class="when ${d === 0 ? 'today' : ''}">${days(d)}</span>`;
+const things = n => `${n} thing${n === 1 ? '' : 's'}`;
+const tabbar = on => `<nav class="tabbar">
+  <span class="it ${on === 'home' ? 'on' : ''}">${IC.home}Home</span><span class="it">${IC.list}List</span>
+  <span class="it"><span class="add">${IC.add}</span></span>
+  <span class="it ${on === 'inv' ? 'on' : ''}">${IC.inv}Inventory</span><span class="it">${IC.gear}Settings</span></nav>`;
+
+const home = m => { const w = week[m]; return `<div class="scroll">${status}
+  <div class="hd"><div><small>Saturday, October 31</small><h3>Our kitchen</h3></div><span class="link">Settings</span></div>
+  ${m === 'nine' ? `<div class="alert"><span class="n">9</span><span class="tx"><b>Things expired</b><span>Leftover curry, milk and 7 more</span></span><span class="btn">Sort</span></div>` : ''}
+  <section class="sec"><span class="lbl">This week</span>
+    <p class="stmt">You tossed ${things(w.n)}, about $${w.usd}.</p>
+    <div class="sub"><span>Usually about ${w.tn} things, $${w.tusd}</span><span class="ulink">History</span></div></section>
+  <a class="cook" aria-label="What could I make?"><span class="ico">${IC.pot}</span><span class="tx"><b>What could I make?</b><span>4 dishes use the cherry tomatoes and celery you should get through this week.</span></span><span class="chev">${IC.chev}</span></a>
+  <section class="sec"><div class="sh"><h4>Use these soon</h4><span>About $14</span></div>
+    ${soon.map(s => `<div class="row"><span class="tile">${FG[s.k]}</span><span class="nm">${s.n}</span>${when(s.d)}</div>`).join('')}</section>
+  </div>${tabbar('home')}`; };
+const inv = () => `<div class="scroll">${status}
+  <div class="hd"><h3>Inventory</h3><span class="link">Invite</span></div>
+  <div class="tabs"><span>Where</span><span class="on">Kind</span><span>Expiring</span></div>
+  <section class="grp"><div class="sh"><h4>Produce</h4><span>9 items</span></div>
+    ${produce.map(([n, d]) => `<div class="row"><span class="nm">${n}</span>${when(d)}</div>`).join('')}</section>
+  <section class="grp"><div class="sh"><h4>Dairy &amp; eggs</h4><span>5 items</span></div>
+    ${dairy.map(([n, d]) => `<div class="row"><span class="nm">${n}</span>${when(d)}</div>`).join('')}</section>
+  </div>${tabbar('inv')}`;
+
+const THEMES = [
+  { key: 'light', name: 'Light', cls: 't-light', sw: [['#F8F7F3', 'Base'], ['#1F1B17', 'Ink'], ['#F2C14E', 'Butter'], ['#C2412A', 'Expiring'], ['#2D7A4C', 'Good news']],
+    about: 'Warm off-white base with dark ink. The cook card has a very soft butter-to-white gradient so it reads as the one card on the page. The tab bar is slightly see-through.' },
+  { key: 'cocoa', name: 'Cocoa dark', cls: 't-cocoa', sw: [['#1B1512', 'Base'], ['#F5EDE3', 'Ink'], ['#FFCF6B', 'Butter'], ['#FF8266', 'Expiring'], ['#9DCC86', 'Good news']],
+    about: 'Espresso brown base with a faint amber glow at the top, like a lamp over the counter. The cook card is a glass panel with a light butter tint. The tab bar is frosted.' },
+  { key: 'graphite', name: 'Graphite dark', cls: 't-graphite', sw: [['#111213', 'Base'], ['#ECEDEE', 'Ink'], ['#FFD27A', 'Butter'], ['#FF7F6A', 'Expiring'], ['#8ED39F', 'Good news']],
+    about: 'Very dark neutral grey, with no blue tint. A faint white light at the top right gives depth. The cook card is clear frosted glass, and butter yellow stays the only warm color.' },
+];
+
+const shot = (t, cap, html) => `<figure class="shot"><div class="phone"><div class="app ${t.cls}">${html}</div></div><figcaption>${cap}</figcaption></figure>`;
+const idx = () => Math.max(0, THEMES.findIndex(t => t.key === (location.hash || '#light').slice(1).toLowerCase()));
+function render() {
+  const t = THEMES[idx()];
+  document.getElementById('stage').innerHTML = `<section>
+    <div class="vhead"><h2>${t.name}</h2><p>${t.about}</p>
+      <div class="swatches">${t.sw.map(([c, n]) => `<span class="sw"><i style="background:${c}"></i>${n}</span>`).join('')}</div></div>
+    <div class="rail"><div class="phones">${shot(t, 'Home · quiet week', home('quiet'))}${shot(t, 'Home · 9 expired', home('nine'))}${shot(t, 'Inventory · Kind', inv())}</div></div></section>
+    <section class="compare"><h3>All three side by side</h3><p>Home with 9 expired items. Select one to switch to it.</p>
+    <div class="rail"><div class="phones">${THEMES.map(x => `<a href="#${x.key}"><figure class="shot"><div class="phone"><div class="app ${x.cls}">${home('nine')}</div></div><figcaption>${x.name}</figcaption></figure></a>`).join('')}</div></div></section>`;
+  document.getElementById('lab').innerHTML = `${t.name} <small>${idx() + 1} of ${THEMES.length}</small>`;
+}
+const go = step => { location.hash = THEMES[(idx() + step + THEMES.length) % THEMES.length].key; };
+document.getElementById('prev').addEventListener('click', () => go(-1));
+document.getElementById('next').addEventListener('click', () => go(1));
+document.addEventListener('keydown', e => {
+  const el = e.target; if (el.closest && el.closest('input, textarea, [contenteditable]')) return;
+  if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1);
+});
+window.addEventListener('hashchange', render);
+render();
+</script>

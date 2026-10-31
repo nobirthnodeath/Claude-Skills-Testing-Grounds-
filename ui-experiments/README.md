@@ -12,3 +12,8 @@ Each direction shows Home (quiet week), Home (9 expired), the sort screen, and I
 
 - `design-principles.md`: six ranked principles from the round 2 feedback (made with the `design-principles` skill).
 - `prototype-home-inventory.html`: throwaway prototype (made with the `prototype` skill). Three layouts for Home and Inventory, each in light and warm dark. Switch with `#a`, `#b`, `#c`, the bottom bar, or the arrow keys.
+
+## Round 4
+
+- `prototype-themes.html`: the Calm list layout with a cook card (no button, right chevron) and no "Less than usual" tag. Three themes: light, cocoa dark, graphite dark. Switch with `#light`, `#cocoa`, `#graphite`, the bottom bar, or the arrow keys.
+- `design-principles.md`: added the round 4 decision on cards and depth.
