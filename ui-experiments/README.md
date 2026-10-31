@@ -17,3 +17,7 @@ Each direction shows Home (quiet week), Home (9 expired), the sort screen, and I
 
 - `prototype-themes.html`: the Calm list layout with a cook card (no button, right chevron) and no "Less than usual" tag. Three themes: light, cocoa dark, graphite dark. Switch with `#light`, `#cocoa`, `#graphite`, the bottom bar, or the arrow keys.
 - `design-principles.md`: added the round 4 decision on cards and depth.
+
+## Round 5
+
+- `prototype-themes.html` updated: the expired alert is now a red-tinted card with "9 things expired" as text (no number circle). Graphite dark has no warm or brown tones.

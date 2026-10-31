@@ -12,8 +12,8 @@
   --f-page: "Instrument Sans", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --page: #141312; --page-ink: #EDEBE8; --page-muted: #A19C96; --page-rule: #2C2A28; --page-card: #1D1B1A; --bar: #EDEBE8; --bar-ink: #141312; color-scheme: dark } }
-:root[data-theme="dark"] { --page: #141312; --page-ink: #EDEBE8; --page-muted: #A19C96; --page-rule: #2C2A28; --page-card: #1D1B1A; --bar: #EDEBE8; --bar-ink: #141312; color-scheme: dark }
+  --page: #131314; --page-ink: #ECEDEE; --page-muted: #9EA0A4; --page-rule: #2A2B2D; --page-card: #1C1D1F; --bar: #ECEDEE; --bar-ink: #131314; color-scheme: dark } }
+:root[data-theme="dark"] { --page: #131314; --page-ink: #ECEDEE; --page-muted: #9EA0A4; --page-rule: #2A2B2D; --page-card: #1C1D1F; --bar: #ECEDEE; --bar-ink: #131314; color-scheme: dark }
 
 body { background: var(--page); color: var(--page-ink); font-family: var(--f-page); font-size: 15px; line-height: 1.5; }
 .wrap { max-width: 1260px; margin: 0 auto; padding-block: 36px 120px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -56,21 +56,21 @@ svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wid
 .t-light { --bg: #F8F7F3; --bg-fx: none;
   --ink: #1F1B17; --mut: #6B645C; --rule: #E4E0D7; --tile: #EFEDE6; --tile-ink: #5D564E;
   --accent: #F2C14E; --on-accent: #241B0C; --red: #C2412A; --on-red: #FFFFFF; --green: #2D7A4C;
-  --alert-bg: #FFFFFF;
+  --alert-bg: linear-gradient(140deg, #FCE9E5 0%, #FDF3F0 100%); --alert-edge: #F2D2CA;
   --card-bg: linear-gradient(135deg, #FFF6DC 0%, #FFFFFF 70%); --card-edge: #EFE3C2; --card-shadow: 0 1px 0 rgba(0,0,0,.02), 0 10px 24px -18px rgba(80,60,20,.35); --card-blur: none;
   --icon-bg: var(--accent); --icon-ink: var(--on-accent);
   --bar-bg: rgba(255,255,255,.88); --bar-edge: #E4E0D7; --bar-blur: blur(12px); }
 .t-cocoa { --bg: #1B1512; --bg-fx: radial-gradient(120% 55% at 15% -8%, rgba(214,140,70,.20) 0%, rgba(214,140,70,0) 60%), radial-gradient(90% 40% at 100% 45%, rgba(255,207,107,.06) 0%, rgba(255,207,107,0) 70%);
   --ink: #F5EDE3; --mut: #B4A597; --rule: rgba(245,225,205,.09); --tile: rgba(255,236,214,.07); --tile-ink: #D4C3B2;
   --accent: #FFCF6B; --on-accent: #2B1D0E; --red: #FF8266; --on-red: #2A110A; --green: #9DCC86;
-  --alert-bg: rgba(255,130,102,.07);
+  --alert-bg: linear-gradient(140deg, rgba(255,130,102,.16) 0%, rgba(255,130,102,.07) 100%); --alert-edge: rgba(255,140,110,.24);
   --card-bg: linear-gradient(140deg, rgba(255,207,107,.16) 0%, rgba(255,236,214,.05) 55%, rgba(255,236,214,.03) 100%); --card-edge: rgba(255,214,150,.18); --card-shadow: inset 0 1px 0 rgba(255,240,220,.08), 0 12px 30px -18px rgba(0,0,0,.6); --card-blur: blur(14px);
   --icon-bg: var(--accent); --icon-ink: var(--on-accent);
   --bar-bg: rgba(33,25,21,.72); --bar-edge: rgba(245,225,205,.08); --bar-blur: blur(16px); }
-.t-graphite { --bg: #111213; --bg-fx: radial-gradient(110% 50% at 85% -10%, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 60%), radial-gradient(80% 40% at 0% 40%, rgba(255,207,107,.04) 0%, rgba(255,207,107,0) 70%);
+.t-graphite { --bg: #111213; --bg-fx: radial-gradient(110% 50% at 85% -10%, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 60%);
   --ink: #ECEDEE; --mut: #9C9FA4; --rule: rgba(255,255,255,.075); --tile: rgba(255,255,255,.06); --tile-ink: #C4C6CA;
-  --accent: #FFD27A; --on-accent: #241A08; --red: #FF7F6A; --on-red: #2A0F0A; --green: #8ED39F;
-  --alert-bg: rgba(255,127,106,.06);
+  --accent: #FFD45C; --on-accent: #161616; --red: #FF6B6B; --on-red: #1A0A0A; --green: #7FD49A;
+  --alert-bg: linear-gradient(140deg, rgba(255,92,92,.16) 0%, rgba(255,92,92,.07) 100%); --alert-edge: rgba(255,110,110,.24);
   --card-bg: linear-gradient(140deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.04) 60%, rgba(255,255,255,.03) 100%); --card-edge: rgba(255,255,255,.10); --card-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 12px 30px -18px rgba(0,0,0,.7); --card-blur: blur(14px);
   --icon-bg: var(--accent); --icon-ink: var(--on-accent);
   --bar-bg: rgba(24,25,27,.72); --bar-edge: rgba(255,255,255,.07); --bar-blur: blur(16px); }
@@ -80,10 +80,9 @@ svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wid
 .hd small { display: block; font-size: 14px; color: var(--mut); margin-bottom: 4px; }
 .hd h3 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
 .hd .link { font-weight: 500; font-size: 14px; color: var(--mut); }
-.alert { display: flex; gap: 12px; align-items: center; padding: 14px 20px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); background: var(--alert-bg); position: relative; }
-.alert .n { width: 32px; height: 32px; border-radius: 50%; background: var(--red); color: var(--on-red); display: grid; place-items: center; font-weight: 700; font-size: 15px; flex: none; }
+.alert { margin: 0 16px; display: flex; gap: 12px; align-items: center; padding: 14px 14px 14px 16px; border-radius: 18px; border: 1px solid var(--alert-edge); background: var(--alert-bg); backdrop-filter: var(--card-blur); -webkit-backdrop-filter: var(--card-blur); position: relative; }
 .alert .tx { flex: 1; min-width: 0; }
-.alert b { display: block; font-size: 16px; }
+.alert b { display: block; font-size: 16px; font-weight: 700; color: var(--red); }
 .alert .tx span { font-size: 14px; color: var(--mut); }
 .btn { display: inline-flex; justify-content: center; align-items: center; background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: 14px; border-radius: 12px; padding: 10px 16px; min-height: 40px; box-sizing: border-box; }
 .sec { padding: 22px 20px; position: relative; }
@@ -129,7 +128,7 @@ svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wid
 
 <div class="wrap">
   <header class="intro">
-    <span class="tagline">Prototype · throwaway · Round 4</span>
+    <span class="tagline">Prototype · throwaway · Round 5</span>
     <h1>One layout, three themes</h1>
     <p>This is the Calm list layout with your feedback applied. Only the colors and surface effects change between versions. Use the bar at the bottom or the ← → keys to switch themes.</p>
     <ul class="changes">
@@ -137,6 +136,8 @@ svg.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wid
       <li>No button in the card, a chevron instead</li>
       <li>“Less than usual” tag removed</li>
       <li>Faint gradients and see-through layers in the dark themes</li>
+      <li>Expired alert is now a red-tinted card, with no number circle</li>
+      <li>Graphite has no warm or brown tones</li>
     </ul>
   </header>
   <main id="stage" aria-live="polite"></main>
@@ -179,7 +180,7 @@ const tabbar = on => `<nav class="tabbar">
 
 const home = m => { const w = week[m]; return `<div class="scroll">${status}
   <div class="hd"><div><small>Saturday, October 31</small><h3>Our kitchen</h3></div><span class="link">Settings</span></div>
-  ${m === 'nine' ? `<div class="alert"><span class="n">9</span><span class="tx"><b>Things expired</b><span>Leftover curry, milk and 7 more</span></span><span class="btn">Sort</span></div>` : ''}
+  ${m === 'nine' ? `<div class="alert"><span class="tx"><b>9 things expired</b><span>Leftover curry, milk and 7 more</span></span><span class="btn">Sort</span></div>` : ''}
   <section class="sec"><span class="lbl">This week</span>
     <p class="stmt">You tossed ${things(w.n)}, about $${w.usd}.</p>
     <div class="sub"><span>Usually about ${w.tn} things, $${w.tusd}</span><span class="ulink">History</span></div></section>
@@ -201,8 +202,8 @@ const THEMES = [
     about: 'Warm off-white base with dark ink. The cook card has a very soft butter-to-white gradient so it reads as the one card on the page. The tab bar is slightly see-through.' },
   { key: 'cocoa', name: 'Cocoa dark', cls: 't-cocoa', sw: [['#1B1512', 'Base'], ['#F5EDE3', 'Ink'], ['#FFCF6B', 'Butter'], ['#FF8266', 'Expiring'], ['#9DCC86', 'Good news']],
     about: 'Espresso brown base with a faint amber glow at the top, like a lamp over the counter. The cook card is a glass panel with a light butter tint. The tab bar is frosted.' },
-  { key: 'graphite', name: 'Graphite dark', cls: 't-graphite', sw: [['#111213', 'Base'], ['#ECEDEE', 'Ink'], ['#FFD27A', 'Butter'], ['#FF7F6A', 'Expiring'], ['#8ED39F', 'Good news']],
-    about: 'Very dark neutral grey, with no blue tint. A faint white light at the top right gives depth. The cook card is clear frosted glass, and butter yellow stays the only warm color.' },
+  { key: 'graphite', name: 'Graphite dark', cls: 't-graphite', sw: [['#111213', 'Base'], ['#ECEDEE', 'Ink'], ['#FFD45C', 'Butter'], ['#FF6B6B', 'Expiring'], ['#7FD49A', 'Good news']],
+    about: 'Very dark neutral grey, with no blue and no brown. A faint white light at the top right gives depth. The cook card is clear frosted glass. Red is a true red, not orange, so it does not turn brown on the grey.' },
 ];
 
 const shot = (t, cap, html) => `<figure class="shot"><div class="phone"><div class="app ${t.cls}">${html}</div></div><figcaption>${cap}</figcaption></figure>`;
